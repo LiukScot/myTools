@@ -90,9 +90,10 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: var(--card-strong);
+      background: var(--card);
       cursor: pointer;
-      transition: border-color 0.2s ease, background 0.2s ease;
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
     }
     .drop:hover {
       border-color: var(--accent);
@@ -212,10 +213,11 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      padding: 8px;
+      padding: 12px;
       border: 1px solid var(--border);
       border-radius: 12px;
-      background: rgba(255,255,255,0.02);
+      background: var(--card);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
       height: auto;
       break-inside: avoid;
       width: 100%;
@@ -781,11 +783,13 @@
         const data = await res.json();
         if (data && data.rows && data.headers) {
           const normalized = normalizeDataset(data, kind);
-          dataStore[kind] = normalized.data;
-          renderTable(kind, normalized.data.headers, normalized.data.rows);
-          setStatus(kind, `Loaded ${normalized.data.rows.length} rows from ${cfg.file}`, true, "logs");
+          const sortedRows = sortRowsByDateTime(normalized.data.rows, normalized.data.headers);
+          const updated = { ...normalized.data, rows: sortedRows };
+          dataStore[kind] = updated;
+          renderTable(kind, updated.headers, updated.rows, true);
+          setStatus(kind, `Loaded ${updated.rows.length} rows from ${cfg.file}`, true, "logs");
           if (normalized.changed) {
-            await persistNormalized(kind, normalized.data);
+            await persistNormalized(kind, updated);
           }
           if (kind === "pain") {
             buildOptionCacheFromStore();
@@ -818,20 +822,34 @@
       setTimeout(() => toast.classList.remove("show"), 2800);
     }
 
+    function sortRowsByDateTime(rows, headers) {
+      const dKey = findHeader(headers, "date") || "date";
+      const tKey = findHeader(headers, "hour") || "hour";
+      return [...rows].sort((a, b) => {
+        const aDate = new Date(`${a?.[dKey] || ""}T${(a?.[tKey] || "00:00").slice(0, 5)}`);
+        const bDate = new Date(`${b?.[dKey] || ""}T${(b?.[tKey] || "00:00").slice(0, 5)}`);
+        const aTs = aDate.toString() === "Invalid Date" ? 0 : aDate.getTime();
+        const bTs = bDate.toString() === "Invalid Date" ? 0 : bDate.getTime();
+        return bTs - aTs;
+      });
+    }
+
     function renderTable(kind, headers, rows, withActions = false) {
       const cfg = datasets[kind];
       if (!headers || !rows) {
         cfg.logsTable.innerHTML = "";
         return;
       }
+      const sortedRows = sortRowsByDateTime(rows, headers);
       const thead = `<thead><tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join("")}${withActions ? "<th>Actions</th>" : ""}</tr></thead>`;
-      const tbody = `<tbody>${rows
-        .map(
-          (r, idx) =>
-            `<tr data-row="${idx}">${headers
-              .map(h => `<td>${escapeHtml(r[h] ?? "")}</td>`)
-              .join("")}${withActions ? `<td class="row-actions"><button class="nav-btn small" data-edit-row="${idx}" data-kind="${kind}">Edit</button><button class="nav-btn danger small" data-delete-row="${idx}" data-kind="${kind}">Delete</button></td>` : ""}</tr>`
-        )
+      const tbody = `<tbody>${sortedRows
+        .map((r, idx) => {
+          const cells = headers.map(h => `<td>${escapeHtml(r[h] ?? "")}</td>`).join("");
+          const actions = withActions
+            ? `<td class="row-actions"><button class="nav-btn small" data-edit-row="${idx}" data-kind="${kind}">Edit</button><button class="nav-btn danger small" data-delete-row="${idx}" data-kind="${kind}">Delete</button></td>`
+            : "";
+          return `<tr data-row="${idx}">${cells}${actions}</tr>`;
+        })
         .join("")}</tbody>`;
       cfg.logsTable.innerHTML = `<table>${thead}${tbody}</table><div class="rowcount">${rows.length} rows</div>`;
       if (withActions) wireRowActions(kind);
@@ -1130,7 +1148,7 @@
           String(val)
             .split(",")
             .map((s) => s.trim())
-            .filter(Boolean)
+            .filter((s) => s && !["true", "false", "yes", "no", "0", "1"].includes(s.toLowerCase()))
             .forEach((s) => options.add(s));
         });
       }
@@ -1156,6 +1174,82 @@
       el.querySelectorAll(".chip-btn").forEach((btn) => {
         btn.addEventListener("click", () => btn.classList.toggle("active"));
       });
+    }
+
+    function wireRowActions(kind) {
+      const cfg = datasets[kind];
+      if (!cfg?.logsTable) return;
+      cfg.logsTable.querySelectorAll("[data-edit-row]").forEach((btn) => {
+        btn.onclick = () => editRow(kind, parseInt(btn.dataset.editRow, 10));
+      });
+      cfg.logsTable.querySelectorAll("[data-delete-row]").forEach((btn) => {
+        btn.onclick = () => deleteRow(kind, parseInt(btn.dataset.deleteRow, 10));
+      });
+    }
+
+    function sanitizeRowForHeaders(row, headers) {
+      const clean = {};
+      headers.forEach((h) => {
+        clean[h] = row[h] ?? "";
+      });
+      return clean;
+    }
+
+    async function saveRows(kind, rows) {
+      const headers = dataStore[kind]?.headers || REQUIRED[kind] || [];
+      const normalized = normalizeRows(headers, rows, kind);
+      const sortedRows = sortRowsByDateTime(normalized.rows, normalized.headers);
+      const payload = {
+        source: "manual edit",
+        imported_at: new Date().toISOString(),
+        headers: normalized.headers,
+        rows: sortedRows,
+      };
+      try {
+        const res = await fetch(`/api/files/${datasets[kind].file}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        dataStore[kind] = payload;
+        renderTable(kind, payload.headers, payload.rows, true);
+        setStatus(kind, "Saved edits", true, "logs");
+        if (kind === "pain") {
+          buildOptionCacheFromStore();
+          renderPainOptionButtons();
+        }
+        renderDashboard();
+      } catch (err) {
+        setStatus(kind, err.message || "Failed to save edits", false, "logs");
+      }
+    }
+
+    function editRow(kind, idx) {
+      const rows = dataStore[kind]?.rows || [];
+      const headers = dataStore[kind]?.headers || [];
+      const row = rows[idx];
+      if (!row) return;
+      const input = prompt("Edit row as JSON", JSON.stringify(row, null, 2));
+      if (input === null) return;
+      try {
+        const parsed = JSON.parse(input);
+        const nextRow = sanitizeRowForHeaders(parsed, headers);
+        const newRows = [...rows];
+        newRows[idx] = nextRow;
+        saveRows(kind, newRows);
+      } catch (err) {
+        alert("Invalid JSON");
+      }
+    }
+
+    function deleteRow(kind, idx) {
+      const rows = dataStore[kind]?.rows || [];
+      if (!rows[idx]) return;
+      const ok = confirm(`Delete row #${idx + 1}?`);
+      if (!ok) return;
+      const newRows = rows.filter((_, i) => i !== idx);
+      saveRows(kind, newRows);
     }
 
     function renderPainOptionButtons() {
@@ -1334,11 +1428,12 @@
           }
         });
 
+        const sortedRows = sortRowsByDateTime(mergedRows, mergedHeaders);
         const payload = {
           source: sourceName,
           imported_at: new Date().toISOString(),
           headers: mergedHeaders,
-          rows: mergedRows,
+          rows: sortedRows,
         };
         const res = await fetch(`/api/files/${cfg.file}`, {
           method: "PUT",
@@ -1349,7 +1444,7 @@
           throw new Error(`Server returned ${res.status}`);
         }
         dataStore[kind] = payload;
-        renderTable(kind, mergedHeaders, mergedRows);
+        renderTable(kind, mergedHeaders, mergedRows, true);
         setStatus(kind, `Saved to ${cfg.file} (${mergedRows.length} total rows)`, true, "import");
         setStatus(kind, `Updated ${mergedRows.length} rows from ${sourceName}`, true, "logs");
         renderDashboard();
