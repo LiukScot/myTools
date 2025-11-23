@@ -114,7 +114,13 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       overflow: auto;
-      max-height: 340px;
+      max-height: none;
+    }
+    .table-wrap.limited {
+      max-height: 440px;
+    }
+    .table-wrap.expanded {
+      max-height: none;
     }
     table {
       width: 100%;
@@ -223,6 +229,9 @@
       width: 100%;
       box-sizing: border-box;
       margin: 0 0 10px 0;
+    }
+    #logs-section .grid {
+      grid-template-columns: 1fr;
     }
     .form-group label {
       font-size: 12px;
@@ -659,12 +668,18 @@
           <div class="hint">Showing the latest diary data saved in the local JSON store.</div>
           <div class="status" id="diary-status-log"></div>
           <div class="table-wrap" id="diary-table"></div>
+          <div style="margin-top:10px;">
+            <button class="nav-btn small" data-toggle-log="diary">Extend</button>
+          </div>
         </div>
         <div class="card">
           <h2>Pain log</h2>
           <div class="hint">Showing the latest pain data saved in the local JSON store.</div>
           <div class="status" id="pain-status-log"></div>
           <div class="table-wrap" id="pain-table"></div>
+          <div style="margin-top:10px;">
+            <button class="nav-btn small" data-toggle-log="pain">Extend</button>
+          </div>
         </div>
       </div>
     </section>
@@ -782,11 +797,11 @@
         if (!res.ok) return;
         const data = await res.json();
         if (data && data.rows && data.headers) {
-          const normalized = normalizeDataset(data, kind);
+        const normalized = normalizeDataset(data, kind);
           const sortedRows = sortRowsByDateTime(normalized.data.rows, normalized.data.headers);
           const updated = { ...normalized.data, rows: sortedRows };
           dataStore[kind] = updated;
-          renderTable(kind, updated.headers, updated.rows, true);
+          renderLog(kind);
           setStatus(kind, `Loaded ${updated.rows.length} rows from ${cfg.file}`, true, "logs");
           if (normalized.changed) {
             await persistNormalized(kind, updated);
@@ -834,15 +849,16 @@
       });
     }
 
-    function renderTable(kind, headers, rows, withActions = false) {
+    function renderTable(kind, headers, rows, withActions = false, limit = null) {
       const cfg = datasets[kind];
       if (!headers || !rows) {
         cfg.logsTable.innerHTML = "";
         return;
       }
       const sortedRows = sortRowsByDateTime(rows, headers);
+      const displayRows = limit ? sortedRows.slice(0, limit) : sortedRows;
       const thead = `<thead><tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join("")}${withActions ? "<th>Actions</th>" : ""}</tr></thead>`;
-      const tbody = `<tbody>${sortedRows
+      const tbody = `<tbody>${displayRows
         .map((r, idx) => {
           const cells = headers.map(h => `<td>${escapeHtml(r[h] ?? "")}</td>`).join("");
           const actions = withActions
@@ -1155,6 +1171,33 @@
       return Array.from(options);
     }
 
+    const logCollapsed = { diary: true, pain: true };
+
+    function renderLog(kind) {
+      const data = dataStore[kind];
+      if (!data?.headers || !data.rows) return;
+      const limit = logCollapsed[kind] ? 10 : null;
+      renderTable(kind, data.headers, data.rows, true, limit);
+      const btn = document.querySelector(`[data-toggle-log="${kind}"]`);
+      if (btn) btn.textContent = logCollapsed[kind] ? "Extend" : "Collapse";
+      const wrap = datasets[kind]?.logsTable;
+      if (wrap) {
+        wrap.classList.toggle("limited", !!limit);
+        wrap.classList.toggle("expanded", !limit);
+      }
+    }
+
+    function wireLogToggles() {
+      document.querySelectorAll("[data-toggle-log]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const kind = btn.dataset.toggleLog;
+          if (!kind) return;
+          logCollapsed[kind] = !logCollapsed[kind];
+          renderLog(kind);
+        });
+      });
+    }
+
     function renderOptionButtons(field, containerId, preselectAll = false) {
       const el = document.getElementById(containerId);
       if (!el) return;
@@ -1213,7 +1256,7 @@
         });
         if (!res.ok) throw new Error(`Server returned ${res.status}`);
         dataStore[kind] = payload;
-        renderTable(kind, payload.headers, payload.rows, true);
+        renderLog(kind);
         setStatus(kind, "Saved edits", true, "logs");
         if (kind === "pain") {
           buildOptionCacheFromStore();
@@ -1257,8 +1300,8 @@
       renderOptionButtons("symptoms", "symptoms-options", false);
       renderOptionButtons("activities", "activities-options", false);
       renderOptionButtons("medicines", "medicines-options", true);
-      renderOptionButtons("other", "other-options", false);
       renderOptionButtons("habits", "habits-options", false);
+      renderOptionButtons("other", "other-options", false);
     }
 
     function renderOptionEditor(field) {
@@ -1444,7 +1487,7 @@
           throw new Error(`Server returned ${res.status}`);
         }
         dataStore[kind] = payload;
-        renderTable(kind, mergedHeaders, mergedRows, true);
+        renderLog(kind);
         setStatus(kind, `Saved to ${cfg.file} (${mergedRows.length} total rows)`, true, "import");
         setStatus(kind, `Updated ${mergedRows.length} rows from ${sourceName}`, true, "logs");
         renderDashboard();
@@ -1974,6 +2017,7 @@
     wireNav();
     wireExport();
     wirePurge();
+    wireLogToggles();
     ["filter-from", "filter-to"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) {
