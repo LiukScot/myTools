@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>myHealth CSV Importer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --card: #1e293b;
+      --accent: #0ea5e9;
+      --accent-2: #22c55e;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: #334155;
+      --danger: #f43f5e;
+      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(80% 80% at 20% 20%, rgba(14,165,233,0.12), rgba(34,197,94,0.08)), var(--bg);
+      color: var(--text);
+    }
+    .shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+    header { margin-bottom: 18px; }
+    .title {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .heart {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      background: radial-gradient(circle at 30% 30%, #f43f5e, #ec4899);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 14px;
+      box-shadow: 0 10px 25px rgba(236,72,153,0.35);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+    }
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+    .drop {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(255,255,255,0.01);
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .drop:hover {
+      border-color: var(--accent);
+      background: rgba(14,165,233,0.06);
+    }
+    .drop strong { display: block; }
+    .drop input { display: none; }
+    .status {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 10px;
+      min-height: 18px;
+    }
+    .status .ok { color: var(--accent-2); font-weight: 700; }
+    .status .err { color: var(--danger); font-weight: 700; }
+    .table-wrap {
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: auto;
+      max-height: 340px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 500px;
+    }
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      color: var(--text);
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: rgba(17,24,39,0.9);
+      z-index: 1;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    tbody tr:nth-child(odd) { background: rgba(255,255,255,0.02); }
+    tbody tr:hover { background: rgba(14,165,233,0.06); }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      background: rgba(34,197,94,0.15);
+      color: var(--accent-2);
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .rowcount { color: var(--muted); font-size: 12px; margin-left: 6px; }
+    @media (max-width: 720px) {
+      header { flex-direction: column; align-items: flex-start; }
+      .grid { grid-template-columns: 1fr; }
+    }
+    nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .nav-btn {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.01em;
+    }
+    .nav-btn.danger {
+      border-color: rgba(244,63,94,0.5);
+      color: var(--danger);
+      background: rgba(244,63,94,0.08);
+    }
+    .nav-btn.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(14,165,233,0.3), var(--shadow);
+      color: var(--accent);
+    }
+    .hidden { display: none; }
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      min-width: 260px;
+      max-width: 360px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: #0b1220;
+      border: 1px solid var(--border);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 999;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .toast.success { border-color: rgba(34,197,94,0.5); }
+    .toast.error { border-color: rgba(244,63,94,0.5); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="title">
+        <span class="heart">❤</span>
+        <span>myHealth</span>
+      </div>
+    </header>
+
+    <nav>
+      <button class="nav-btn active" data-target="dashboard">Dashboard</button>
+      <button class="nav-btn" data-target="newlog">New Log</button>
+      <button class="nav-btn" data-target="logs">Logs</button>
+      <button class="nav-btn" data-target="import">Import / Export</button>
+    </nav>
+
+    <section id="dashboard-section">
+      <div class="card">
+        <h2>Dashboard</h2>
+        <div class="hint">Coming soon.</div>
+      </div>
+    </section>
+
+    <section id="newlog-section" class="hidden">
+      <div class="card">
+        <h2>New Log</h2>
+        <div class="hint">Coming soon.</div>
+      </div>
+    </section>
+
+    <section id="logs-section" class="hidden">
+      <div class="grid">
+        <div class="card">
+          <h2>Diary log</h2>
+          <div class="hint">Showing the latest diary data saved in the local JSON store.</div>
+          <div class="status" id="diary-status-log"></div>
+          <div class="table-wrap" id="diary-table"></div>
+        </div>
+        <div class="card">
+          <h2>Pain log</h2>
+          <div class="hint">Showing the latest pain data saved in the local JSON store.</div>
+          <div class="status" id="pain-status-log"></div>
+          <div class="table-wrap" id="pain-table"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="import-section" class="hidden">
+      <div class="grid">
+        <div class="card">
+          <h2>Diary CSV</h2>
+          <div class="hint">Expected columns: file name, created time, mood level, depression, anxiety</div>
+          <label class="drop">
+            <div>
+              <strong>Select or drop Diary CSV</strong>
+              <span class="hint">We parse in-browser; nothing leaves your machine.</span>
+            </div>
+            <input type="file" accept=".csv,text/csv" data-kind="diary" />
+            <span class="badge">Import</span>
+          </label>
+          <div class="status" id="diary-status-import"></div>
+          <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="nav-btn" data-export="diary" data-type="csv">Export Diary CSV</button>
+            <button class="nav-btn" data-export="diary" data-type="json">Export Diary JSON</button>
+            <button class="nav-btn danger" data-purge="diary">Purge Diary Data</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Pain CSV</h2>
+          <div class="hint">Expected columns include: fatigue, mood, symptoms, area, activities, sleep, food, meds, note…</div>
+          <label class="drop">
+            <div>
+              <strong>Select or drop Pain CSV</strong>
+              <span class="hint">We parse in-browser; nothing leaves your machine.</span>
+            </div>
+            <input type="file" accept=".csv,text/csv" data-kind="pain" />
+            <span class="badge">Import</span>
+          </label>
+          <div class="status" id="pain-status-import"></div>
+          <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="nav-btn" data-export="pain" data-type="csv">Export Pain CSV</button>
+            <button class="nav-btn" data-export="pain" data-type="json">Export Pain JSON</button>
+            <button class="nav-btn danger" data-purge="pain">Purge Pain Data</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const datasets = {
+      diary: {
+        file: "diary.json",
+        logsTable: document.getElementById("diary-table"),
+        statusLog: document.getElementById("diary-status-log"),
+        statusImport: document.getElementById("diary-status-import"),
+      },
+      pain: {
+        file: "pain.json",
+        logsTable: document.getElementById("pain-table"),
+        statusLog: document.getElementById("pain-status-log"),
+        statusImport: document.getElementById("pain-status-import"),
+      },
+    };
+    const dataStore = { diary: null, pain: null };
+    const REQUIRED = {
+      diary: ["file name", "created time", "mood level", "depression", "anxiety"],
+      pain: ["fatigue", "mood", "symptoms", "area", "activities", "good sleep"],
+    };
+
+    async function fetchExisting(kind) {
+      const cfg = datasets[kind];
+      try {
+        const res = await fetch(`/api/files/${cfg.file}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && data.rows && data.headers) {
+          dataStore[kind] = data;
+          renderTable(kind, data.headers, data.rows);
+          setStatus(kind, `Loaded ${data.rows.length} rows from ${cfg.file}`, true, "logs");
+        }
+      } catch (err) {
+        console.warn("Load error", err);
+      }
+    }
+
+    function setStatus(kind, message, ok = false, target = "logs") {
+      const el = target === "import" ? datasets[kind].statusImport : datasets[kind].statusLog;
+      if (!el) return;
+      el.innerHTML = message ? `<span class="${ok ? "ok" : "err"}">${ok ? "OK" : "Error"}:</span> ${message}` : "";
+    }
+
+    function showPopup(message, ok = true) {
+      let toast = document.getElementById("toast");
+      if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "toast";
+        toast.className = "toast";
+        document.body.appendChild(toast);
+      }
+      toast.className = `toast ${ok ? "success" : "error"}`;
+      toast.textContent = message;
+      requestAnimationFrame(() => toast.classList.add("show"));
+      setTimeout(() => toast.classList.remove("show"), 2800);
+    }
+
+    function renderTable(kind, headers, rows) {
+      const cfg = datasets[kind];
+      if (!headers || !rows) {
+        cfg.logsTable.innerHTML = "";
+        return;
+      }
+      const thead = `<thead><tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join("")}</tr></thead>`;
+      const tbody = `<tbody>${rows.map(r => `<tr>${headers.map(h => `<td>${escapeHtml(r[h] ?? "")}</td>`).join("")}</tr>`).join("")}</tbody>`;
+      cfg.logsTable.innerHTML = `<table>${thead}${tbody}</table><div class="rowcount">${rows.length} rows</div>`;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function parseCSV(text) {
+      const rows = [];
+      let current = [];
+      let value = "";
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQuotes) {
+          if (c === '"') {
+            if (text[i + 1] === '"') {
+              value += '"';
+              i++;
+            } else {
+              inQuotes = false;
+            }
+          } else {
+            value += c;
+          }
+        } else {
+          if (c === '"') {
+            inQuotes = true;
+          } else if (c === ",") {
+            current.push(value);
+            value = "";
+          } else if (c === "\n") {
+            current.push(value);
+            rows.push(current);
+            current = [];
+            value = "";
+          } else if (c === "\r") {
+            continue;
+          } else {
+            value += c;
+          }
+        }
+      }
+      if (value !== "" || current.length) {
+        current.push(value);
+        rows.push(current);
+      }
+      const headers = rows.shift() || [];
+      const objects = rows.filter(r => r.length && r.some(cell => cell.trim() !== "")).map(r => {
+        const obj = {};
+        headers.forEach((h, idx) => obj[h.trim()] = r[idx] ?? "");
+        return obj;
+      });
+      return { headers, rows: objects };
+    }
+
+    async function handleFile(kind, file) {
+      const cfg = datasets[kind];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const parsed = parseCSV(text);
+        if (!parsed.headers.length) throw new Error("No headers detected");
+        if (!hasCreatedTime(parsed.headers)) throw new Error('Missing "created time" column');
+        const validateMsg = validateHeaders(kind, parsed.headers);
+        if (validateMsg) throw new Error(validateMsg);
+        const result = await persist(kind, parsed, file.name);
+        setStatus(kind, `Imported ${result.added} new, ${result.skipped} existing (source: ${file.name})`, true, "import");
+        showPopup(`Imported ${result.added} new, ${result.skipped} already present`, true);
+      } catch (err) {
+        setStatus(kind, err.message || "Failed to parse", false, "import");
+        showPopup(err.message || "Import failed", false);
+      }
+    }
+
+    function normalizeHeaderName(h) {
+      return h.trim().toLowerCase().replace(/^\uFEFF/, "");
+    }
+
+    function hasCreatedTime(headers) {
+      return headers.some(h => normalizeHeaderName(h) === "created time");
+    }
+
+    function validateHeaders(kind, headers) {
+      const expected = REQUIRED[kind];
+      if (!expected) return "";
+      const lower = headers.map(normalizeHeaderName);
+      const missing = expected.filter(col => !lower.includes(col));
+      if (missing.length) {
+        return `Missing columns for ${kind}: ${missing.join(", ")}`;
+      }
+      return "";
+    }
+
+    function findHeader(headers, target) {
+      const wanted = normalizeHeaderName(target);
+      for (const h of headers) {
+        if (normalizeHeaderName(h) === wanted) return h;
+      }
+      return null;
+    }
+
+    async function persist(kind, parsed, sourceName) {
+      const cfg = datasets[kind];
+      try {
+        const createdKey = findHeader(parsed.headers, "created time");
+        if (!createdKey) throw new Error('Missing "created time" column');
+
+        const existing = dataStore[kind]?.rows || [];
+        const existingHeaders = dataStore[kind]?.headers || parsed.headers;
+        const existingCreatedKey = findHeader(existingHeaders, "created time") || createdKey;
+        const seen = new Set(existing.map(r => (r[existingCreatedKey] || "").trim()));
+        let added = 0;
+        let skipped = 0;
+        const mergedRows = [...existing];
+
+        parsed.rows.forEach(r => {
+          const created = (r[createdKey] || "").trim();
+          if (!created) return;
+          if (seen.has(created)) {
+            skipped += 1;
+          } else {
+            seen.add(created);
+            mergedRows.push(r);
+            added += 1;
+          }
+        });
+
+        const mergedHeaders = dataStore[kind]?.headers?.length ? dataStore[kind].headers : parsed.headers;
+        const payload = {
+          source: sourceName,
+          imported_at: new Date().toISOString(),
+          headers: mergedHeaders,
+          rows: mergedRows,
+        };
+        const res = await fetch(`/api/files/${cfg.file}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          throw new Error(`Server returned ${res.status}`);
+        }
+        dataStore[kind] = payload;
+        renderTable(kind, parsed.headers, mergedRows);
+        setStatus(kind, `Saved to ${cfg.file} (${mergedRows.length} total rows)`, true, "import");
+        setStatus(kind, `Updated ${mergedRows.length} rows from ${sourceName}`, true, "logs");
+        return { added, skipped };
+      } catch (err) {
+        console.error(err);
+        setStatus(kind, err.message || "Failed to save", false, "import");
+        throw err;
+      }
+    }
+
+    function wireDropZones() {
+      document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener("change", (e) => {
+          const kind = e.target.dataset.kind;
+          const file = e.target.files?.[0];
+          handleFile(kind, file);
+        });
+        const label = input.closest(".drop");
+        label.addEventListener("dragover", (e) => { e.preventDefault(); label.classList.add("hover"); });
+        label.addEventListener("dragleave", () => label.classList.remove("hover"));
+        label.addEventListener("drop", (e) => {
+          e.preventDefault();
+          label.classList.remove("hover");
+          const file = e.dataTransfer.files?.[0];
+          handleFile(input.dataset.kind, file);
+        });
+      });
+    }
+
+    function wireNav() {
+      const buttons = document.querySelectorAll(".nav-btn[data-target]");
+      const sections = {
+        dashboard: document.getElementById("dashboard-section"),
+        newlog: document.getElementById("newlog-section"),
+        logs: document.getElementById("logs-section"),
+        import: document.getElementById("import-section"),
+      };
+      buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const target = btn.dataset.target;
+          buttons.forEach(b => b.classList.toggle("active", b === btn));
+          Object.entries(sections).forEach(([key, el]) => {
+            el.classList.toggle("hidden", key !== target);
+          });
+        });
+      });
+    }
+
+    function toCSV(headers, rows) {
+      const esc = (val) => {
+        const s = String(val ?? "");
+        if (s.includes(",") || s.includes('"') || s.includes("\n")) {
+          return `"${s.replace(/"/g, '""')}"`;
+        }
+        return s;
+      };
+      const head = headers.map(esc).join(",");
+      const body = rows.map(r => headers.map(h => esc(r[h])).join(",")).join("\n");
+      return `${head}\n${body}`;
+    }
+
+    function wireExport() {
+      document.querySelectorAll("[data-export]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const kind = btn.dataset.export;
+          const type = btn.dataset.type;
+          const data = dataStore[kind];
+          try {
+            if (!data || !data.headers || !data.rows) {
+              throw new Error("No data loaded yet. Import first.");
+            }
+            let blob;
+            let filename;
+            if (type === "csv") {
+              blob = new Blob([toCSV(data.headers, data.rows)], { type: "text/csv;charset=utf-8" });
+              filename = `${kind}.csv`;
+            } else {
+              blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+              filename = `${kind}.json`;
+            }
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+            showPopup(`Exported ${kind} as ${filename}`, true);
+          } catch (err) {
+            showPopup(err.message || "Export failed", false);
+          }
+        });
+      });
+    }
+
+    function wirePurge() {
+      document.querySelectorAll("[data-purge]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const kind = btn.dataset.purge;
+          try {
+            const confirmFirst = confirm(`Are you sure you want to purge all ${kind} data?`);
+            if (!confirmFirst) return;
+            const confirmSecond = confirm("This will remove all rows. Confirm purge?");
+            if (!confirmSecond) return;
+            const payload = {
+              source: "purge",
+              imported_at: new Date().toISOString(),
+              headers: dataStore[kind]?.headers || REQUIRED[kind] || [],
+              rows: [],
+            };
+            const res = await fetch(`/api/files/${datasets[kind].file}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            if (!res.ok) throw new Error(`Server returned ${res.status}`);
+            dataStore[kind] = payload;
+            renderTable(kind, payload.headers, payload.rows);
+            setStatus(kind, "Purged all rows", true, "import");
+            setStatus(kind, "Purged all rows", true, "logs");
+            showPopup(`Purged ${kind} data`, true);
+          } catch (err) {
+            showPopup(err.message || "Purge failed", false);
+            setStatus(kind, err.message || "Purge failed", false, "import");
+          }
+        });
+      });
+    }
+
+    wireDropZones();
+    wireNav();
+    wireExport();
+    wirePurge();
+    fetchExisting("diary");
+    fetchExisting("pain");
+  </script>
+</body>
+</html>
