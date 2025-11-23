@@ -3,6 +3,7 @@
 import argparse
 import sys
 from pathlib import Path
+import webbrowser
 
 
 def parse_args() -> argparse.Namespace:
@@ -34,7 +35,12 @@ def main() -> None:
     args = parse_args()
     data_dir = Path(args.data_dir).expanduser().resolve()
     app = create_app(data_dir)
-    print(f"Starting myHealth sync server on http://{args.host}:{args.port} (data dir: {data_dir})")
+    url = f"http://{args.host}:{args.port}/"
+    print(f"Starting myHealth sync server on {url} (data dir: {data_dir})")
+    try:
+        webbrowser.open_new_tab(url)
+    except Exception:
+        pass
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")
 
 

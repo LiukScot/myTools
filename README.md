@@ -8,6 +8,11 @@ Local Python server that watches JSON files and streams updates in real time (si
 2) Start the server from a terminal so you can see logs/errors:
    - `python start.py --host 127.0.0.1 --port 8000 --data-dir data` (or `python launch.py ...`)
    - Or mark executable: `chmod +x start.py` then `./start.py --data-dir data`
+
+## Web UI (CSV importer/viewer)
+
+- Visit `http://127.0.0.1:8000/` to use the CSV importer.
+- Drop a Diary CSV or Pain CSV; it parses in-browser, shows the table, and saves the data into `diary.json` / `pain.json` via the existing API.
 3) Edit any `.json` inside the data directory (example: `data/health.json`); connected clients get updates immediately over WebSocket.
 
 ## API quick reference

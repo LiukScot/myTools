@@ -9,22 +9,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f172a;
-      --panel: #111827;
-      --card: #1e293b;
-      --accent: #0ea5e9;
-      --accent-2: #22c55e;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --border: #334155;
-      --danger: #f43f5e;
-      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+      --bg: #000000;
+      --panel: #0b0b0d;
+      --card: #1f1f23;
+      --card-strong: #26262b;
+      --accent: #ff5e8a;
+      --accent-2: #ff8fb1;
+      --text: #f5f5f7;
+      --muted: #a1a1ad;
+      --border: #35353b;
+      --danger: #ff5a7f;
+      --shadow: 0 20px 55px rgba(0,0,0,0.5);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(80% 80% at 20% 20%, rgba(14,165,233,0.12), rgba(34,197,94,0.08)), var(--bg);
+      background:
+        radial-gradient(140% 120% at 20% 10%, rgba(255,94,138,0.14), rgba(0,0,0,0)),
+        radial-gradient(120% 100% at 80% 5%, rgba(255,143,177,0.08), rgba(0,0,0,0)),
+        var(--bg);
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-attachment: fixed;
       color: var(--text);
     }
     .shell {
@@ -45,12 +52,12 @@
       width: 24px;
       height: 24px;
       border-radius: 8px;
-      background: radial-gradient(circle at 30% 30%, #f43f5e, #ec4899);
+      background: radial-gradient(circle at 30% 30%, #ff5e8a, #ff8fb1);
       display: grid;
       place-items: center;
       color: #fff;
       font-size: 14px;
-      box-shadow: 0 10px 25px rgba(236,72,153,0.35);
+      box-shadow: 0 10px 25px rgba(255,94,138,0.35);
     }
     .grid {
       display: grid;
@@ -83,13 +90,13 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: rgba(255,255,255,0.01);
+      background: var(--card-strong);
       cursor: pointer;
       transition: border-color 0.2s ease, background 0.2s ease;
     }
     .drop:hover {
       border-color: var(--accent);
-      background: rgba(14,165,233,0.06);
+      background: rgba(255,94,138,0.08);
     }
     .drop strong { display: block; }
     .drop input { display: none; }
@@ -129,7 +136,7 @@
       letter-spacing: 0.01em;
     }
     tbody tr:nth-child(odd) { background: rgba(255,255,255,0.02); }
-    tbody tr:hover { background: rgba(14,165,233,0.06); }
+    tbody tr:hover { background: rgba(255,94,138,0.08); }
     .badge {
       display: inline-flex;
       align-items: center;
@@ -170,7 +177,7 @@
     }
     .nav-btn.active {
       border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(14,165,233,0.3), var(--shadow);
+      box-shadow: 0 0 0 1px rgba(255,94,138,0.3), var(--shadow);
       color: var(--accent);
     }
     .hidden { display: none; }
@@ -197,6 +204,112 @@
     }
     .toast.success { border-color: rgba(34,197,94,0.5); }
     .toast.error { border-color: rgba(244,63,94,0.5); }
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .dash-card {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card-strong);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+    }
+    .dash-label { color: var(--muted); font-size: 12px; }
+    .dash-value { font-size: 18px; font-weight: 700; }
+    .graph-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .graph-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.4);
+    }
+    .graph-title {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    canvas { width: 100%; height: 160px; }
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+      align-items: center;
+    }
+    .filters label {
+      color: var(--muted);
+      font-size: 12px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+    }
+    .filters input {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+    .filters .divider {
+      align-self: center;
+      width: 1px;
+      height: 28px;
+      background: var(--border);
+      margin: 0 6px;
+    }
+    .quick-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .quick-btn {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 12px;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .quick-btn:hover {
+      border-color: var(--accent);
+      background: rgba(255,94,138,0.1);
+    }
+    .quick-btn.active {
+      border-color: var(--accent);
+      background: rgba(255,94,138,0.2);
+      color: var(--text);
+    }
+    .tooltip {
+      position: fixed;
+      pointer-events: none;
+      background: #0b1220;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transition: opacity 0.1s ease;
+      z-index: 1000;
+    }
   </style>
 </head>
 <body>
@@ -210,21 +323,41 @@
 
     <nav>
       <button class="nav-btn active" data-target="dashboard">Dashboard</button>
-      <button class="nav-btn" data-target="newlog">New Log</button>
+      <button class="nav-btn" data-target="newlog">New Entry</button>
       <button class="nav-btn" data-target="logs">Logs</button>
       <button class="nav-btn" data-target="import">Import / Export</button>
     </nav>
 
     <section id="dashboard-section">
-      <div class="card">
+      <div class="card" id="dashboard-stats">
         <h2>Dashboard</h2>
-        <div class="hint">Coming soon.</div>
+        <div class="hint">Overview of diary and pain logs.</div>
+        <div class="filters">
+          <label>From
+            <input type="date" id="filter-from" />
+          </label>
+          <label>To
+            <input type="date" id="filter-to" />
+          </label>
+          <div class="divider"></div>
+          <div class="quick-filters">
+            <button class="quick-btn" data-range="7">1 week</button>
+            <button class="quick-btn" data-range="30">1 month</button>
+            <button class="quick-btn" data-range="90">3 months</button>
+            <button class="quick-btn" data-range="180">6 months</button>
+            <button class="quick-btn" data-range="365">1 year</button>
+            <button class="quick-btn" data-range="1095">3 years</button>
+            <button class="quick-btn" data-range="all">Since start</button>
+          </div>
+        </div>
+        <div class="dash-grid" id="dash-cards"></div>
       </div>
+      <div class="graph-grid" id="dash-graphs"></div>
     </section>
 
     <section id="newlog-section" class="hidden">
       <div class="card">
-        <h2>New Log</h2>
+        <h2>New Entry</h2>
         <div class="hint">Coming soon.</div>
       </div>
     </section>
@@ -249,12 +382,10 @@
     <section id="import-section" class="hidden">
       <div class="grid">
         <div class="card">
-          <h2>Diary CSV</h2>
-          <div class="hint">Expected columns: file name, created time, mood level, depression, anxiety</div>
+          <h2></h2>
           <label class="drop">
             <div>
               <strong>Select or drop Diary CSV</strong>
-              <span class="hint">We parse in-browser; nothing leaves your machine.</span>
             </div>
             <input type="file" accept=".csv,text/csv" data-kind="diary" />
             <span class="badge">Import</span>
@@ -267,12 +398,10 @@
           </div>
         </div>
         <div class="card">
-          <h2>Pain CSV</h2>
-          <div class="hint">Expected columns include: fatigue, mood, symptoms, area, activities, sleep, food, meds, note…</div>
+          <h2></h2>
           <label class="drop">
             <div>
               <strong>Select or drop Pain CSV</strong>
-              <span class="hint">We parse in-browser; nothing leaves your machine.</span>
             </div>
             <input type="file" accept=".csv,text/csv" data-kind="pain" />
             <span class="badge">Import</span>
@@ -306,7 +435,34 @@
     const dataStore = { diary: null, pain: null };
     const REQUIRED = {
       diary: ["file name", "created time", "mood level", "depression", "anxiety"],
-      pain: ["fatigue", "mood", "symptoms", "area", "activities", "good sleep"],
+      pain: [
+        "file name",
+        "created time",
+        "pain level",
+        "fatigue level",
+        "mood level",
+        "symptoms",
+        "area",
+        "activities",
+        "good sleep",
+        "healthy food",
+        "coffee",
+        ">6h day byte",
+        ">1h masturbation",
+        "<1h masturbation",
+        "cum",
+        "medicines",
+        "note",
+      ],
+    };
+    const ALIASES = {
+      diary: {},
+      pain: {
+        "pain level": ["pain level", "pain"],
+        "fatigue level": ["fatigue level", "fatigue"],
+        "mood level": ["mood level", "mood"],
+        "good sleep": ["good sleep", "sleep"],
+      },
     };
 
     async function fetchExisting(kind) {
@@ -319,6 +475,7 @@
           dataStore[kind] = data;
           renderTable(kind, data.headers, data.rows);
           setStatus(kind, `Loaded ${data.rows.length} rows from ${cfg.file}`, true, "logs");
+          renderDashboard();
         }
       } catch (err) {
         console.warn("Load error", err);
@@ -434,7 +591,13 @@
     }
 
     function normalizeHeaderName(h) {
-      return h.trim().toLowerCase().replace(/^\uFEFF/, "");
+      return h
+        .replace(/^\uFEFF/, "")
+        .toLowerCase()
+        .replace(/\u00a0/g, " ") // nbsp to space
+        .replace(/[-_–—]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
     }
 
     function hasCreatedTime(headers) {
@@ -444,12 +607,16 @@
     function validateHeaders(kind, headers) {
       const expected = REQUIRED[kind];
       if (!expected) return "";
-      const lower = headers.map(normalizeHeaderName);
-      const missing = expected.filter(col => !lower.includes(col));
-      if (missing.length) {
-        return `Missing columns for ${kind}: ${missing.join(", ")}`;
-      }
-      return "";
+      const normalized = headers.map(normalizeHeaderName);
+      const set = new Set(normalized);
+      const aliasMap = ALIASES[kind] || {};
+      const missing = [];
+      expected.forEach(req => {
+        const aliases = aliasMap[req] || [req];
+        const found = aliases.some(a => set.has(normalizeHeaderName(a)));
+        if (!found) missing.push(req);
+      });
+      return missing.length ? `Missing columns for ${kind}: ${missing.join(", ")}` : "";
     }
 
     function findHeader(headers, target) {
@@ -505,6 +672,7 @@
         renderTable(kind, parsed.headers, mergedRows);
         setStatus(kind, `Saved to ${cfg.file} (${mergedRows.length} total rows)`, true, "import");
         setStatus(kind, `Updated ${mergedRows.length} rows from ${sourceName}`, true, "logs");
+        renderDashboard();
         return { added, skipped };
       } catch (err) {
         console.error(err);
@@ -549,6 +717,285 @@
           });
         });
       });
+    }
+
+    function renderDashboard() {
+      const container = document.getElementById("dash-cards");
+      const graphs = document.getElementById("dash-graphs");
+      if (!container || !graphs) return;
+      const diary = applyDateFilter(dataStore.diary);
+      const pain = applyDateFilter(dataStore.pain);
+
+      const diaryCount = diary?.rows?.length || 0;
+      const painCount = pain?.rows?.length || 0;
+      const diaryMoodAvg = avgField(diary, "mood level");
+      const diaryDepAvg = avgField(diary, "depression");
+      const diaryAnxAvg = avgField(diary, "anxiety");
+      const painLevelAvg = avgField(pain, "pain level");
+      const fatigueAvg = avgField(pain, "fatigue level");
+
+      const cards = [
+        { label: "Diary entries", value: diaryCount },
+        { label: "Pain entries", value: painCount },
+        { label: "Mood avg", value: diaryMoodAvg ?? "–" },
+        { label: "Depression avg", value: diaryDepAvg ?? "–" },
+        { label: "Anxiety avg", value: diaryAnxAvg ?? "–" },
+        { label: "Pain avg", value: painLevelAvg ?? "–" },
+        { label: "Fatigue avg", value: fatigueAvg ?? "–" },
+      ];
+
+      container.innerHTML = cards
+        .map(
+          (c) => `
+            <div class="dash-card">
+              <div class="dash-label">${escapeHtml(c.label)}</div>
+              <div class="dash-value">${escapeHtml(c.value)}</div>
+            </div>
+          `
+        )
+        .join("");
+
+      const graphDefs = [
+        { id: "graph-diary-mood", title: "Diary: Mood over time", yLabel: "Mood level", data: timeSeries(diary, "mood level") },
+        { id: "graph-pain-level", title: "Pain: Pain level over time", yLabel: "Pain level", data: timeSeries(pain, "pain level") },
+        { id: "graph-fatigue", title: "Pain: Fatigue level over time", yLabel: "Fatigue level", data: timeSeries(pain, "fatigue level") },
+      ];
+
+      graphs.innerHTML = graphDefs
+        .map(
+          (g) => `
+            <div class="graph-card">
+              <div class="graph-title">${escapeHtml(g.title)}</div>
+              <canvas id="${g.id}"></canvas>
+            </div>
+          `
+        )
+        .join("");
+
+      graphDefs.forEach((g, idx) => {
+        const canvas = document.getElementById(g.id);
+        drawLineChart(canvas, g.data, idx, { yLabel: g.yLabel });
+      });
+    }
+
+    function avgField(store, field) {
+      if (!store?.rows?.length) return null;
+      const key = findHeader(store.headers, field) || field;
+      let sum = 0;
+      let count = 0;
+      store.rows.forEach((row) => {
+        const val = parseFloat(row[key]);
+        if (!Number.isNaN(val)) {
+          sum += val;
+          count += 1;
+        }
+      });
+      if (!count) return null;
+      return (sum / count).toFixed(2);
+    }
+
+    function timeSeries(store, field) {
+      if (!store?.rows?.length) return [];
+      const key = findHeader(store.headers, field) || field;
+      const createdKey = findHeader(store.headers, "created time") || "created time";
+      return store.rows
+        .map((row) => {
+          const d = new Date(row[createdKey]);
+          const v = parseFloat(row[key]);
+          return { t: d, v };
+        })
+        .filter((p) => p.t.toString() !== "Invalid Date" && !Number.isNaN(p.v))
+        .sort((a, b) => a.t - b.t);
+    }
+
+    const graphMeta = {};
+
+    function drawLineChart(canvas, data, idx, opts = {}) {
+      if (!canvas || !canvas.getContext) return;
+      const ctx = canvas.getContext("2d");
+      const width = (canvas.width = canvas.offsetWidth || 320);
+      const height = (canvas.height = canvas.offsetHeight || 180);
+      ctx.clearRect(0, 0, width, height);
+      ctx.strokeStyle = [ "#ff5e8a", "#ff8fb1", "#ffb3c9" ][idx % 3];
+      ctx.lineWidth = 2;
+      ctx.fillStyle = "rgba(255,255,255,0.04)";
+      ctx.fillRect(0, 0, width, height);
+      if (!data.length) {
+        ctx.fillStyle = "rgba(226,232,240,0.7)";
+        ctx.fillText("No data yet", 12, 20);
+        return;
+      }
+      const yBounds = getYBounds(opts.yLabel, data);
+      const minY = yBounds.min;
+      const maxY = yBounds.max;
+      const minX = data[0].t.getTime();
+      const maxX = data[data.length - 1].t.getTime();
+      const pad = 28;
+      ctx.beginPath();
+      const points = [];
+      data.forEach((pt, i) => {
+        const x = scale(pt.t.getTime(), minX, maxX || minX + 1, pad, width - pad);
+        const y = scale(pt.v, maxY === minY ? minY - 1 : minY, maxY === minY ? minY + 1 : maxY, height - pad, pad);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+        points.push({ x, y, ...pt });
+      });
+      ctx.stroke();
+      ctx.fillStyle = ctx.strokeStyle;
+      data.forEach((pt) => {
+        const x = scale(pt.t.getTime(), minX, maxX || minX + 1, pad, width - pad);
+        const y = scale(pt.v, maxY === minY ? minY - 1 : minY, maxY === minY ? minY + 1 : maxY, height - pad, pad);
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // axis labels
+      ctx.fillStyle = "rgba(226,232,240,0.7)";
+      ctx.font = "11px Manrope, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Date", width / 2, height - 6);
+      ctx.save();
+      ctx.translate(10, height / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = "center";
+      ctx.fillText(opts.yLabel || "Value", 0, 0);
+      ctx.restore();
+
+      // axis ticks
+      drawAxes(ctx, width, height, pad, minX, maxX, minY, maxY, data);
+
+      graphMeta[canvas.id] = { points, yLabel: opts.yLabel || "Value" };
+      canvas.onmousemove = (e) => handleHover(canvas, e);
+      canvas.onmouseleave = () => hideTooltip();
+    }
+
+    function scale(val, min, max, outMin, outMax) {
+      if (max === min) return (outMin + outMax) / 2;
+      return outMin + ((val - min) / (max - min)) * (outMax - outMin);
+    }
+
+    function getYBounds(label, data) {
+      const rawMin = Math.min(...data.map(d => d.v));
+      const rawMax = Math.max(...data.map(d => d.v));
+      const normLabel = (label || "").toLowerCase();
+      const preset = ["pain", "fatigue", "mood", "depression", "anxiety"].some(k => normLabel.includes(k));
+      let min = preset ? 0 : rawMin;
+      let max = preset ? 10 : rawMax;
+      if (!preset) {
+        const pad = Math.max(1, (rawMax - rawMin) * 0.1);
+        min = rawMin - pad;
+        max = rawMax + pad;
+      }
+      if (min === max) {
+        min -= 1;
+        max += 1;
+      }
+      return { min, max };
+    }
+
+    function drawAxes(ctx, width, height, pad, minX, maxX, minY, maxY, data) {
+      ctx.strokeStyle = "rgba(226,232,240,0.2)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pad, pad);
+      ctx.lineTo(pad, height - pad);
+      ctx.lineTo(width - pad, height - pad);
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(226,232,240,0.7)";
+      ctx.font = "10px Manrope, sans-serif";
+      ctx.textAlign = "right";
+      const yTicks = 5;
+      for (let i = 0; i <= yTicks; i++) {
+        const v = minY + ((maxY - minY) * i) / yTicks;
+        const y = scale(v, minY, maxY, height - pad, pad);
+        ctx.fillText(v.toFixed(0), pad - 6, y + 3);
+        ctx.strokeStyle = "rgba(226,232,240,0.08)";
+        ctx.beginPath();
+        ctx.moveTo(pad + 2, y);
+        ctx.lineTo(width - pad, y);
+        ctx.stroke();
+      }
+
+      const xLabels = pickXLabels(data);
+      ctx.textAlign = "center";
+      xLabels.forEach((lbl) => {
+        const x = scale(lbl.time, minX, maxX || minX + 1, pad, width - pad);
+        ctx.fillText(lbl.text, x, height - pad + 12);
+        ctx.strokeStyle = "rgba(226,232,240,0.08)";
+        ctx.beginPath();
+        ctx.moveTo(x, height - pad);
+        ctx.lineTo(x, pad);
+        ctx.stroke();
+      });
+    }
+
+    function pickXLabels(data) {
+      const labels = [];
+      const total = data.length;
+      const step = Math.max(1, Math.floor(total / 4));
+      for (let i = 0; i < total; i += step) {
+        const d = data[i];
+        const text = d.t instanceof Date ? d.t.toISOString().slice(5, 10) : String(d.t);
+        labels.push({ time: d.t.getTime(), text });
+      }
+      if (labels.length && labels[labels.length - 1].time !== data[total - 1].t.getTime()) {
+        const last = data[total - 1];
+        labels.push({ time: last.t.getTime(), text: last.t.toISOString().slice(5, 10) });
+      }
+      return labels;
+    }
+
+    function handleHover(canvas, evt) {
+      const meta = graphMeta[canvas.id];
+      if (!meta || !meta.points?.length) return hideTooltip();
+      const rect = canvas.getBoundingClientRect();
+      const x = evt.clientX - rect.left;
+      const y = evt.clientY - rect.top;
+      let closest = null;
+      let minDist = Infinity;
+      meta.points.forEach((p) => {
+        const dx = p.x - x;
+        const dy = p.y - y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = p;
+        }
+      });
+      if (!closest || minDist > 12) return hideTooltip();
+      const tooltip = getTooltip();
+      const dateStr = closest.t instanceof Date ? closest.t.toISOString().slice(0, 10) : String(closest.t);
+      tooltip.innerHTML = `<strong>${meta.yLabel}:</strong> ${closest.v}<br/><span style="color:${'var(--muted)'}">${dateStr}</span>`;
+      tooltip.style.left = `${evt.clientX + 12}px`;
+      tooltip.style.top = `${evt.clientY + 12}px`;
+      tooltip.style.opacity = "1";
+    }
+
+    function hideTooltip() {
+      const t = document.getElementById("tooltip");
+      if (t) t.style.opacity = "0";
+    }
+
+    function getTooltip() {
+      let t = document.getElementById("tooltip");
+      if (!t) {
+        t = document.createElement("div");
+        t.id = "tooltip";
+        t.className = "tooltip";
+        document.body.appendChild(t);
+      }
+      return t;
+    }
+
+    function setQuickActive(btn) {
+      document.querySelectorAll(".quick-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    }
+
+    function clearQuickActive() {
+      document.querySelectorAll(".quick-btn").forEach(b => b.classList.remove("active"));
     }
 
     function toCSV(headers, rows) {
@@ -623,6 +1070,7 @@
             setStatus(kind, "Purged all rows", true, "import");
             setStatus(kind, "Purged all rows", true, "logs");
             showPopup(`Purged ${kind} data`, true);
+            renderDashboard();
           } catch (err) {
             showPopup(err.message || "Purge failed", false);
             setStatus(kind, err.message || "Purge failed", false, "import");
@@ -631,12 +1079,61 @@
       });
     }
 
+    function applyDateFilter(store) {
+      if (!store?.rows?.length) return store;
+      const fromInput = document.getElementById("filter-from");
+      const toInput = document.getElementById("filter-to");
+      const fromVal = fromInput?.value ? new Date(fromInput.value) : null;
+      const toVal = toInput?.value ? new Date(toInput.value) : null;
+      if ((!fromVal || isNaN(fromVal)) && (!toVal || isNaN(toVal))) return store;
+      const createdKey = findHeader(store.headers, "created time") || "created time";
+      const filteredRows = store.rows.filter((row) => {
+        const d = new Date(row[createdKey]);
+        if (d.toString() === "Invalid Date") return false;
+        if (fromVal && d < fromVal) return false;
+        if (toVal && d > toVal) return false;
+        return true;
+      });
+      return { ...store, rows: filteredRows };
+    }
+
     wireDropZones();
     wireNav();
     wireExport();
     wirePurge();
+    ["filter-from", "filter-to"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("change", () => {
+          clearQuickActive();
+          renderDashboard();
+        });
+      }
+    });
+    document.querySelectorAll(".quick-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const range = btn.dataset.range;
+        const fromInput = document.getElementById("filter-from");
+        const toInput = document.getElementById("filter-to");
+        const today = new Date();
+        const toStr = today.toISOString().slice(0, 10);
+        if (range === "all") {
+          if (fromInput) fromInput.value = "";
+          if (toInput) toInput.value = "";
+        } else {
+          const days = parseInt(range, 10);
+          const from = new Date(today.getTime() - days * 24 * 60 * 60 * 1000);
+          const fromStr = from.toISOString().slice(0, 10);
+          if (fromInput) fromInput.value = fromStr;
+          if (toInput) toInput.value = toStr;
+        }
+        setQuickActive(btn);
+        renderDashboard();
+      });
+    });
     fetchExisting("diary");
     fetchExisting("pain");
+    renderDashboard();
   </script>
 </body>
 </html>

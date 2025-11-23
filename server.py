@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from fastapi import Body, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from watchfiles import Change, awatch
 
 
@@ -139,6 +140,7 @@ def create_app(data_dir: Path) -> FastAPI:
     last_sent: Dict[str, float] = {}
     last_sent_lock = asyncio.Lock()
     app = FastAPI(title="myHealth sync server")
+    web_dir = Path(__file__).parent.joinpath("web").resolve()
 
     app.add_middleware(
         CORSMiddleware,
@@ -196,6 +198,15 @@ def create_app(data_dir: Path) -> FastAPI:
             }
         )
         return {"status": "saved", "file": path.name}
+
+    if web_dir.exists():
+        index_path = web_dir / "index.html"
+
+        @app.get("/", include_in_schema=False)
+        async def serve_index() -> FileResponse:
+            if index_path.exists():
+                return FileResponse(index_path)
+            raise HTTPException(status_code=404, detail="UI not found")
 
     @app.websocket("/ws")
     async def websocket_endpoint(socket: WebSocket) -> None:
