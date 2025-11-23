@@ -52,12 +52,12 @@
       width: 24px;
       height: 24px;
       border-radius: 8px;
-      background: radial-gradient(circle at 30% 30%, #ff5e8a, #ff8fb1);
+      background: radial-gradient(circle at 30% 30%, #e44d75, #ff7fa6);
       display: grid;
       place-items: center;
       color: #fff;
       font-size: 14px;
-      box-shadow: 0 10px 25px rgba(255,94,138,0.35);
+      box-shadow: 0 4px 10px rgba(228,77,117,0.14);
     }
     .grid {
       display: grid;
@@ -159,6 +159,15 @@
       margin-bottom: 18px;
       flex-wrap: wrap;
     }
+    .entry-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 12px 0 4px;
+    }
+    .entry-panel {
+      margin-top: 8px;
+    }
     .nav-btn {
       padding: 10px 14px;
       border-radius: 10px;
@@ -180,6 +189,207 @@
       box-shadow: 0 0 0 1px rgba(255,94,138,0.3), var(--shadow);
       color: var(--accent);
     }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,94,138,0.08);
+      border: 1px solid rgba(255,94,138,0.24);
+      color: var(--text);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    .form-grid {
+      display: block;
+      column-width: 220px;
+      column-gap: 12px;
+      column-fill: balance;
+      margin-top: 10px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+      height: auto;
+      break-inside: avoid;
+      width: 100%;
+      box-sizing: border-box;
+      margin: 0 0 10px 0;
+    }
+    .form-group label {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.01em;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: var(--card-strong);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 10px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--accent);
+      background: rgba(255,94,138,0.08);
+    }
+    .form-group small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 72px;
+    }
+    .form-actions {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #0b0b0d;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 12px rgba(255,94,138,0.16);
+      letter-spacing: 0.01em;
+    }
+    .btn-primary.btn-plain {
+      box-shadow: none;
+      background: rgba(255,94,138,0.18);
+      color: #fff;
+      border: 1px solid rgba(255,94,138,0.35);
+    }
+    .btn-muted {
+      background: var(--card-strong);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .chip-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .chip-btn {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card-strong);
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      font-size: 13px;
+      box-shadow: none;
+    }
+    .chip-btn.active {
+      background: rgba(255,94,138,0.06);
+      border-color: rgba(255,94,138,0.25);
+      color: #f1c8d7;
+      box-shadow: none;
+    }
+    .tile {
+      padding: 12px;
+      border-radius: 12px;
+      background: var(--card-strong);
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+    }
+    .tile strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+    .tile p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .chip-edit {
+      margin-left: 8px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card-strong);
+      color: var(--muted);
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .chip-editor {
+      margin-top: 8px;
+      border: 1px dashed var(--border);
+      padding: 10px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.02);
+    }
+    .chip-editor-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .chip-editor-row:last-child { border-bottom: none; }
+    .chip-editor-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .chip-editor-actions button,
+    .chip-editor-add button {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .chip-editor-add {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      align-items: center;
+      width: 100%;
+    }
+    .chip-editor-add input {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card-strong);
+      color: var(--text);
+      box-sizing: border-box;
+    }
+    .chip-editor-add button { flex-shrink: 0; }
     .hidden { display: none; }
     .toast {
       position: fixed;
@@ -358,7 +568,85 @@
     <section id="newlog-section" class="hidden">
       <div class="card">
         <h2>New Entry</h2>
-        <div class="hint">Coming soon.</div>
+        <div class="hint">Capture a quick log without waiting for a CSV import.</div>
+        <div class="entry-tabs" role="tablist" aria-label="New entry categories">
+          <button class="nav-btn entry-btn active" data-entry="pain" type="button">Physical pain</button>
+          <button class="nav-btn entry-btn" data-entry="autotherapy" type="button">Autotherapy</button>
+        </div>
+
+        <div class="entry-panel" data-entry-panel="pain">
+          <form id="pain-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="pain-date">Entry date/time</label>
+                <input id="pain-date" name="pain-date" type="datetime-local" />
+                <small>Stored as separate date + time columns; defaults to now if left empty.</small>
+              </div>
+              <div class="form-group">
+                <label for="pain-level">Pain level (0-9)</label>
+                <input id="pain-level" name="pain-level" type="number" min="0" max="9" step="1" placeholder="e.g. 6" />
+              </div>
+              <div class="form-group">
+                <label for="fatigue-level">Fatigue level (0-9)</label>
+                <input id="fatigue-level" name="fatigue-level" type="number" min="0" max="9" step="1" placeholder="e.g. 4" />
+              </div>
+              <div class="form-group">
+                <label for="mood-level">Mood level (0-9)</label>
+                <input id="mood-level" name="mood-level" type="number" min="0" max="9" step="1" placeholder="e.g. 7" />
+              </div>
+              <div class="form-group">
+                <label>Area <button type="button" class="chip-edit" data-edit="area">Edit</button></label>
+                <div id="area-options" class="chip-row" data-field="area"></div>
+                <div id="area-editor" class="chip-editor hidden" data-field="area"></div>
+              </div>
+              <div class="form-group">
+                <label>Symptoms <button type="button" class="chip-edit" data-edit="symptoms">Edit</button></label>
+                <div id="symptoms-options" class="chip-row" data-field="symptoms"></div>
+                <div id="symptoms-editor" class="chip-editor hidden" data-field="symptoms"></div>
+              </div>
+              <div class="form-group">
+                <label>Activities <button type="button" class="chip-edit" data-edit="activities">Edit</button></label>
+                <div id="activities-options" class="chip-row" data-field="activities"></div>
+                <div id="activities-editor" class="chip-editor hidden" data-field="activities"></div>
+              </div>
+              <div class="form-group">
+                <label>Medicines <button type="button" class="chip-edit" data-edit="medicines">Edit</button></label>
+                <div id="medicines-options" class="chip-row" data-field="medicines" data-preselect="all"></div>
+                <div id="medicines-editor" class="chip-editor hidden" data-field="medicines"></div>
+              </div>
+              <div class="form-group">
+                <label for="pain-note">Notes</label>
+                <textarea id="pain-note" name="pain-note" placeholder="Anything else worth tracking?"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Habits <button type="button" class="chip-edit" data-edit="habits">Edit</button></label>
+                <div id="habits-options" class="chip-row" data-field="habits"></div>
+                <div id="habits-editor" class="chip-editor hidden" data-field="habits"></div>
+              </div>
+              <div class="form-group">
+                <label for="coffee-count">Coffee (cups)</label>
+                <input id="coffee-count" name="coffee-count" type="number" min="0" max="9" step="1" placeholder="e.g. 1" />
+              </div>
+              <div class="form-group">
+                <label>Other <button type="button" class="chip-edit" data-edit="other">Edit</button></label>
+                <div id="other-options" class="chip-row" data-field="other"></div>
+                <div id="other-editor" class="chip-editor hidden" data-field="other"></div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn-primary btn-plain" type="submit">Save new entry</button>
+              <div id="pain-form-status" class="status"></div>
+            </div>
+          </form>
+        </div>
+
+        <div class="entry-panel hidden" data-entry-panel="autotherapy">
+          <div class="hint" style="margin-bottom:8px;">Autotherapy logging is coming soon.</div>
+          <div class="tile" style="padding:14px;">
+            <strong style="margin-bottom:6px; display:block;">Nothing to fill in yet</strong>
+            <p style="margin:0; color:var(--muted);">We’ll add a focused form here once categories are defined.</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -434,36 +722,56 @@
     };
     const dataStore = { diary: null, pain: null };
     const REQUIRED = {
-      diary: ["file name", "created time", "mood level", "depression", "anxiety"],
+      diary: ["date", "hour", "mood level", "depression", "anxiety"],
       pain: [
-        "file name",
-        "created time",
+        "date",
+        "hour",
         "pain level",
         "fatigue level",
         "mood level",
         "symptoms",
         "area",
         "activities",
-        "good sleep",
-        "healthy food",
+        "habits",
         "coffee",
-        ">6h day byte",
-        ">1h masturbation",
-        "<1h masturbation",
-        "cum",
+        "other",
         "medicines",
         "note",
       ],
     };
     const ALIASES = {
-      diary: {},
+      diary: {
+        "date": ["date", "file name"],
+        "hour": ["hour", "time"],
+      },
       pain: {
+        "date": ["date", "file name"],
+        "hour": ["hour", "time"],
         "pain level": ["pain level", "pain"],
         "fatigue level": ["fatigue level", "fatigue"],
         "mood level": ["mood level", "mood"],
-        "good sleep": ["good sleep", "sleep"],
+        "habits": ["habits", "good sleep", "healthy food", "sleep"],
+        "other": ["other", ">6h day byte", ">1h masturbation", "<1h masturbation", "cum"],
+        "coffee": ["coffee"],
+        "medicines": ["medicines"],
       },
     };
+    let entryTabSetter = null;
+    const optionFields = ["area", "symptoms", "activities", "medicines", "habits", "other"];
+    const optionsCache = {
+      area: [],
+      symptoms: [],
+      activities: [],
+      medicines: [],
+      habits: [],
+      other: [],
+    };
+
+    function buildOptionCacheFromStore() {
+      optionFields.forEach((field) => {
+        optionsCache[field] = collectOptions(field);
+      });
+    }
 
     async function fetchExisting(kind) {
       const cfg = datasets[kind];
@@ -472,9 +780,17 @@
         if (!res.ok) return;
         const data = await res.json();
         if (data && data.rows && data.headers) {
-          dataStore[kind] = data;
-          renderTable(kind, data.headers, data.rows);
-          setStatus(kind, `Loaded ${data.rows.length} rows from ${cfg.file}`, true, "logs");
+          const normalized = normalizeDataset(data, kind);
+          dataStore[kind] = normalized.data;
+          renderTable(kind, normalized.data.headers, normalized.data.rows);
+          setStatus(kind, `Loaded ${normalized.data.rows.length} rows from ${cfg.file}`, true, "logs");
+          if (normalized.changed) {
+            await persistNormalized(kind, normalized.data);
+          }
+          if (kind === "pain") {
+            buildOptionCacheFromStore();
+            renderPainOptionButtons();
+          }
           renderDashboard();
         }
       } catch (err) {
@@ -502,15 +818,23 @@
       setTimeout(() => toast.classList.remove("show"), 2800);
     }
 
-    function renderTable(kind, headers, rows) {
+    function renderTable(kind, headers, rows, withActions = false) {
       const cfg = datasets[kind];
       if (!headers || !rows) {
         cfg.logsTable.innerHTML = "";
         return;
       }
-      const thead = `<thead><tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join("")}</tr></thead>`;
-      const tbody = `<tbody>${rows.map(r => `<tr>${headers.map(h => `<td>${escapeHtml(r[h] ?? "")}</td>`).join("")}</tr>`).join("")}</tbody>`;
+      const thead = `<thead><tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join("")}${withActions ? "<th>Actions</th>" : ""}</tr></thead>`;
+      const tbody = `<tbody>${rows
+        .map(
+          (r, idx) =>
+            `<tr data-row="${idx}">${headers
+              .map(h => `<td>${escapeHtml(r[h] ?? "")}</td>`)
+              .join("")}${withActions ? `<td class="row-actions"><button class="nav-btn small" data-edit-row="${idx}" data-kind="${kind}">Edit</button><button class="nav-btn danger small" data-delete-row="${idx}" data-kind="${kind}">Delete</button></td>` : ""}</tr>`
+        )
+        .join("")}</tbody>`;
       cfg.logsTable.innerHTML = `<table>${thead}${tbody}</table><div class="rowcount">${rows.length} rows</div>`;
+      if (withActions) wireRowActions(kind);
     }
 
     function escapeHtml(str) {
@@ -578,10 +902,10 @@
         const text = await file.text();
         const parsed = parseCSV(text);
         if (!parsed.headers.length) throw new Error("No headers detected");
-        if (!hasCreatedTime(parsed.headers)) throw new Error('Missing "created time" column');
-        const validateMsg = validateHeaders(kind, parsed.headers);
+        const normalized = normalizeParsed(parsed, kind);
+        const validateMsg = validateHeaders(kind, normalized.headers);
         if (validateMsg) throw new Error(validateMsg);
-        const result = await persist(kind, parsed, file.name);
+        const result = await persist(kind, normalized, file.name);
         setStatus(kind, `Imported ${result.added} new, ${result.skipped} existing (source: ${file.name})`, true, "import");
         showPopup(`Imported ${result.added} new, ${result.skipped} already present`, true);
       } catch (err) {
@@ -598,10 +922,6 @@
         .replace(/[-_–—]+/g, " ")
         .replace(/\s+/g, " ")
         .trim();
-    }
-
-    function hasCreatedTime(headers) {
-      return headers.some(h => normalizeHeaderName(h) === "created time");
     }
 
     function validateHeaders(kind, headers) {
@@ -627,33 +947,393 @@
       return null;
     }
 
+    function normalizeTimestamp(val) {
+      const raw = String(val ?? "").trim();
+      if (!raw) return "";
+      const hasTime = raw.includes("T") || raw.includes(" ");
+      if (hasTime) return raw.replace(" ", "T");
+      return raw;
+    }
+
+    function normalizeRows(headers, rows, kind) {
+      const createdKey = findHeader(headers, "created time");
+      const fileKey = findHeader(headers, "file name");
+      const dateKey = findHeader(headers, "date") || fileKey || createdKey || "date";
+      const hourKey = findHeader(headers, "hour") || findHeader(headers, "time");
+      const habitsKey = findHeader(headers, "habits");
+      const goodKey = findHeader(headers, "good sleep");
+      const healthyKey = findHeader(headers, "healthy food");
+      const otherKey = findHeader(headers, "other");
+      const flagDefs = [
+        { key: findHeader(headers, ">6h day byte"), label: ">6h day byte" },
+        { key: findHeader(headers, ">1h masturbation"), label: ">1h masturbation" },
+        { key: findHeader(headers, "<1h masturbation"), label: "<1h masturbation" },
+        { key: findHeader(headers, "cum"), label: "cum" },
+      ];
+
+      const allowed = kind && REQUIRED[kind] ? REQUIRED[kind] : null;
+      const cleanedHeaders = headers.filter((h) => {
+        const norm = normalizeHeaderName(h);
+        if (allowed) return allowed.some((a) => normalizeHeaderName(a) === norm);
+        return ![
+          "created time",
+          "file name",
+          "date",
+          "time",
+          "hour",
+          "habits",
+          "good sleep",
+          "healthy food",
+          ">6h day byte",
+          ">1h masturbation",
+          "<1h masturbation",
+          "cum",
+        ].includes(norm);
+      });
+      const normalizedHeaders = [];
+      const desiredOrder =
+        allowed ||
+        [
+          "date",
+          "hour",
+          "pain level",
+          "fatigue level",
+          "mood level",
+          "symptoms",
+          "area",
+          "activities",
+          "habits",
+          "coffee",
+          "other",
+          "medicines",
+          "note",
+        ];
+      [...desiredOrder, ...cleanedHeaders].forEach((h) => {
+        const norm = normalizeHeaderName(h);
+        if (!normalizedHeaders.some((x) => normalizeHeaderName(x) === norm)) {
+          normalizedHeaders.push(h === "file name" ? "date" : h);
+        }
+      });
+
+      let changed = normalizeHeaderName(createdKey || "") === "created time" || !!fileKey;
+      const normalizedRows = (rows || []).map((row) => {
+        const rawFile = fileKey ? row[fileKey] : "";
+        const rawCreated = createdKey ? row[createdKey] : "";
+        const rawDate = dateKey ? row[dateKey] : "";
+        const rawHour = hourKey ? row[hourKey] : "";
+        const rawHabits = habitsKey ? row[habitsKey] : "";
+        const rawGood = goodKey ? row[goodKey] : "";
+        const rawHealthy = healthyKey ? row[healthyKey] : "";
+
+        const preferred = rawDate || rawFile || rawCreated || "";
+        const normalizedValue = normalizeTimestamp(preferred);
+        let datePart = normalizedValue;
+        let hourPart = "";
+        if (normalizedValue.includes("T")) {
+          const [d, t] = normalizedValue.split("T");
+          datePart = d;
+          hourPart = (t || "").slice(0, 5);
+        }
+        if (!hourPart && rawHour) {
+          hourPart = String(rawHour).slice(0, 5);
+        }
+        if (!hourPart) hourPart = "21:00";
+
+        const next = { ...row, date: datePart, hour: hourPart };
+        if (kind === "pain") {
+          if (habitsKey) delete next[habitsKey];
+          if (goodKey) delete next[goodKey];
+          if (healthyKey) delete next[healthyKey];
+          flagDefs.forEach((f) => {
+            if (f.key && f.key in next) delete next[f.key];
+          });
+          if (otherKey && otherKey in next) delete next[otherKey];
+
+        const habitTokens = new Set();
+        const addTokens = (val) => {
+          String(val || "")
+            .split(",")
+            .map((s) => s.trim().toLowerCase())
+            .filter((s) => s && !["false", "true", "yes", "1", "no", "0"].includes(s))
+            .forEach((s) => habitTokens.add(s));
+        };
+          addTokens(rawHabits);
+          addTokens(rawGood);
+          addTokens(rawHealthy);
+          const goodYes = habitTokens.has("good sleep") || /^yes|true|1$/i.test(String(rawGood || "").trim());
+          const healthyYes =
+            habitTokens.has("healthy food") || /^yes|true|1$/i.test(String(rawHealthy || "").trim());
+          const habitList = [];
+          if (goodYes) habitList.push("good sleep");
+          if (healthyYes) habitList.push("healthy food");
+          const extraHabits = Array.from(habitTokens).filter(
+            (t) => t && t !== "good sleep" && t !== "healthy food"
+          );
+          if (extraHabits.length) habitList.push(...extraHabits);
+          next["habits"] = habitList.join(", ");
+
+        const otherTokens = new Set();
+        const addOther = (label, val) => {
+          const v = String(val || "").trim();
+          if (!v) return;
+          const lower = v.toLowerCase();
+          if (["yes", "true", "1"].includes(lower)) {
+            otherTokens.add(label);
+          } else if (!["false", "no", "0"].includes(lower)) {
+            otherTokens.add(v);
+          }
+        };
+        flagDefs.forEach((f) => addOther(f.label, f.key ? row[f.key] : ""));
+        if (otherKey) {
+          String(row[otherKey] || "")
+            .split(",")
+            .map((s) => s.trim())
+            .filter((s) => s && !["false", "true", "yes", "1", "no", "0"].includes(s.toLowerCase()))
+            .forEach((s) => otherTokens.add(s));
+        }
+        next["other"] = Array.from(otherTokens).join(", ");
+        } else if (allowed) {
+          // strip any fields not in allowed when not pain
+          Object.keys(next).forEach((key) => {
+            if (!allowed.some((a) => normalizeHeaderName(a) === normalizeHeaderName(key))) {
+              delete next[key];
+            }
+          });
+        }
+
+        if (fileKey && fileKey in next) delete next[fileKey];
+        if (createdKey && createdKey in next) delete next[createdKey];
+        if (hourKey && hourKey !== "hour" && hourKey in next) delete next[hourKey];
+
+        if (
+          next.date !== rawDate ||
+          (fileKey && rawFile && next.date !== rawFile) ||
+          (createdKey && rawCreated && next.date !== rawCreated) ||
+          next.hour !== rawHour ||
+          (kind === "pain" && (next.habits !== rawHabits || next.other !== (otherKey ? row[otherKey] : "")))
+        ) {
+          changed = true;
+        }
+        return next;
+      });
+      return { headers: normalizedHeaders, rows: normalizedRows, changed };
+    }
+
+    function collectOptions(field) {
+      const store = dataStore.pain;
+      const options = new Set();
+      if (store?.rows?.length) {
+        const key = findHeader(store.headers, field) || field;
+        store.rows.forEach((row) => {
+          const val = row[key];
+          if (!val) return;
+          String(val)
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .forEach((s) => options.add(s));
+        });
+      }
+      return Array.from(options);
+    }
+
+    function renderOptionButtons(field, containerId, preselectAll = false) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      const values = optionsCache[field] || [];
+      if (!values.length) {
+        el.innerHTML = `<span style="color:var(--muted); font-size:13px;">No ${field} options yet</span>`;
+        return;
+      }
+      el.innerHTML = values
+        .map(
+          (v) =>
+            `<button type="button" class="chip-btn${preselectAll ? " active" : ""}" data-value="${escapeHtml(
+              v
+            )}">${escapeHtml(v)}</button>`
+        )
+        .join("");
+      el.querySelectorAll(".chip-btn").forEach((btn) => {
+        btn.addEventListener("click", () => btn.classList.toggle("active"));
+      });
+    }
+
+    function renderPainOptionButtons() {
+      renderOptionButtons("area", "area-options", false);
+      renderOptionButtons("symptoms", "symptoms-options", false);
+      renderOptionButtons("activities", "activities-options", false);
+      renderOptionButtons("medicines", "medicines-options", true);
+      renderOptionButtons("other", "other-options", false);
+      renderOptionButtons("habits", "habits-options", false);
+    }
+
+    function renderOptionEditor(field) {
+      const container = document.getElementById(`${field}-editor`);
+      if (!container) return;
+      const listContainer = document.getElementById(`${field}-options`);
+      if (listContainer) listContainer.classList.add("hidden");
+      const opts = optionsCache[field] || [];
+      const listHtml = opts.length
+        ? opts
+            .map(
+              (v) => `
+            <div class="chip-editor-row">
+              <span>${escapeHtml(v)}</span>
+              <div class="chip-editor-actions">
+                <button type="button" data-action="edit" data-value="${escapeHtml(v)}" data-field="${field}">Edit</button>
+                <button type="button" data-action="delete" data-value="${escapeHtml(v)}" data-field="${field}">Delete</button>
+              </div>
+            </div>`
+            )
+            .join("")
+        : `<div style="color:var(--muted); font-size:13px;">No ${escapeHtml(field)} options yet</div>`;
+      container.innerHTML = `
+        <div class="chip-editor-list">${listHtml}</div>
+        <div class="chip-editor-add">
+          <input type="text" placeholder="Add ${escapeHtml(field)}" data-new="${field}" />
+          <button type="button" data-action="add" data-field="${field}">Add</button>
+        </div>
+      `;
+      container.querySelectorAll("[data-action]").forEach((btn) => {
+        btn.addEventListener("click", () => handleEditorAction(btn.dataset));
+      });
+    }
+
+    function handleEditorAction(dataset) {
+      const field = dataset.field;
+      if (!field) return;
+      const action = dataset.action;
+      const current = optionsCache[field] || [];
+      if (action === "add") {
+        const input = document.querySelector(`input[data-new="${field}"]`);
+        const val = input?.value?.trim();
+        if (val) {
+          optionsCache[field] = dedupe([...current, val]);
+          input.value = "";
+          renderOptionEditor(field);
+          renderPainOptionButtons();
+        }
+      } else if (action === "delete") {
+        const val = dataset.value;
+        optionsCache[field] = current.filter((v) => v !== val);
+        renderOptionEditor(field);
+        renderPainOptionButtons();
+      } else if (action === "edit") {
+        const val = dataset.value;
+        const next = prompt(`Rename ${field}`, val);
+        if (next && next.trim()) {
+          optionsCache[field] = dedupe(current.map((v) => (v === val ? next.trim() : v)));
+          renderOptionEditor(field);
+          renderPainOptionButtons();
+        }
+      }
+      const listContainer = document.getElementById(`${field}-options`);
+      if (listContainer) listContainer.classList.add("hidden");
+    }
+
+    function dedupe(list) {
+      return Array.from(new Set((list || []).filter(Boolean).map((v) => v.trim())));
+    }
+
+    function wireOptionEditors() {
+      document.querySelectorAll("[data-edit]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const field = btn.dataset.edit;
+          if (!field) return;
+          const editor = document.getElementById(`${field}-editor`);
+          const listContainer = document.getElementById(`${field}-options`);
+          if (!editor) return;
+          const isHidden = editor.classList.contains("hidden");
+          document.querySelectorAll(".chip-editor").forEach((ed) => ed.classList.add("hidden"));
+          document.querySelectorAll(".chip-row").forEach((row) => row.classList.remove("hidden"));
+          if (isHidden) {
+            editor.classList.remove("hidden");
+            if (listContainer) listContainer.classList.add("hidden");
+            renderOptionEditor(field);
+          }
+        });
+      });
+    }
+
+    function selectedOptions(containerId) {
+      const el = document.getElementById(containerId);
+      if (!el) return [];
+      return Array.from(el.querySelectorAll(".chip-btn.active")).map((btn) => btn.dataset.value || "");
+    }
+
+    function normalizeParsed(parsed, kind) {
+      if (!parsed?.headers || !Array.isArray(parsed.rows)) return parsed;
+      const result = normalizeRows(parsed.headers, parsed.rows, kind);
+      return { headers: result.headers, rows: result.rows };
+    }
+
+    function normalizeDataset(data, kind) {
+      if (!data?.headers || !Array.isArray(data.rows)) return { data, changed: false };
+      const normalized = normalizeRows(data.headers, data.rows, kind);
+      return {
+        data: { ...data, headers: normalized.headers, rows: normalized.rows },
+        changed: normalized.changed,
+      };
+    }
+
+    function entryDateFromRow(row, headers) {
+      const dateKey = findHeader(headers, "date") || "date";
+      const timeKey = findHeader(headers, "hour") || "hour";
+      const dateVal = (row?.[dateKey] || "").trim();
+      const timeVal = (row?.[timeKey] || "").trim() || "21:00";
+      if (!dateVal) return null;
+      const d = new Date(`${dateVal}T${timeVal}`);
+      return d.toString() === "Invalid Date" ? null : d;
+    }
+
+    async function persistNormalized(kind, payload) {
+      const cfg = datasets[kind];
+      if (!cfg) return;
+      try {
+        const res = await fetch(`/api/files/${cfg.file}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      } catch (err) {
+        console.warn("Failed to persist normalized data", err);
+      }
+    }
+
     async function persist(kind, parsed, sourceName) {
       const cfg = datasets[kind];
       try {
-        const createdKey = findHeader(parsed.headers, "created time");
-        if (!createdKey) throw new Error('Missing "created time" column');
-
-        const existing = dataStore[kind]?.rows || [];
-        const existingHeaders = dataStore[kind]?.headers || parsed.headers;
-        const existingCreatedKey = findHeader(existingHeaders, "created time") || createdKey;
-        const seen = new Set(existing.map(r => (r[existingCreatedKey] || "").trim()));
+        const normalizedIncoming = normalizeRows(parsed.headers, parsed.rows, kind);
+        const existingNormalized = normalizeRows(
+          dataStore[kind]?.headers || normalizedIncoming.headers,
+          dataStore[kind]?.rows || [],
+          kind
+        );
+        const mergedHeaders = Array.from(
+          new Set([...(existingNormalized.headers || []), ...(normalizedIncoming.headers || [])])
+        );
+        const dateKey = findHeader(mergedHeaders, "date") || "date";
+        const timeKey = findHeader(mergedHeaders, "hour") || "hour";
+        const seen = new Set(
+          existingNormalized.rows.map(r => `${r[dateKey] || ""}T${(r[timeKey] || "21:00").slice(0,5)}`)
+        );
         let added = 0;
         let skipped = 0;
-        const mergedRows = [...existing];
+        const mergedRows = [...existingNormalized.rows];
 
-        parsed.rows.forEach(r => {
-          const created = (r[createdKey] || "").trim();
-          if (!created) return;
-          if (seen.has(created)) {
+        normalizedIncoming.rows.forEach(r => {
+          const stamp = `${(r[dateKey] || "").trim()}T${(r[timeKey] || "21:00").slice(0,5)}`;
+          if (!stamp.trim()) return;
+          if (seen.has(stamp)) {
             skipped += 1;
           } else {
-            seen.add(created);
+            seen.add(stamp);
             mergedRows.push(r);
             added += 1;
           }
         });
 
-        const mergedHeaders = dataStore[kind]?.headers?.length ? dataStore[kind].headers : parsed.headers;
         const payload = {
           source: sourceName,
           imported_at: new Date().toISOString(),
@@ -669,7 +1349,7 @@
           throw new Error(`Server returned ${res.status}`);
         }
         dataStore[kind] = payload;
-        renderTable(kind, parsed.headers, mergedRows);
+        renderTable(kind, mergedHeaders, mergedRows);
         setStatus(kind, `Saved to ${cfg.file} (${mergedRows.length} total rows)`, true, "import");
         setStatus(kind, `Updated ${mergedRows.length} rows from ${sourceName}`, true, "logs");
         renderDashboard();
@@ -679,6 +1359,96 @@
         setStatus(kind, err.message || "Failed to save", false, "import");
         throw err;
       }
+    }
+
+    function wireEntryTabs() {
+      const buttons = document.querySelectorAll(".entry-btn");
+      const panels = document.querySelectorAll("[data-entry-panel]");
+      const setActive = (key) => {
+        if (!key) return;
+        buttons.forEach((btn) => btn.classList.toggle("active", btn.dataset.entry === key));
+        panels.forEach((panel) => panel.classList.toggle("hidden", panel.dataset.entryPanel !== key));
+      };
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => setActive(btn.dataset.entry));
+      });
+      if (buttons.length) {
+        const current = document.querySelector(".entry-btn.active")?.dataset.entry || buttons[0].dataset.entry;
+        setActive(current);
+      }
+      entryTabSetter = setActive;
+    }
+
+    function wirePainForm() {
+      const form = document.getElementById("pain-form");
+      const status = document.getElementById("pain-form-status");
+      if (!form) return;
+
+      const setStatus = (msg, ok = false) => {
+        if (!status) return;
+        status.innerHTML = msg ? `<span class="${ok ? "ok" : "err"}">${ok ? "Saved" : "Error"}:</span> ${escapeHtml(msg)}` : "";
+      };
+
+      const setDefaultDate = () => {
+        const input = form.querySelector('input[name="pain-date"]');
+        if (input && !input.value) {
+          const now = new Date();
+          const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+          input.value = localIso;
+        }
+      };
+
+      setDefaultDate();
+      renderPainOptionButtons();
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = new FormData(form);
+        const toParts = (val) => {
+          const fallback = new Date();
+          const parsed = val ? new Date(val) : fallback;
+          const good = parsed.toString() !== "Invalid Date" ? parsed : fallback;
+          const iso = new Date(good.getTime() - good.getTimezoneOffset() * 60000).toISOString();
+          return { date: iso.slice(0, 10), time: iso.slice(11, 16) };
+        };
+        const parts = toParts(data.get("pain-date"));
+        const areas = selectedOptions("area-options").join(", ");
+        const symptoms = selectedOptions("symptoms-options").join(", ");
+        const activities = selectedOptions("activities-options").join(", ");
+        const medicines = selectedOptions("medicines-options").join(", ");
+        const other = selectedOptions("other-options").join(", ");
+        const habits = selectedOptions("habits-options").join(", ");
+        const row = {
+          "date": parts.date,
+          "hour": parts.time,
+          "pain level": data.get("pain-level") || "",
+          "fatigue level": data.get("fatigue-level") || "",
+          "mood level": data.get("mood-level") || "",
+          "symptoms": symptoms,
+          "area": areas,
+          "activities": activities,
+          "habits": habits,
+          "coffee": data.get("coffee-count") || "",
+          "other": other,
+          "medicines": medicines,
+          "note": data.get("pain-note") || "",
+        };
+        const parsed = { headers: REQUIRED.pain, rows: [row] };
+        try {
+          await persist("pain", parsed, "manual form");
+          setStatus("Saved new pain entry", true);
+          buildOptionCacheFromStore();
+          renderPainOptionButtons();
+          optionFields.forEach((field) => {
+            const editor = document.getElementById(`${field}-editor`);
+            if (editor && !editor.classList.contains("hidden")) renderOptionEditor(field);
+          });
+          form.reset();
+          setDefaultDate();
+        } catch (err) {
+          setStatus(err.message || "Failed to save pain entry", false);
+        }
+      });
     }
 
     function wireDropZones() {
@@ -715,6 +1485,11 @@
           Object.entries(sections).forEach(([key, el]) => {
             el.classList.toggle("hidden", key !== target);
           });
+          if (target === "newlog" && entryTabSetter) {
+            const current = document.querySelector(".entry-btn.active")?.dataset.entry
+              || document.querySelector(".entry-btn")?.dataset.entry;
+            entryTabSetter(current);
+          }
         });
       });
     }
@@ -797,14 +1572,13 @@
     function timeSeries(store, field) {
       if (!store?.rows?.length) return [];
       const key = findHeader(store.headers, field) || field;
-      const createdKey = findHeader(store.headers, "created time") || "created time";
       return store.rows
         .map((row) => {
-          const d = new Date(row[createdKey]);
+          const d = entryDateFromRow(row, store.headers);
           const v = parseFloat(row[key]);
           return { t: d, v };
         })
-        .filter((p) => p.t.toString() !== "Invalid Date" && !Number.isNaN(p.v))
+        .filter((p) => p.t && p.t.toString() !== "Invalid Date" && !Number.isNaN(p.v))
         .sort((a, b) => a.t - b.t);
     }
 
@@ -1086,10 +1860,9 @@
       const fromVal = fromInput?.value ? new Date(fromInput.value) : null;
       const toVal = toInput?.value ? new Date(toInput.value) : null;
       if ((!fromVal || isNaN(fromVal)) && (!toVal || isNaN(toVal))) return store;
-      const createdKey = findHeader(store.headers, "created time") || "created time";
       const filteredRows = store.rows.filter((row) => {
-        const d = new Date(row[createdKey]);
-        if (d.toString() === "Invalid Date") return false;
+        const d = entryDateFromRow(row, store.headers);
+        if (!d) return false;
         if (fromVal && d < fromVal) return false;
         if (toVal && d > toVal) return false;
         return true;
@@ -1097,6 +1870,11 @@
       return { ...store, rows: filteredRows };
     }
 
+    buildOptionCacheFromStore();
+    renderPainOptionButtons();
+    wireEntryTabs();
+    wirePainForm();
+    wireOptionEditors();
     wireDropZones();
     wireNav();
     wireExport();
