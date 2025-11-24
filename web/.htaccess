@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Allow direct access to hash.php if you temporarily add it for password hashing
+RewriteRule ^hash\.php$ - [L]
+
+# Route login/logout/register and files to index.php
+RewriteRule ^(login|logout|register)/?$ index.php [L,QSA]
+RewriteRule ^$ index.php [L]
+RewriteRule ^(.+)$ index.php [L,QSA]

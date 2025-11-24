@@ -1,14 +1,27 @@
 {
-  "source": "diary(1).csv",
-  "imported_at": "2025-11-24T09:46:05.222Z",
+  "source": "journal form",
+  "imported_at": "2025-11-24T17:22:54.767Z",
   "headers": [
     "date",
     "hour",
     "mood level",
     "depression",
-    "anxiety"
+    "anxiety",
+    "description",
+    "gratitude",
+    "reflection"
   ],
   "rows": [
+    {
+      "date": "2025-11-24",
+      "hour": "18:20",
+      "mood level": "6",
+      "depression": "4",
+      "anxiety": "7",
+      "description": "sia io che dani, coincidentalmente, abbiamo sperimentato con codex e abbiam deciso di portarlo a lavoro, ho trovato un nuovo stimolo e sono contento.\ni dolori mi stanno un po uccidendo e ho ansia da iperfissazione",
+      "gratitude": "nuove opportunità a lavoro, compagnia di lasky, good food",
+      "reflection": "sto cercando di tenermi controllato ma sto andando come un treno"
+    },
     {
       "date": "2025-11-16",
       "hour": "21:00",
