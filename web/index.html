@@ -122,6 +122,63 @@
     .table-wrap.expanded {
       max-height: none;
     }
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .inline-input {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--card-strong);
+      color: var(--text);
+      box-sizing: border-box;
+    }
+    .sub-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+      margin: 12px 0 8px;
+    }
+    .sub-divider .sub-label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .autotherapy-subnav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card-strong);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+    }
+    .autotherapy-subnav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card-strong);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+    }
+    .autotherapy-subnav .sub-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-right: 6px;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -652,10 +709,62 @@
         </div>
 
         <div class="entry-panel hidden" data-entry-panel="autotherapy">
-          <div class="hint" style="margin-bottom:8px;">Autotherapy logging is coming soon.</div>
-          <div class="tile" style="padding:14px;">
-            <strong style="margin-bottom:6px; display:block;">Nothing to fill in yet</strong>
-            <p style="margin:0; color:var(--muted);">We’ll add a focused form here once categories are defined.</p>
+          <div class="sub-divider">
+            <span class="sub-label">Autotherapy options</span>
+            <button class="nav-btn small" type="button" id="autotherapy-toggle">Show ▶</button>
+          </div>
+          <div id="autotherapy-stack" class="hidden">
+            <div class="entry-tabs autotherapy-subnav" role="tablist" aria-label="Autotherapy entries">
+              <span class="sub-label">Choose one</span>
+              <button class="nav-btn entry-btn secondary" data-autotherapy="journal" type="button">Journal</button>
+              <button class="nav-btn entry-btn secondary" data-autotherapy="cbt" type="button">CBT thought response</button>
+              <button class="nav-btn entry-btn secondary" data-autotherapy="dbt" type="button">DBT distress tolerance</button>
+            </div>
+            <div class="entry-panel hidden" data-autotherapy-panel="journal">
+              <form id="journal-form">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="journal-date">Entry date/time</label>
+                    <input id="journal-date" name="journal-date" type="datetime-local" />
+                    <small>Stored as separate date + time columns; defaults to now if left empty.</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="journal-mood">Mood level (0-9)</label>
+                    <input id="journal-mood" name="journal-mood" type="number" min="0" max="9" step="1" placeholder="e.g. 6" />
+                  </div>
+                  <div class="form-group">
+                    <label for="journal-depression">Depression (0-9)</label>
+                    <input id="journal-depression" name="journal-depression" type="number" min="0" max="9" step="1" placeholder="e.g. 4" />
+                  </div>
+                  <div class="form-group">
+                    <label for="journal-anxiety">Anxiety (0-9)</label>
+                    <input id="journal-anxiety" name="journal-anxiety" type="number" min="0" max="9" step="1" placeholder="e.g. 5" />
+                  </div>
+                  <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="journal-description">description</label>
+                    <textarea id="journal-description" name="journal-description" placeholder="cosa hai fatto oggi?"></textarea>
+                  </div>
+                  <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="journal-gratitude">gratitude</label>
+                    <textarea id="journal-gratitude" name="journal-gratitude" placeholder="per cosa sei grato?"></textarea>
+                  </div>
+                  <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="journal-reflection">reflection</label>
+                    <textarea id="journal-reflection" name="journal-reflection" placeholder="vuoi riflettere su qualcosa?"></textarea>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button class="btn-primary btn-plain" type="submit">Save journal entry</button>
+                  <div id="journal-form-status" class="status"></div>
+                </div>
+              </form>
+            </div>
+            <div class="entry-panel hidden" data-autotherapy-panel="cbt">
+              <div class="hint">CBT thought response coming soon.</div>
+            </div>
+            <div class="entry-panel hidden" data-autotherapy-panel="dbt">
+              <div class="hint">DBT distress tolerance coming soon.</div>
+            </div>
           </div>
         </div>
       </div>
@@ -664,22 +773,18 @@
     <section id="logs-section" class="hidden">
       <div class="grid">
         <div class="card">
-          <h2>Diary log</h2>
-          <div class="hint">Showing the latest diary data saved in the local JSON store.</div>
-          <div class="status" id="diary-status-log"></div>
-          <div class="table-wrap" id="diary-table"></div>
-          <div style="margin-top:10px;">
-            <button class="nav-btn small" data-toggle-log="diary">Extend</button>
+          <div class="log-header">
+            <h2>Journal log</h2>
+            <button class="nav-btn small" data-toggle-log="diary">Expand ▶</button>
           </div>
+          <div class="table-wrap" id="diary-table"></div>
         </div>
         <div class="card">
-          <h2>Pain log</h2>
-          <div class="hint">Showing the latest pain data saved in the local JSON store.</div>
-          <div class="status" id="pain-status-log"></div>
-          <div class="table-wrap" id="pain-table"></div>
-          <div style="margin-top:10px;">
-            <button class="nav-btn small" data-toggle-log="pain">Extend</button>
+          <div class="log-header">
+            <h2>Pain log</h2>
+            <button class="nav-btn small" data-toggle-log="pain">Expand ▶</button>
           </div>
+          <div class="table-wrap" id="pain-table"></div>
         </div>
       </div>
     </section>
@@ -739,7 +844,7 @@
     };
     const dataStore = { diary: null, pain: null };
     const REQUIRED = {
-      diary: ["date", "hour", "mood level", "depression", "anxiety"],
+      diary: ["date", "hour", "mood level", "depression", "anxiety", "description", "gratitude", "reflection"],
       pain: [
         "date",
         "hour",
@@ -787,6 +892,56 @@
     function buildOptionCacheFromStore() {
       optionFields.forEach((field) => {
         optionsCache[field] = collectOptions(field);
+      });
+    }
+
+    function wireJournalForm() {
+      const form = document.getElementById("journal-form");
+      const status = document.getElementById("journal-form-status");
+      if (!form) return;
+      const setStatusMsg = (msg, ok = false) => {
+        if (!status) return;
+        status.innerHTML = msg ? `<span class="${ok ? "ok" : "err"}">${ok ? "Saved" : "Error"}:</span> ${escapeHtml(msg)}` : "";
+      };
+      const setDefaultDate = () => {
+        const input = form.querySelector('input[name="journal-date"]');
+        if (input) {
+          const now = new Date();
+          const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+          input.value = localIso;
+        }
+      };
+      setDefaultDate();
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = new FormData(form);
+        const toParts = (val) => {
+          const fallback = new Date();
+          const parsed = val ? new Date(val) : fallback;
+          const good = parsed.toString() !== "Invalid Date" ? parsed : fallback;
+          const iso = new Date(good.getTime() - good.getTimezoneOffset() * 60000).toISOString();
+          return { date: iso.slice(0, 10), time: iso.slice(11, 16) };
+        };
+        const parts = toParts(data.get("journal-date"));
+        const row = {
+          "date": parts.date,
+          "hour": parts.time,
+          "mood level": data.get("journal-mood") || "",
+          "depression": data.get("journal-depression") || "",
+          "anxiety": data.get("journal-anxiety") || "",
+          "description": data.get("journal-description") || "",
+          "gratitude": data.get("journal-gratitude") || "",
+          "reflection": data.get("journal-reflection") || "",
+        };
+        const parsed = { headers: REQUIRED.diary, rows: [row] };
+        try {
+          await persist("diary", parsed, "journal form");
+          setStatusMsg("Saved journal entry", true);
+          form.reset();
+          setDefaultDate();
+        } catch (err) {
+          setStatusMsg(err.message || "Failed to save journal entry", false);
+        }
       });
     }
 
@@ -849,22 +1004,51 @@
       });
     }
 
+    function sortRowsWithIndex(rows, headers) {
+      const dKey = findHeader(headers, "date") || "date";
+      const tKey = findHeader(headers, "hour") || "hour";
+      return rows
+        .map((row, idx) => ({ row, idx }))
+        .sort((a, b) => {
+          const aDate = new Date(`${a.row?.[dKey] || ""}T${(a.row?.[tKey] || "00:00").slice(0, 5)}`);
+          const bDate = new Date(`${b.row?.[dKey] || ""}T${(b.row?.[tKey] || "00:00").slice(0, 5)}`);
+          const aTs = aDate.toString() === "Invalid Date" ? 0 : aDate.getTime();
+          const bTs = bDate.toString() === "Invalid Date" ? 0 : bDate.getTime();
+          return bTs - aTs;
+        });
+    }
+
     function renderTable(kind, headers, rows, withActions = false, limit = null) {
       const cfg = datasets[kind];
       if (!headers || !rows) {
         cfg.logsTable.innerHTML = "";
         return;
       }
-      const sortedRows = sortRowsByDateTime(rows, headers);
+      const sortedRows = sortRowsWithIndex(rows, headers);
       const displayRows = limit ? sortedRows.slice(0, limit) : sortedRows;
       const thead = `<thead><tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join("")}${withActions ? "<th>Actions</th>" : ""}</tr></thead>`;
       const tbody = `<tbody>${displayRows
-        .map((r, idx) => {
-          const cells = headers.map(h => `<td>${escapeHtml(r[h] ?? "")}</td>`).join("");
-          const actions = withActions
-            ? `<td class="row-actions"><button class="nav-btn small" data-edit-row="${idx}" data-kind="${kind}">Edit</button><button class="nav-btn danger small" data-delete-row="${idx}" data-kind="${kind}">Delete</button></td>`
-            : "";
-          return `<tr data-row="${idx}">${cells}${actions}</tr>`;
+        .map(({ row, idx: originalIdx }) => {
+          const isEditing = editingState.kind === kind && editingState.idx === originalIdx;
+          const cells = headers
+            .map((h) => {
+              if (isEditing) {
+                return `<td><input class="inline-input" data-edit-field="${escapeHtml(h)}" data-edit-kind="${kind}" data-edit-idx="${originalIdx}" value="${escapeHtml(
+                  editingState.draft?.[h] ?? row[h] ?? ""
+                )}"/></td>`;
+              }
+              return `<td>${escapeHtml(row[h] ?? "")}</td>`;
+            })
+            .join("");
+          let actions = "";
+          if (withActions) {
+            if (isEditing) {
+              actions = `<td class="row-actions"><button class="nav-btn small" data-save-row="${originalIdx}" data-kind="${kind}">Save</button><button class="nav-btn danger small" data-cancel-row="${originalIdx}" data-kind="${kind}">Cancel</button></td>`;
+            } else {
+              actions = `<td class="row-actions"><button class="nav-btn small" data-edit-row="${originalIdx}" data-kind="${kind}">Edit</button><button class="nav-btn danger small" data-delete-row="${originalIdx}" data-kind="${kind}">Delete</button></td>`;
+            }
+          }
+          return `<tr data-row="${originalIdx}">${cells}${actions}</tr>`;
         })
         .join("")}</tbody>`;
       cfg.logsTable.innerHTML = `<table>${thead}${tbody}</table><div class="rowcount">${rows.length} rows</div>`;
@@ -1172,19 +1356,21 @@
     }
 
     const logCollapsed = { diary: true, pain: true };
+    let editingState = { kind: null, idx: null, draft: null };
+    let autotherapyCollapsed = true;
 
     function renderLog(kind) {
       const data = dataStore[kind];
       if (!data?.headers || !data.rows) return;
-      const limit = logCollapsed[kind] ? 10 : null;
-      renderTable(kind, data.headers, data.rows, true, limit);
       const btn = document.querySelector(`[data-toggle-log="${kind}"]`);
-      if (btn) btn.textContent = logCollapsed[kind] ? "Extend" : "Collapse";
       const wrap = datasets[kind]?.logsTable;
-      if (wrap) {
-        wrap.classList.toggle("limited", !!limit);
-        wrap.classList.toggle("expanded", !limit);
+      if (logCollapsed[kind]) {
+        if (wrap) wrap.innerHTML = "";
+        if (btn) btn.textContent = "Expand ▶";
+        return;
       }
+      renderTable(kind, data.headers, data.rows, true, null);
+      if (btn) btn.textContent = "Collapse ▼";
     }
 
     function wireLogToggles() {
@@ -1228,6 +1414,13 @@
       cfg.logsTable.querySelectorAll("[data-delete-row]").forEach((btn) => {
         btn.onclick = () => deleteRow(kind, parseInt(btn.dataset.deleteRow, 10));
       });
+      cfg.logsTable.querySelectorAll("[data-save-row]").forEach((btn) => {
+        btn.onclick = () => saveInline(kind, parseInt(btn.dataset.saveRow, 10));
+      });
+      cfg.logsTable.querySelectorAll("[data-cancel-row]").forEach((btn) => {
+        btn.onclick = () => cancelInline(kind);
+      });
+      attachInlineInputs(kind);
     }
 
     function sanitizeRowForHeaders(row, headers) {
@@ -1273,17 +1466,38 @@
       const headers = dataStore[kind]?.headers || [];
       const row = rows[idx];
       if (!row) return;
-      const input = prompt("Edit row as JSON", JSON.stringify(row, null, 2));
-      if (input === null) return;
-      try {
-        const parsed = JSON.parse(input);
-        const nextRow = sanitizeRowForHeaders(parsed, headers);
-        const newRows = [...rows];
-        newRows[idx] = nextRow;
-        saveRows(kind, newRows);
-      } catch (err) {
-        alert("Invalid JSON");
-      }
+      editingState = { kind, idx, draft: sanitizeRowForHeaders(row, headers) };
+      renderLog(kind);
+    }
+
+    function cancelInline(kind) {
+      editingState = { kind: null, idx: null, draft: null };
+      renderLog(kind);
+    }
+
+    function attachInlineInputs(kind) {
+      const cfg = datasets[kind];
+      if (!cfg?.logsTable) return;
+      cfg.logsTable.querySelectorAll(".inline-input[data-edit-kind]").forEach((input) => {
+        input.addEventListener("input", (e) => {
+          const field = e.target.dataset.editField;
+          const idx = parseInt(e.target.dataset.editIdx, 10);
+          if (editingState.kind !== kind || editingState.idx !== idx) return;
+          if (!editingState.draft) editingState.draft = {};
+          editingState.draft[field] = e.target.value;
+        });
+      });
+    }
+
+    function saveInline(kind, idx) {
+      if (editingState.kind !== kind || editingState.idx !== idx) return;
+      const rows = dataStore[kind]?.rows || [];
+      const headers = dataStore[kind]?.headers || [];
+      const draft = sanitizeRowForHeaders(editingState.draft || {}, headers);
+      const newRows = [...rows];
+      newRows[idx] = draft;
+      editingState = { kind: null, idx: null, draft: null };
+      saveRows(kind, newRows);
     }
 
     function deleteRow(kind, idx) {
@@ -1293,6 +1507,33 @@
       if (!ok) return;
       const newRows = rows.filter((_, i) => i !== idx);
       saveRows(kind, newRows);
+    }
+
+    function wireAutotherapyTabs() {
+      const buttons = document.querySelectorAll("[data-autotherapy]");
+      const panels = document.querySelectorAll("[data-autotherapy-panel]");
+      const setActive = (key) => {
+        buttons.forEach((btn) => btn.classList.toggle("active", btn.dataset.autotherapy === key));
+        panels.forEach((panel) => panel.classList.toggle("hidden", panel.dataset.autotherapyPanel !== key));
+      };
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => setActive(btn.dataset.autotherapy));
+      });
+    }
+
+    function wireAutotherapyToggle() {
+      const toggle = document.getElementById("autotherapy-toggle");
+      const stack = document.getElementById("autotherapy-stack");
+      if (!toggle || !stack) return;
+      const apply = () => {
+        stack.classList.toggle("hidden", autotherapyCollapsed);
+        toggle.textContent = autotherapyCollapsed ? "Show ▶" : "Hide ▼";
+      };
+      toggle.addEventListener("click", () => {
+        autotherapyCollapsed = !autotherapyCollapsed;
+        apply();
+      });
+      apply();
     }
 
     function renderPainOptionButtons() {
@@ -2011,7 +2252,10 @@
     buildOptionCacheFromStore();
     renderPainOptionButtons();
     wireEntryTabs();
+    wireAutotherapyTabs();
+    wireAutotherapyToggle();
     wirePainForm();
+    wireJournalForm();
     wireOptionEditors();
     wireDropZones();
     wireNav();
