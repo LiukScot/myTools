@@ -1,31 +1,46 @@
-# myHealth
+# myHealth (PHP + static frontend)
 
-Local Python server that watches JSON files and streams updates in real time (similar to the myMoney workflow).
+This repo now ships as a static frontend (`web/index.html`) with a PHP API in `web/api/files/`. The old Python server has been removed.
 
-## Getting started
+## Local testing (recommended before deploy)
 
-1) Install deps: `pip install -r requirements.txt`
-2) Start the server from a terminal so you can see logs/errors:
-   - `python start.py --host 127.0.0.1 --port 8000 --data-dir data` (or `python launch.py ...`)
-   - Or mark executable: `chmod +x start.py` then `./start.py --data-dir data`
+1) Install PHP 8.x.
+2) From the repo root, run:
+   ```bash
+   php -S 127.0.0.1:8000 -t web
+   ```
+   If you need rewrites for `/api/files/...`, add a simple router (see comments in `web/api/files/.htaccess`) or call `web/api/files/index.php` directly.
+3) Open `http://127.0.0.1:8000` in the browser. Log in with a user that exists in your DB (same shape as production: table `users`, fields `email`, `password_hash`, etc.).
 
-## Web UI (CSV importer/viewer)
+## Deploy
 
-- Visit `http://127.0.0.1:8000/` to use the CSV importer.
-- Drop a Diary CSV or Pain CSV; it parses in-browser, shows the table, and saves the data into `diary.json` / `pain.json` via the existing API.
-3) Edit any `.json` inside the data directory (example: `data/health.json`); connected clients get updates immediately over WebSocket.
+- Use `deploy.sh` (lftp-based mirror) to push `web/` to `public_html/myhealth/` on Hetzner. Credentials are passed via env vars:
+  ```bash
+  FTP_HOST=your-host FTP_USER=your-user FTP_PASS='your-pass' ./deploy.sh
+  ```
+  This places:
+  ```
+  public_html/myhealth/index.html
+  public_html/myhealth/api/files/index.php
+  public_html/myhealth/api/files/.htaccess
+  ```
 
-## API quick reference
+## API endpoints (PHP)
 
-- `GET /api/files` – list available JSON files with size and timestamp.
-- `GET /api/files/{name}` – return the JSON payload for a file (name or name.json).
-- `PUT /api/files/{name}` – replace the JSON payload for a file; body is the new JSON.
-- `WS /ws` – receive `{type:"snapshot", files:[...]}` on connect, then `{type:"updated"|"deleted"}` events on changes.
+- `POST /api/files/login` – body `{"email": "...", "password": "..."}`; sets session.
+- `POST /api/files/logout` – clears session.
+- `GET /api/files` – list stored JSON files.
+- `GET /api/files/{name}.json` – fetch file.
+- `PUT /api/files/{name}.json` – save/replace JSON payload.
 
-WebSocket examples:
+Authentication is session-based; the frontend uses `credentials: "include"` on fetch.
 
-- Snapshot: `{"type":"snapshot","files":[{"name":"health.json","updated_at":"2024-11-23T12:00:00Z","data":{...}}]}`
-- Update: `{"type":"updated","file":"health.json","updated_at":"2024-11-23T12:05:00Z","data":{...}}`
-- Delete: `{"type":"deleted","file":"health.json"}`
+## Data format
 
-The default data folder is `./data`; change it with `--data-dir` when launching. The server also exposes `/healthz` for a simple status check.
+Files like `diary.json` / `pain.json` are stored in the DB `files` table as JSON blobs shaped:
+```json
+{
+  "headers": ["date", "hour", "..."],
+  "rows": [ { "date": "...", "hour": "...", ... } ]
+}
+```

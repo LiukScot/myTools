@@ -22,11 +22,15 @@ if [[ -z "$FTP_HOST" || -z "$FTP_USER" || -z "$FTP_PASS" ]]; then
   exit 1
 fi
 
-echo "Deploying $LOCAL_DIR -> $REMOTE_BASE on $FTP_HOST as $FTP_USER"
+echo "Deploying $LOCAL_DIR -> $REMOTE_BASE on $FTP_HOST as $FTP_USER (cleanup enabled)"
 
 lftp -u "$FTP_USER","$FTP_PASS" sftp://"$FTP_HOST" <<EOF
 set ssl:verify-certificate no
-mirror -R --verbose --parallel=4 --exclude-glob ".DS_Store" "$LOCAL_DIR" "$REMOTE_BASE"
+set sftp:auto-confirm yes
+mirror -R --delete --verbose --parallel=4 \
+  --exclude-glob ".DS_Store" \
+  --include-glob ".htaccess" \
+  "$LOCAL_DIR" "$REMOTE_BASE"
 bye
 EOF
 

@@ -961,7 +961,6 @@
         return;
       }
       try {
-        const res = await apiFetch("/api/login", {
         const res = await apiFetch("/api/files/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

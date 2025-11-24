@@ -17,11 +17,15 @@ $FILES_TABLE = 'files';
 
 session_start();
 
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '*';
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: ' . ($origin ?: '*'));
-header('Vary: Origin');
-header('Access-Control-Allow-Credentials: true');
+if ($origin) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Vary: Origin');
+    header('Access-Control-Allow-Credentials: true');
+} else {
+    header('Access-Control-Allow-Origin: *');
+}
 header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, X-App-Key');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
