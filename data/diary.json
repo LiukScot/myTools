@@ -1,6 +1,6 @@
 {
   "source": "diary(1).csv",
-  "imported_at": "2025-11-23T22:08:39.687Z",
+  "imported_at": "2025-11-24T09:46:05.222Z",
   "headers": [
     "date",
     "hour",
@@ -10,102 +10,102 @@
   ],
   "rows": [
     {
+      "date": "2025-11-16",
+      "hour": "21:00",
       "mood level": "7",
       "depression": "5",
-      "anxiety": "6",
-      "date": "2025-11-16",
-      "hour": "21:00"
+      "anxiety": "6"
     },
     {
+      "date": "2025-11-15",
+      "hour": "21:00",
       "mood level": "5",
       "depression": "6",
-      "anxiety": "4",
-      "date": "2025-11-15",
-      "hour": "21:00"
+      "anxiety": "4"
     },
     {
+      "date": "2025-11-14",
+      "hour": "21:00",
       "mood level": "4",
       "depression": "6",
-      "anxiety": "5",
-      "date": "2025-11-14",
-      "hour": "21:00"
+      "anxiety": "5"
     },
     {
+      "date": "2025-11-09",
+      "hour": "21:00",
       "mood level": "6",
       "depression": "5",
-      "anxiety": "5",
-      "date": "2025-11-09",
-      "hour": "21:00"
+      "anxiety": "5"
     },
     {
-      "mood level": "4",
-      "depression": "",
-      "anxiety": "",
       "date": "2025-11-05",
-      "hour": "21:00"
-    },
-    {
+      "hour": "21:00",
       "mood level": "4",
       "depression": "",
-      "anxiety": "",
+      "anxiety": ""
+    },
+    {
       "date": "2025-11-01",
-      "hour": "21:00"
-    },
-    {
-      "mood level": "6",
-      "depression": "",
-      "anxiety": "",
-      "date": "2025-10-30",
-      "hour": "21:00"
-    },
-    {
-      "mood level": "6",
-      "depression": "",
-      "anxiety": "",
-      "date": "2025-10-29",
-      "hour": "21:00"
-    },
-    {
-      "mood level": "5",
-      "depression": "",
-      "anxiety": "",
-      "date": "2025-10-24",
-      "hour": "21:00"
-    },
-    {
+      "hour": "21:00",
       "mood level": "4",
       "depression": "",
-      "anxiety": "",
-      "date": "2025-10-13",
-      "hour": "21:00"
+      "anxiety": ""
     },
     {
+      "date": "2025-10-30",
+      "hour": "21:00",
+      "mood level": "6",
+      "depression": "",
+      "anxiety": ""
+    },
+    {
+      "date": "2025-10-29",
+      "hour": "21:00",
+      "mood level": "6",
+      "depression": "",
+      "anxiety": ""
+    },
+    {
+      "date": "2025-10-24",
+      "hour": "21:00",
       "mood level": "5",
       "depression": "",
-      "anxiety": "",
-      "date": "2025-10-11",
-      "hour": "21:00"
+      "anxiety": ""
     },
     {
+      "date": "2025-10-13",
+      "hour": "21:00",
+      "mood level": "4",
+      "depression": "",
+      "anxiety": ""
+    },
+    {
+      "date": "2025-10-11",
+      "hour": "21:00",
+      "mood level": "5",
+      "depression": "",
+      "anxiety": ""
+    },
+    {
+      "date": "2025-10-03",
+      "hour": "21:00",
       "mood level": "6.5",
       "depression": "",
-      "anxiety": "",
-      "date": "2025-10-03",
-      "hour": "21:00"
+      "anxiety": ""
     },
     {
-      "mood level": "5",
-      "depression": "",
-      "anxiety": "",
       "date": "2025-10-02",
-      "hour": "21:00"
-    },
-    {
+      "hour": "21:00",
       "mood level": "5",
       "depression": "",
-      "anxiety": "",
+      "anxiety": ""
+    },
+    {
       "date": "2025-10-01",
-      "hour": "21:00"
+      "hour": "21:00",
+      "mood level": "5",
+      "depression": "",
+      "anxiety": ""
     }
   ]
 }
