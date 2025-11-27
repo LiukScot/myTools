@@ -890,6 +890,7 @@
       logoutBtn: document.getElementById("auth-logout"),
     };
     const appMain = document.getElementById("app-main");
+    let isAuthed = false;
     function apiFetch(url, options = {}) {
       const opts = { credentials: "include", ...options };
       opts.headers = { ...(options.headers || {}) };
@@ -906,6 +907,15 @@
       authUI.status.innerHTML = message
         ? `<span class="${ok ? "ok" : "err"}">${ok ? "OK" : "Error"}:</span> ${escapeHtml(message)}`
         : "";
+    }
+    function setAuthVisibility(authed) {
+      isAuthed = authed;
+      const toHide = [authUI.email, authUI.pass, authUI.loginBtn, authUI.status];
+      toHide.forEach((el) => el?.classList.toggle("hidden", authed));
+      authUI.logoutBtn?.classList.toggle("hidden", !authed);
+      if (!authed) {
+        setAuthStatus("");
+      }
     }
     function setAppVisible(isAuthed) {
       if (appMain) appMain.classList.toggle("hidden", !isAuthed);
@@ -998,6 +1008,7 @@
         }
         setAuthStatus(`Logged in as ${data.email || email}`, true);
         if (authUI.pass) authUI.pass.value = "";
+        setAuthVisibility(true);
         setAppVisible(true);
         await fetchExisting("diary");
         await fetchExisting("pain");
@@ -1013,6 +1024,7 @@
         setAuthStatus("Logged out", true);
         resetAppState();
         setAppVisible(false);
+        setAuthVisibility(false);
       } catch (err) {
         setAuthStatus(err.message || "Logout failed");
       }
@@ -2380,6 +2392,7 @@
       const loadedPain = await fetchExisting("pain", { silentAuthFail: true });
       const hasData = loadedDiary || loadedPain;
       setAppVisible(hasData);
+      setAuthVisibility(hasData);
       if (hasData) {
         renderDashboard();
       }
@@ -2446,6 +2459,7 @@
         renderDashboard();
       });
     });
+    setAuthVisibility(false);
     setAppVisible(false);
     resetAppState();
     restoreSessionIfPossible();

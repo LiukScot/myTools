@@ -3,11 +3,25 @@
 // Drop this file (and the .htaccess in the same folder) into public_html/myhealth/api/files/
 // Then point your frontend requests to /api/files/...
 
-// ---- Fill in your DB credentials from the Hetzner panel ----
-$DB_HOST = 'jxwl.your-database.de';
-$DB_USER = 'bhsbwy_1';
-$DB_PASS = 'q5/Wo8XX/iuW';
-$DB_NAME = 'bhsbwy_db1';
+// ---- DB credentials are provided via environment (.env file or hosting panel) ----
+function load_env_files(array $paths) {
+    foreach ($paths as $path) {
+        if (!is_file($path)) continue;
+        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (preg_match('/^\s*#/', $line)) continue;
+            if (strpos($line, '=') === false) continue;
+            [$key, $val] = explode('=', $line, 2);
+            $key = trim($key);
+            $val = trim($val);
+            $val = trim($val, "\"'");
+            if ($key === '') continue;
+            putenv("$key=$val");
+            $_ENV[$key] = $val;
+            $_SERVER[$key] = $val;
+        }
+    }
+}
 
 // Session login only; users are pre-created by you.
 $ALLOW_SIGNUP = false; // leave false to block self-registration
@@ -45,6 +59,29 @@ function read_json() {
         respond(400, ['error' => 'invalid json']);
     }
     return $data;
+}
+
+$env_candidates = [
+    __DIR__ . '/.env',
+    dirname(__DIR__) . '/.env',
+    dirname(__DIR__, 2) . '/.env',
+    dirname(__DIR__, 3) . '/.env',
+];
+load_env_files($env_candidates);
+function env_or_fail($key) {
+    $val = getenv($key);
+    if ($val === false || $val === '') {
+        respond(500, ['error' => "missing env $key"]);
+    }
+    return $val;
+}
+$DB_HOST = env_or_fail('DB_HOST');
+$DB_USER = env_or_fail('DB_USER');
+$DB_PASS = env_or_fail('DB_PASS');
+$DB_NAME = env_or_fail('DB_NAME');
+
+if (!extension_loaded('mysqli')) {
+    respond(500, ['error' => 'mysqli extension not loaded']);
 }
 
 $mysqli = @new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
