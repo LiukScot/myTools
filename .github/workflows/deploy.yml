@@ -30,18 +30,18 @@ jobs:
           : "${FTP_USER:?FTP_USER secret missing}"
           : "${FTP_PASS:?FTP_PASS secret missing}"
           REMOTE_BASE="${REMOTE_BASE:-/public_html/myhealth}"
-          LOCAL_DIR="myHealth/web"
+          LOCAL_DIR="$(realpath myHealth/web)"
           if [[ ! -d "$LOCAL_DIR" ]]; then
             echo "Local dir not found: $LOCAL_DIR" >&2
             exit 1
           fi
           echo "Deploying $LOCAL_DIR -> $REMOTE_BASE on $FTP_HOST as $FTP_USER"
-          lftp -u "$FTP_USER","$FTP_PASS" sftp://"$FTP_HOST" -e "
-            set ssl:verify-certificate no
-            set sftp:auto-confirm yes
-            mirror -R --delete --verbose --parallel=4 \
-              --exclude-glob .DS_Store \
-              --include-glob .htaccess \
-              \"$LOCAL_DIR\" \"$REMOTE_BASE\"
-            bye
-          "
+          lftp -u "$FTP_USER","$FTP_PASS" sftp://"$FTP_HOST" <<EOF
+set ssl:verify-certificate no
+set sftp:auto-confirm yes
+mirror -R --delete --verbose --parallel=4 \
+  --exclude-glob .DS_Store \
+  --include-glob .htaccess \
+  $LOCAL_DIR $REMOTE_BASE
+bye
+EOF
