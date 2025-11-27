@@ -5,12 +5,17 @@ This lives under `myTools/myHealth` and ships as a static frontend (`web/index.h
 ## Local testing (recommended before deploy)
 
 1) Install PHP 8.x.
-2) From the repo root, run:
+2) Copy `myHealth/.env.example` to `myHealth/.env` and fill in `DB_HOST`, `DB_USER`, `DB_PASS`, and `DB_NAME` so the PHP API can connect to your DB.
+3) From the repo root, run either:
+   ```bash
+   ./myHealth/testing/run.sh
+   ```
+   (auto-loads `.env` and uses the router for `/api/files/...`) or the raw PHP command:
    ```bash
    php -S 127.0.0.1:8000 -t myHealth/web
    ```
    If you need rewrites for `/api/files/...`, add a simple router (see comments in `myHealth/web/api/files/.htaccess`) or call `myHealth/web/api/files/index.php` directly.
-3) Open `http://127.0.0.1:8000` in the browser. Log in with a user that exists in your DB (same shape as production: table `users`, fields `email`, `password_hash`, etc.).
+4) Open `http://127.0.0.1:8000` in the browser. Log in with a user that exists in your DB (same shape as production: table `users`, fields `email`, `password_hash`, etc.).
 
 ## Deploy
 
