@@ -36,12 +36,4 @@ jobs:
             exit 1
           fi
           echo "Deploying $LOCAL_DIR -> $REMOTE_BASE on $FTP_HOST as $FTP_USER"
-          lftp -u "$FTP_USER","$FTP_PASS" sftp://"$FTP_HOST" <<EOF
-set ssl:verify-certificate no
-set sftp:auto-confirm yes
-mirror -R --delete --verbose --parallel=4 \
-  --exclude-glob .DS_Store \
-  --include-glob .htaccess \
-  $LOCAL_DIR $REMOTE_BASE
-bye
-EOF
+          lftp -u "$FTP_USER","$FTP_PASS" sftp://"$FTP_HOST" -e "set ssl:verify-certificate no; set sftp:auto-confirm yes; mirror -R --delete --verbose --parallel=4 --exclude-glob .DS_Store --include-glob .htaccess \"$LOCAL_DIR\" \"$REMOTE_BASE\"; bye"
