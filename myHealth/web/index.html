@@ -636,232 +636,234 @@
       <div class="status" id="auth-status"></div>
     </div>
 
-    <nav>
-      <button class="nav-btn active" data-target="dashboard">Dashboard</button>
-      <button class="nav-btn" data-target="newlog">New Entry</button>
-      <button class="nav-btn" data-target="logs">Logs</button>
-      <button class="nav-btn" data-target="import">Import / Export</button>
-    </nav>
+    <div id="app-main" class="hidden">
+      <nav>
+        <button class="nav-btn active" data-target="dashboard">Dashboard</button>
+        <button class="nav-btn" data-target="newlog">New Entry</button>
+        <button class="nav-btn" data-target="logs">Logs</button>
+        <button class="nav-btn" data-target="import">Import / Export</button>
+      </nav>
 
-    <section id="dashboard-section">
-      <div class="card" id="dashboard-stats">
-        <h2>Dashboard</h2>
-        <div class="hint">Overview of diary and pain logs.</div>
-        <div class="filters">
-          <label>From
-            <input type="date" id="filter-from" />
-          </label>
-          <label>To
-            <input type="date" id="filter-to" />
-          </label>
-          <div class="divider"></div>
-          <div class="quick-filters">
-            <button class="quick-btn" data-range="7">1 week</button>
-            <button class="quick-btn" data-range="30">1 month</button>
-            <button class="quick-btn" data-range="90">3 months</button>
-            <button class="quick-btn" data-range="180">6 months</button>
-            <button class="quick-btn" data-range="365">1 year</button>
-            <button class="quick-btn" data-range="1095">3 years</button>
-            <button class="quick-btn" data-range="all">Since start</button>
+      <section id="dashboard-section">
+        <div class="card" id="dashboard-stats">
+          <h2>Dashboard</h2>
+          <div class="hint">Overview of diary and pain logs.</div>
+          <div class="filters">
+            <label>From
+              <input type="date" id="filter-from" />
+            </label>
+            <label>To
+              <input type="date" id="filter-to" />
+            </label>
+            <div class="divider"></div>
+            <div class="quick-filters">
+              <button class="quick-btn" data-range="7">1 week</button>
+              <button class="quick-btn" data-range="30">1 month</button>
+              <button class="quick-btn" data-range="90">3 months</button>
+              <button class="quick-btn" data-range="180">6 months</button>
+              <button class="quick-btn" data-range="365">1 year</button>
+              <button class="quick-btn" data-range="1095">3 years</button>
+              <button class="quick-btn" data-range="all">Since start</button>
+            </div>
           </div>
+          <div class="dash-grid" id="dash-cards"></div>
         </div>
-        <div class="dash-grid" id="dash-cards"></div>
-      </div>
-      <div class="graph-grid" id="dash-graphs"></div>
-    </section>
+        <div class="graph-grid" id="dash-graphs"></div>
+      </section>
 
-    <section id="newlog-section" class="hidden">
-      <div class="card">
-        <h2>New Entry</h2>
-        <div class="hint">Capture a quick log without waiting for a CSV import.</div>
-        <div class="entry-tabs" role="tablist" aria-label="New entry categories">
-          <button class="nav-btn entry-btn active" data-entry="pain" type="button">Physical pain</button>
-          <button class="nav-btn entry-btn" data-entry="autotherapy" type="button">Autotherapy</button>
-        </div>
-
-        <div class="entry-panel" data-entry-panel="pain">
-          <form id="pain-form">
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="pain-date">Entry date/time</label>
-                <input id="pain-date" name="pain-date" type="datetime-local" />
-                <small>Stored as separate date + time columns; defaults to now if left empty.</small>
-              </div>
-              <div class="form-group">
-                <label for="pain-level">Pain level (0-9)</label>
-                <input id="pain-level" name="pain-level" type="number" min="0" max="9" step="1" placeholder="e.g. 6" />
-              </div>
-              <div class="form-group">
-                <label for="fatigue-level">Fatigue level (0-9)</label>
-                <input id="fatigue-level" name="fatigue-level" type="number" min="0" max="9" step="1" placeholder="e.g. 4" />
-              </div>
-              <div class="form-group">
-                <label for="mood-level">Mood level (0-9)</label>
-                <input id="mood-level" name="mood-level" type="number" min="0" max="9" step="1" placeholder="e.g. 7" />
-              </div>
-              <div class="form-group">
-                <label>Area <button type="button" class="chip-edit" data-edit="area">Edit</button></label>
-                <div id="area-options" class="chip-row" data-field="area"></div>
-                <div id="area-editor" class="chip-editor hidden" data-field="area"></div>
-              </div>
-              <div class="form-group">
-                <label>Symptoms <button type="button" class="chip-edit" data-edit="symptoms">Edit</button></label>
-                <div id="symptoms-options" class="chip-row" data-field="symptoms"></div>
-                <div id="symptoms-editor" class="chip-editor hidden" data-field="symptoms"></div>
-              </div>
-              <div class="form-group">
-                <label>Activities <button type="button" class="chip-edit" data-edit="activities">Edit</button></label>
-                <div id="activities-options" class="chip-row" data-field="activities"></div>
-                <div id="activities-editor" class="chip-editor hidden" data-field="activities"></div>
-              </div>
-              <div class="form-group">
-                <label>Medicines <button type="button" class="chip-edit" data-edit="medicines">Edit</button></label>
-                <div id="medicines-options" class="chip-row" data-field="medicines" data-preselect="all"></div>
-                <div id="medicines-editor" class="chip-editor hidden" data-field="medicines"></div>
-              </div>
-              <div class="form-group">
-                <label for="pain-note">Notes</label>
-                <textarea id="pain-note" name="pain-note" placeholder="Anything else worth tracking?"></textarea>
-              </div>
-              <div class="form-group">
-                <label>Habits <button type="button" class="chip-edit" data-edit="habits">Edit</button></label>
-                <div id="habits-options" class="chip-row" data-field="habits"></div>
-                <div id="habits-editor" class="chip-editor hidden" data-field="habits"></div>
-              </div>
-              <div class="form-group">
-                <label for="coffee-count">Coffee (cups)</label>
-                <input id="coffee-count" name="coffee-count" type="number" min="0" max="9" step="1" placeholder="e.g. 1" />
-              </div>
-              <div class="form-group">
-                <label>Other <button type="button" class="chip-edit" data-edit="other">Edit</button></label>
-                <div id="other-options" class="chip-row" data-field="other"></div>
-                <div id="other-editor" class="chip-editor hidden" data-field="other"></div>
-              </div>
-            </div>
-            <div class="form-actions">
-              <button class="btn-primary btn-plain" type="submit">Save new entry</button>
-              <div id="pain-form-status" class="status"></div>
-            </div>
-          </form>
-        </div>
-
-        <div class="entry-panel hidden" data-entry-panel="autotherapy">
-          <div class="sub-divider">
-            <span class="sub-label">Autotherapy options</span>
-            <button class="nav-btn small" type="button" id="autotherapy-toggle">Show ▶</button>
+      <section id="newlog-section" class="hidden">
+        <div class="card">
+          <h2>New Entry</h2>
+          <div class="hint">Capture a quick log without waiting for a CSV import.</div>
+          <div class="entry-tabs" role="tablist" aria-label="New entry categories">
+            <button class="nav-btn entry-btn active" data-entry="pain" type="button">Physical pain</button>
+            <button class="nav-btn entry-btn" data-entry="autotherapy" type="button">Autotherapy</button>
           </div>
-          <div id="autotherapy-stack" class="hidden">
-            <div class="entry-tabs autotherapy-subnav" role="tablist" aria-label="Autotherapy entries">
-              <span class="sub-label">Choose one</span>
-              <button class="nav-btn entry-btn secondary" data-autotherapy="journal" type="button">Journal</button>
-              <button class="nav-btn entry-btn secondary" data-autotherapy="cbt" type="button">CBT thought response</button>
-              <button class="nav-btn entry-btn secondary" data-autotherapy="dbt" type="button">DBT distress tolerance</button>
-            </div>
-            <div class="entry-panel hidden" data-autotherapy-panel="journal">
-              <form id="journal-form">
-                <div class="form-grid">
-                  <div class="form-group">
-                    <label for="journal-date">Entry date/time</label>
-                    <input id="journal-date" name="journal-date" type="datetime-local" />
-                    <small>Stored as separate date + time columns; defaults to now if left empty.</small>
-                  </div>
-                  <div class="form-group">
-                    <label for="journal-mood">Mood level (0-9)</label>
-                    <input id="journal-mood" name="journal-mood" type="number" min="0" max="9" step="1" placeholder="e.g. 6" />
-                  </div>
-                  <div class="form-group">
-                    <label for="journal-depression">Depression (0-9)</label>
-                    <input id="journal-depression" name="journal-depression" type="number" min="0" max="9" step="1" placeholder="e.g. 4" />
-                  </div>
-                  <div class="form-group">
-                    <label for="journal-anxiety">Anxiety (0-9)</label>
-                    <input id="journal-anxiety" name="journal-anxiety" type="number" min="0" max="9" step="1" placeholder="e.g. 5" />
-                  </div>
-                  <div class="form-group" style="grid-column: 1 / -1;">
-                    <label for="journal-description">description</label>
-                    <textarea id="journal-description" name="journal-description" placeholder="cosa hai fatto oggi?"></textarea>
-                  </div>
-                  <div class="form-group" style="grid-column: 1 / -1;">
-                    <label for="journal-gratitude">gratitude</label>
-                    <textarea id="journal-gratitude" name="journal-gratitude" placeholder="per cosa sei grato?"></textarea>
-                  </div>
-                  <div class="form-group" style="grid-column: 1 / -1;">
-                    <label for="journal-reflection">reflection</label>
-                    <textarea id="journal-reflection" name="journal-reflection" placeholder="vuoi riflettere su qualcosa?"></textarea>
-                  </div>
+
+          <div class="entry-panel" data-entry-panel="pain">
+            <form id="pain-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="pain-date">Entry date/time</label>
+                  <input id="pain-date" name="pain-date" type="datetime-local" />
+                  <small>Stored as separate date + time columns; defaults to now if left empty.</small>
                 </div>
-                <div class="form-actions">
-                  <button class="btn-primary btn-plain" type="submit">Save journal entry</button>
-                  <div id="journal-form-status" class="status"></div>
+                <div class="form-group">
+                  <label for="pain-level">Pain level (0-9)</label>
+                  <input id="pain-level" name="pain-level" type="number" min="0" max="9" step="1" placeholder="e.g. 6" />
                 </div>
-              </form>
-            </div>
-            <div class="entry-panel hidden" data-autotherapy-panel="cbt">
-              <div class="hint">CBT thought response coming soon.</div>
-            </div>
-            <div class="entry-panel hidden" data-autotherapy-panel="dbt">
-              <div class="hint">DBT distress tolerance coming soon.</div>
-            </div>
+                <div class="form-group">
+                  <label for="fatigue-level">Fatigue level (0-9)</label>
+                  <input id="fatigue-level" name="fatigue-level" type="number" min="0" max="9" step="1" placeholder="e.g. 4" />
+                </div>
+                <div class="form-group">
+                  <label for="mood-level">Mood level (0-9)</label>
+                  <input id="mood-level" name="mood-level" type="number" min="0" max="9" step="1" placeholder="e.g. 7" />
+                </div>
+                <div class="form-group">
+                  <label>Area <button type="button" class="chip-edit" data-edit="area">Edit</button></label>
+                  <div id="area-options" class="chip-row" data-field="area"></div>
+                  <div id="area-editor" class="chip-editor hidden" data-field="area"></div>
+                </div>
+                <div class="form-group">
+                  <label>Symptoms <button type="button" class="chip-edit" data-edit="symptoms">Edit</button></label>
+                  <div id="symptoms-options" class="chip-row" data-field="symptoms"></div>
+                  <div id="symptoms-editor" class="chip-editor hidden" data-field="symptoms"></div>
+                </div>
+                <div class="form-group">
+                  <label>Activities <button type="button" class="chip-edit" data-edit="activities">Edit</button></label>
+                  <div id="activities-options" class="chip-row" data-field="activities"></div>
+                  <div id="activities-editor" class="chip-editor hidden" data-field="activities"></div>
+                </div>
+                <div class="form-group">
+                  <label>Medicines <button type="button" class="chip-edit" data-edit="medicines">Edit</button></label>
+                  <div id="medicines-options" class="chip-row" data-field="medicines" data-preselect="all"></div>
+                  <div id="medicines-editor" class="chip-editor hidden" data-field="medicines"></div>
+                </div>
+                <div class="form-group">
+                  <label for="pain-note">Notes</label>
+                  <textarea id="pain-note" name="pain-note" placeholder="Anything else worth tracking?"></textarea>
+                </div>
+                <div class="form-group">
+                  <label>Habits <button type="button" class="chip-edit" data-edit="habits">Edit</button></label>
+                  <div id="habits-options" class="chip-row" data-field="habits"></div>
+                  <div id="habits-editor" class="chip-editor hidden" data-field="habits"></div>
+                </div>
+                <div class="form-group">
+                  <label for="coffee-count">Coffee (cups)</label>
+                  <input id="coffee-count" name="coffee-count" type="number" min="0" max="9" step="1" placeholder="e.g. 1" />
+                </div>
+                <div class="form-group">
+                  <label>Other <button type="button" class="chip-edit" data-edit="other">Edit</button></label>
+                  <div id="other-options" class="chip-row" data-field="other"></div>
+                  <div id="other-editor" class="chip-editor hidden" data-field="other"></div>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="btn-primary btn-plain" type="submit">Save new entry</button>
+                <div id="pain-form-status" class="status"></div>
+              </div>
+            </form>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <section id="logs-section" class="hidden">
-      <div class="grid">
-        <div class="card">
-          <div class="log-header">
-            <h2>Journal log</h2>
-            <button class="nav-btn small" data-toggle-log="diary">Expand ▶</button>
+          <div class="entry-panel hidden" data-entry-panel="autotherapy">
+            <div class="sub-divider">
+              <span class="sub-label">Autotherapy options</span>
+              <button class="nav-btn small" type="button" id="autotherapy-toggle">Show ▶</button>
+            </div>
+            <div id="autotherapy-stack" class="hidden">
+              <div class="entry-tabs autotherapy-subnav" role="tablist" aria-label="Autotherapy entries">
+                <span class="sub-label">Choose one</span>
+                <button class="nav-btn entry-btn secondary" data-autotherapy="journal" type="button">Journal</button>
+                <button class="nav-btn entry-btn secondary" data-autotherapy="cbt" type="button">CBT thought response</button>
+                <button class="nav-btn entry-btn secondary" data-autotherapy="dbt" type="button">DBT distress tolerance</button>
+              </div>
+              <div class="entry-panel hidden" data-autotherapy-panel="journal">
+                <form id="journal-form">
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label for="journal-date">Entry date/time</label>
+                      <input id="journal-date" name="journal-date" type="datetime-local" />
+                      <small>Stored as separate date + time columns; defaults to now if left empty.</small>
+                    </div>
+                    <div class="form-group">
+                      <label for="journal-mood">Mood level (0-9)</label>
+                      <input id="journal-mood" name="journal-mood" type="number" min="0" max="9" step="1" placeholder="e.g. 6" />
+                    </div>
+                    <div class="form-group">
+                      <label for="journal-depression">Depression (0-9)</label>
+                      <input id="journal-depression" name="journal-depression" type="number" min="0" max="9" step="1" placeholder="e.g. 4" />
+                    </div>
+                    <div class="form-group">
+                      <label for="journal-anxiety">Anxiety (0-9)</label>
+                      <input id="journal-anxiety" name="journal-anxiety" type="number" min="0" max="9" step="1" placeholder="e.g. 5" />
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                      <label for="journal-description">description</label>
+                      <textarea id="journal-description" name="journal-description" placeholder="cosa hai fatto oggi?"></textarea>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                      <label for="journal-gratitude">gratitude</label>
+                      <textarea id="journal-gratitude" name="journal-gratitude" placeholder="per cosa sei grato?"></textarea>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                      <label for="journal-reflection">reflection</label>
+                      <textarea id="journal-reflection" name="journal-reflection" placeholder="vuoi riflettere su qualcosa?"></textarea>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button class="btn-primary btn-plain" type="submit">Save journal entry</button>
+                    <div id="journal-form-status" class="status"></div>
+                  </div>
+                </form>
+              </div>
+              <div class="entry-panel hidden" data-autotherapy-panel="cbt">
+                <div class="hint">CBT thought response coming soon.</div>
+              </div>
+              <div class="entry-panel hidden" data-autotherapy-panel="dbt">
+                <div class="hint">DBT distress tolerance coming soon.</div>
+              </div>
+            </div>
           </div>
-          <div class="table-wrap" id="diary-table"></div>
         </div>
-        <div class="card">
-          <div class="log-header">
-            <h2>Pain log</h2>
-            <button class="nav-btn small" data-toggle-log="pain">Expand ▶</button>
-          </div>
-          <div class="table-wrap" id="pain-table"></div>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="import-section" class="hidden">
-      <div class="grid">
-        <div class="card">
-          <h2></h2>
-          <label class="drop">
-            <div>
-              <strong>Select or drop Diary CSV</strong>
+      <section id="logs-section" class="hidden">
+        <div class="grid">
+          <div class="card">
+            <div class="log-header">
+              <h2>Journal log</h2>
+              <button class="nav-btn small" data-toggle-log="diary">Expand ▶</button>
             </div>
-            <input type="file" accept=".csv,text/csv" data-kind="diary" />
-            <span class="badge">Import</span>
-          </label>
-          <div class="status" id="diary-status-import"></div>
-          <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="nav-btn" data-export="diary" data-type="csv">Export Diary CSV</button>
-            <button class="nav-btn" data-export="diary" data-type="json">Export Diary JSON</button>
-            <button class="nav-btn danger" data-purge="diary">Purge Diary Data</button>
+            <div class="table-wrap" id="diary-table"></div>
+          </div>
+          <div class="card">
+            <div class="log-header">
+              <h2>Pain log</h2>
+              <button class="nav-btn small" data-toggle-log="pain">Expand ▶</button>
+            </div>
+            <div class="table-wrap" id="pain-table"></div>
           </div>
         </div>
-        <div class="card">
-          <h2></h2>
-          <label class="drop">
-            <div>
-              <strong>Select or drop Pain CSV</strong>
+      </section>
+
+      <section id="import-section" class="hidden">
+        <div class="grid">
+          <div class="card">
+            <h2></h2>
+            <label class="drop">
+              <div>
+                <strong>Select or drop Diary CSV</strong>
+              </div>
+              <input type="file" accept=".csv,text/csv" data-kind="diary" />
+              <span class="badge">Import</span>
+            </label>
+            <div class="status" id="diary-status-import"></div>
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="nav-btn" data-export="diary" data-type="csv">Export Diary CSV</button>
+              <button class="nav-btn" data-export="diary" data-type="json">Export Diary JSON</button>
+              <button class="nav-btn danger" data-purge="diary">Purge Diary Data</button>
             </div>
-            <input type="file" accept=".csv,text/csv" data-kind="pain" />
-            <span class="badge">Import</span>
-          </label>
-          <div class="status" id="pain-status-import"></div>
-          <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="nav-btn" data-export="pain" data-type="csv">Export Pain CSV</button>
-            <button class="nav-btn" data-export="pain" data-type="json">Export Pain JSON</button>
-            <button class="nav-btn danger" data-purge="pain">Purge Pain Data</button>
+          </div>
+          <div class="card">
+            <h2></h2>
+            <label class="drop">
+              <div>
+                <strong>Select or drop Pain CSV</strong>
+              </div>
+              <input type="file" accept=".csv,text/csv" data-kind="pain" />
+              <span class="badge">Import</span>
+            </label>
+            <div class="status" id="pain-status-import"></div>
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="nav-btn" data-export="pain" data-type="csv">Export Pain CSV</button>
+              <button class="nav-btn" data-export="pain" data-type="json">Export Pain JSON</button>
+              <button class="nav-btn danger" data-purge="pain">Purge Pain Data</button>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </div>
 
   <script>
@@ -887,6 +889,7 @@
       loginBtn: document.getElementById("auth-login"),
       logoutBtn: document.getElementById("auth-logout"),
     };
+    const appMain = document.getElementById("app-main");
     function apiFetch(url, options = {}) {
       const opts = { credentials: "include", ...options };
       opts.headers = { ...(options.headers || {}) };
@@ -903,6 +906,23 @@
       authUI.status.innerHTML = message
         ? `<span class="${ok ? "ok" : "err"}">${ok ? "OK" : "Error"}:</span> ${escapeHtml(message)}`
         : "";
+    }
+    function setAppVisible(isAuthed) {
+      if (appMain) appMain.classList.toggle("hidden", !isAuthed);
+    }
+    function resetAppState() {
+      dataStore.diary = null;
+      dataStore.pain = null;
+      ["diary", "pain"].forEach((kind) => {
+        const table = datasets[kind]?.logsTable;
+        if (table) table.innerHTML = "";
+        setStatus(kind, "", true, "logs");
+        setStatus(kind, "", true, "import");
+      });
+      const dashCards = document.getElementById("dash-cards");
+      const dashGraphs = document.getElementById("dash-graphs");
+      if (dashCards) dashCards.innerHTML = "";
+      if (dashGraphs) dashGraphs.innerHTML = "";
     }
     const REQUIRED = {
       diary: ["date", "hour", "mood level", "depression", "anxiety", "description", "gratitude", "reflection"],
@@ -978,8 +998,10 @@
         }
         setAuthStatus(`Logged in as ${data.email || email}`, true);
         if (authUI.pass) authUI.pass.value = "";
-        fetchExisting("diary");
-        fetchExisting("pain");
+        setAppVisible(true);
+        await fetchExisting("diary");
+        await fetchExisting("pain");
+        renderDashboard();
       } catch (err) {
         setAuthStatus(err.message || "Login failed");
       }
@@ -989,6 +1011,8 @@
       try {
         await apiFetch("/api/files/logout", { method: "POST" });
         setAuthStatus("Logged out", true);
+        resetAppState();
+        setAppVisible(false);
       } catch (err) {
         setAuthStatus(err.message || "Logout failed");
       }
@@ -1050,15 +1074,16 @@
       });
     }
 
-    async function fetchExisting(kind) {
+    async function fetchExisting(kind, opts = {}) {
+      const { silentAuthFail = false } = opts;
       const cfg = datasets[kind];
       try {
         const res = await apiFetch(`/api/files/${cfg.file}`);
         if (res.status === 401) {
-          setAuthStatus("Please log in to load data");
-          return;
+          if (!silentAuthFail) setAuthStatus("Please log in to load data");
+          return false;
         }
-        if (!res.ok) return;
+        if (!res.ok) return false;
         const data = await res.json();
         if (data && data.rows && data.headers) {
         const normalized = normalizeDataset(data, kind);
@@ -1075,10 +1100,12 @@
             renderPainOptionButtons();
           }
           renderDashboard();
+          return true;
         }
       } catch (err) {
         console.warn("Load error", err);
       }
+      return false;
     }
 
     function setStatus(kind, message, ok = false, target = "logs") {
@@ -2347,6 +2374,17 @@
       });
     }
 
+    async function restoreSessionIfPossible() {
+      // Try to load data with an existing session; if successful, show the app.
+      const loadedDiary = await fetchExisting("diary", { silentAuthFail: true });
+      const loadedPain = await fetchExisting("pain", { silentAuthFail: true });
+      const hasData = loadedDiary || loadedPain;
+      setAppVisible(hasData);
+      if (hasData) {
+        renderDashboard();
+      }
+    }
+
     function applyDateFilter(store) {
       if (!store?.rows?.length) return store;
       const fromInput = document.getElementById("filter-from");
@@ -2408,9 +2446,9 @@
         renderDashboard();
       });
     });
-    fetchExisting("diary");
-    fetchExisting("pain");
-    renderDashboard();
+    setAppVisible(false);
+    resetAppState();
+    restoreSessionIfPossible();
   </script>
 </body>
 </html>
