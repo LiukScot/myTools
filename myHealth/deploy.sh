@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Simple deploy script to push the local web/ folder (UI + API) to your Hetzner webhosting.
-# Usage:
-#   FTP_HOST=your-host FTP_USER=your-user FTP_PASS=your-pass ./deploy.sh
+# Simple deploy script to push the myHealth web/ folder (UI + API) to your Hetzner webhosting.
+# Usage (run from repo root or myHealth/):
+#   FTP_HOST=your-host FTP_USER=your-user FTP_PASS=your-pass ./myHealth/deploy.sh
 # Expected remote layout: public_html/myhealth/ (adjust REMOTE_BASE if needed).
 
 set -euo pipefail
@@ -11,14 +11,20 @@ if ! command -v lftp >/dev/null 2>&1; then
   exit 1
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 FTP_HOST="${FTP_HOST:-}"
 FTP_USER="${FTP_USER:-}"
 FTP_PASS="${FTP_PASS:-}"
 REMOTE_BASE="${REMOTE_BASE:-/public_html/myhealth}"
-LOCAL_DIR="${LOCAL_DIR:-web}"
+LOCAL_DIR="${LOCAL_DIR:-$SCRIPT_DIR/web}"
 
 if [[ -z "$FTP_HOST" || -z "$FTP_USER" || -z "$FTP_PASS" ]]; then
   echo "Set FTP_HOST, FTP_USER, FTP_PASS environment variables." >&2
+  exit 1
+fi
+
+if [[ ! -d "$LOCAL_DIR" ]]; then
+  echo "Local directory not found: $LOCAL_DIR" >&2
   exit 1
 fi
 

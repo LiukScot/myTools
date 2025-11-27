@@ -890,7 +890,13 @@
     function apiFetch(url, options = {}) {
       const opts = { credentials: "include", ...options };
       opts.headers = { ...(options.headers || {}) };
-      return fetch(url, opts);
+      let finalUrl = url;
+      if (url.startsWith("/")) {
+        const pathBase = (window.location.pathname || "").replace(/\/[^/]*$/, "");
+        const scopedBase = pathBase === "/" ? "" : pathBase;
+        finalUrl = `${scopedBase}${url}`;
+      }
+      return fetch(finalUrl, opts);
     }
     function setAuthStatus(message, ok = false) {
       if (!authUI.status) return;

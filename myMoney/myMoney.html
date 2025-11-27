@@ -1,0 +1,2030 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>investments dashboard (offline)</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 1rem;
+      background: #111;
+      color: #eee;
+    }
+    h1, h2, h3 {
+      margin-top: 1.2rem;
+      margin-bottom: 0.6rem;
+    }
+    .card {
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: #141414;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.85rem;
+    }
+    th {
+      background: #222;
+      position: sticky;
+      top: 0;
+      cursor: pointer;
+      user-select: none;
+    }
+    th .sort-indicator {
+      margin-left: 0.25rem;
+      opacity: 0.6;
+      font-size: 0.75rem;
+    }
+    .filter-row input {
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 0.75rem;
+      padding: 0.15rem 0.25rem;
+    }
+    input, select {
+      padding: 0.3rem;
+      margin: 0.2rem 0;
+      background: #222;
+      color: #eee;
+      border: 1px solid #444;
+      border-radius: 4px;
+    }
+    button {
+      padding: 0.4rem 0.8rem;
+      margin-top: 0.3rem;
+      border-radius: 4px;
+      border: 1px solid #555;
+      background: #444;
+      color: #eee;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #555;
+    }
+    .btn-primary {
+      background: #374151;
+      border-color: #4b5563;
+    }
+    .btn-accent {
+      background: #b45309;
+      border-color: #f59e0b;
+      color: #111;
+    }
+    .btn-danger {
+      background: #7f1d1d;
+      border-color: #b91c1c;
+    }
+    .actions-cell {
+      white-space: nowrap;
+    }
+    .row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .row > .card {
+      flex: 1;
+      min-width: 260px;
+    }
+    .field-group {
+      margin-bottom: 0.5rem;
+    }
+    .two-columns {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .two-columns > .column {
+      min-width: 260px;
+    }
+    .form-column {
+      flex: 1 1 300px;
+      max-width: 420px;
+    }
+    .table-column {
+      flex: 3 1 520px;
+    }
+    .two-columns > .column + .column {
+      border-left: 1px solid #333;
+      padding-left: 1rem;
+      margin-left: 0.5rem;
+    }
+    .small-text {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+    .btn-small {
+      padding: 0.1rem 0.4rem;
+      font-size: 0.75rem;
+      margin-right: 0.2rem;
+    }
+    .asset-blocks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.8rem;
+    }
+    .asset-block {
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      min-width: 190px;
+      background: #181818;
+    }
+    .asset-block-title {
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .asset-block-line {
+      font-size: 0.8rem;
+      opacity: 0.9;
+    }
+
+    .value-positive {
+      color: #4caf50;
+      font-weight: 600;
+    }
+    .value-negative {
+      color: #f44336;
+      font-weight: 600;
+    }
+    .value-zero {
+      color: #bbb;
+      font-weight: 500;
+    }
+
+    .page {
+      display: none;
+    }
+    .page.active {
+      display: block;
+    }
+
+    .top-nav {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid #333;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      position: sticky;
+      top: 0;
+      background: #111;
+      z-index: 10;
+    }
+    .nav-button {
+      border-radius: 999px;
+      padding: 0.3rem 0.9rem;
+      border: 1px solid #444;
+      background: #222;
+      color: #eee;
+      font-size: 0.9rem;
+    }
+    .nav-button.active {
+      background: #4a4a4a;
+      border-color: #888;
+    }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-top: 0.5rem;
+      align-items: stretch;
+    }
+    .chart-card {
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 0.75rem;
+      background: #141414;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .chart-card h4 {
+      margin: 0 0 0.4rem 0;
+      text-align: center;
+    }
+    .chart-card canvas {
+      width: 100%;
+      max-width: 320px;
+      max-height: 260px;
+    }
+
+    .monthly-chart-box {
+      height: 260px;
+      margin-top: 0.8rem;
+    }
+
+    .dash-top-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      align-items: flex-start;
+    }
+    .dash-metrics {
+      min-width: 220px;
+      flex: 0 0 260px;
+    }
+    .dash-charts {
+      flex: 1;
+      min-width: 340px;
+      border-left: 1px solid #333;
+      padding-left: 1.5rem;
+      margin-left: 1.5rem;
+    }
+    .heading-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .chart-box + .chart-box {
+      border-left: 1px solid #333;
+      padding-left: 1rem;
+      margin-left: 1rem;
+    }
+    .divider {
+      border-top: 1px solid #333;
+      margin: 1rem 0;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <h1>📚 <strong>investments dashboard (offline)</strong></h1>
+
+  <nav class="top-nav">
+    <button class="nav-button active" data-page="dashboard">🏠 dashboard</button>
+    <button class="nav-button" data-page="monthly-review">📅 monthly review</button>
+    <button class="nav-button" data-page="monthly-movements">📆 monthly movements</button>
+    <button class="nav-button" data-page="transactions">🧾 transactions</button>
+    <button class="nav-button" data-page="import-backup">📥 import / backup</button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <section id="page-dashboard" class="page active">
+    <div class="card">
+      <div class="dash-top-row">
+        <div class="dash-metrics">
+          <h2>📊 <strong>Dashboard</strong></h2>
+          <div><strong>💰 totale investito:</strong> <span id="totalInvested">-</span></div>
+          <div><strong>📈 pnl totale:</strong> <span id="totalPnl">-</span></div>
+          <div><strong>📦 asset diversi:</strong> <span id="assetCount">-</span></div>
+          <div><strong>🧾 numero transazioni:</strong> <span id="txCount">-</span></div>
+          <div><strong>🕒 ultima transazione:</strong> <span id="lastTxDate">-</span></div>
+        </div>
+        <div class="dash-charts">
+          <div class="charts-row">
+            <div class="chart-card">
+              <h4>🥧 allocazione per asset</h4>
+              <canvas id="assetAllocationChart" height="150"></canvas>
+            </div>
+            <div class="chart-card">
+              <h4>📉 PnL per asset</h4>
+              <canvas id="assetPnlChart" height="150"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3>📦 dettaglio per asset</h3>
+      <button id="toggleZeroAssetsButton" style="margin-bottom:0.4rem;">nascondi investimenti chiusi (valore = 0)</button>
+      <div id="assetBlocks" class="asset-blocks"></div>
+    </div>
+  </section>
+
+  <!-- MONTHLY REVIEW -->
+  <section id="page-monthly-review" class="page">
+    <div class="card">
+      <div class="heading-row">
+        <h2>📅 <strong>Monthly review</strong></h2>
+      </div>
+
+      <div class="field-group">
+        <label><strong>liquidità attuale (snapshot rapido)</strong></label><br>
+        <input type="number" step="0.01" id="quickLiquidityInput" />
+        <button type="button" id="addTodaySnapshotButton">➕ aggiungi snapshot di oggi</button>
+      </div>
+      <div class="field-group">
+        <span class="small-text" style="opacity:0.85;">filter by date:</span><br>
+        <select id="monthlyRangeSelect" aria-label="Filtro intervallo mensile">
+          <option value="all">since beginning</option>
+          <option value="3m">last 3 months</option>
+          <option value="6m">last 6 months</option>
+          <option value="1y">last 1 year</option>
+          <option value="3y">last 3 years</option>
+          <option value="10y">last 10 years</option>
+        </select>
+      </div>
+      <p class="small-text">
+        crea una nuova colonna nel grafico con data di oggi usando low/medium/high dell’ultimo snapshot
+        e la liquidità inserita qui.
+      </p>
+
+      <div id="monthlySummary" class="small-text">
+        caricata da <code>monthlySnapshots</code> (xlsx) – nessun dato ancora.
+      </div>
+      <div class="monthly-chart-box">
+        <canvas id="monthlyRiskChart" height="200"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- MONTHLY MOVEMENTS -->
+  <section id="page-monthly-movements" class="page">
+    <div class="card">
+      <div class="two-columns">
+        <div class="column form-column">
+          <h2>📆 <strong>Monthly movements</strong></h2>
+          <div>📥 entrate mensili: <span id="mmIncome">-</span></div>
+          <div>📤 uscite mensili: <span id="mmExpense">-</span></div>
+          <div>⚖️ netto mensile: <span id="mmNet">-</span></div>
+
+          <form id="monthlyForm" style="margin-top:0.8rem;">
+            <div class="field-group">
+              <label><strong>nome</strong></label><br>
+              <input type="text" name="name" required />
+            </div>
+            <div class="field-group">
+              <label><strong>tipo</strong></label><br>
+              <select name="direction" id="monthlyDirection">
+                <option value="income">entrata</option>
+                <option value="expense">uscita</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label><strong>importo mensile</strong></label><br>
+              <input type="number" step="0.01" name="amount" required />
+            </div>
+            <div class="field-group">
+              <label><strong>note</strong></label><br>
+              <input type="text" name="note" />
+            </div>
+            <button type="submit" id="monthlySubmitButton">💾 salva</button>
+            <button type="button" id="monthlyCancelEditButton" style="display:none; margin-left:0.5rem;">↩️ annulla</button>
+          </form>
+          <p class="small-text" style="margin-top:0.6rem;">
+            i monthly movements <strong>non influiscono</strong> sul totale investito: servono solo come riepilogo di entrate/uscite mensili 💡
+          </p>
+        </div>
+
+        <div class="column table-column">
+          <h3>📋 elenco movimenti</h3>
+          <table>
+            <thead>
+              <tr>
+                <th data-mm-column="name">nome <span class="sort-indicator"></span></th>
+                <th data-mm-column="direction">tipo <span class="sort-indicator"></span></th>
+                <th data-mm-column="amount">importo <span class="sort-indicator"></span></th>
+                <th data-mm-column="note">note <span class="sort-indicator"></span></th>
+                <th>azioni</th>
+              </tr>
+              <tr class="filter-row">
+                <th><input type="text" data-mm-filter="name" placeholder="filtra" /></th>
+                <th><input type="text" data-mm-filter="direction" placeholder="filtra" /></th>
+                <th><input type="text" data-mm-filter="amount" placeholder="filtra" /></th>
+                <th><input type="text" data-mm-filter="note" placeholder="filtra" /></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="monthlyMovementsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRANSACTIONS -->
+  <section id="page-transactions" class="page">
+    <div class="card">
+      <div class="two-columns">
+        <div class="column form-column">
+          <h2>➕ <strong>Nuova transazione</strong></h2>
+          <form id="addForm">
+            <div class="field-group">
+              <label><strong>data</strong></label><br>
+              <input type="date" name="date" required />
+            </div>
+
+            <div class="field-group">
+              <label><strong>asset</strong></label><br>
+              <input type="text" name="asset" placeholder="cherrybank" required />
+            </div>
+
+            <div class="field-group">
+              <label><strong>tipo (descrizione)</strong></label><br>
+              <select name="tipo" id="tipoSelect">
+                <option value="nuovo vincolo">nuovo vincolo</option>
+                <option value="cedola">cedola</option>
+                <option value="interessi">interessi</option>
+                <option value="cashback">cashback</option>
+                <option value="Variazione Valore">Variazione Valore</option>
+              </select>
+            </div>
+
+            <div class="field-group" id="groupBuy">
+              <label><strong>valore d'acquisto</strong></label><br>
+              <input type="number" step="1" name="buyValue" />
+            </div>
+
+            <div class="field-group" id="groupPnl">
+              <label><strong>pnl</strong></label><br>
+              <input type="number" step="1" name="pnl" />
+            </div>
+
+            <div class="field-group">
+              <label><strong>note</strong></label><br>
+              <input type="text" name="note" />
+            </div>
+
+            <button type="submit" id="txSubmitButton">💾 salva</button>
+            <button type="button" id="txCancelEditButton" style="display:none; margin-left:0.5rem;">↩️ annulla</button>
+          </form>
+        </div>
+
+        <div class="column table-column">
+          <h2>📋 <strong>Transazioni</strong></h2>
+          <table id="transactionsTable">
+            <thead>
+              <tr>
+                <th data-column="date">data <span class="sort-indicator"></span></th>
+                <th data-column="asset">asset <span class="sort-indicator"></span></th>
+                <th data-column="tipo">tipo <span class="sort-indicator"></span></th>
+                <th data-column="type">type <span class="sort-indicator"></span></th>
+                <th data-column="buyValue">buy/sell <span class="sort-indicator"></span></th>
+                <th data-column="pnl">pnl <span class="sort-indicator"></span></th>
+                <th data-column="note">note <span class="sort-indicator"></span></th>
+                <th>azioni</th>
+              </tr>
+              <tr class="filter-row">
+                <th><input type="text" data-tx-filter="date" placeholder="filtra" /></th>
+                <th><input type="text" data-tx-filter="asset" placeholder="filtra" /></th>
+                <th><input type="text" data-tx-filter="tipo" placeholder="filtra" /></th>
+                <th><input type="text" data-tx-filter="type" placeholder="filtra" /></th>
+                <th><input type="text" data-tx-filter="buyValue" placeholder="filtra" /></th>
+                <th><input type="text" data-tx-filter="pnl" placeholder="filtra" /></th>
+                <th><input type="text" data-tx-filter="note" placeholder="filtra" /></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="transactionsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IMPORT / BACKUP -->
+  <section id="page-import-backup" class="page">
+    <div class="card">
+      <h2>📥 <strong>Import / backup</strong></h2>
+
+      <!-- XLSX area -->
+      <div class="field-group">
+        <label><strong>importa xlsx</strong> (fogli: <code>rawTransactions</code>, <code>movements</code>, <code>monthlySnapshots</code>)</label><br>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" />
+      </div>
+      <div class="field-group">
+        <button id="exportXlsxButton" class="btn-accent">📤 esporta dati (.xlsx)</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- JSON area -->
+      <div class="field-group">
+        <label><strong>importa dati da backup (.json)</strong></label><br>
+        <input type="file" id="importBackupInput" accept=".json" />
+      </div>
+      <div class="field-group">
+        <button id="exportBackupButton" class="btn-primary">🗃️ salva dati (.json)</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Purge -->
+      <div class="field-group">
+        <button id="fullPurgeButton" class="btn-danger">🧨 full purge dati</button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const primaryStorageKey = 'investments_state_v1';
+    const legacyStorageKey = 'investments_transactions_v1';
+
+    let transactions = [];
+    let monthlyMovements = [];
+    let monthlySnapshots = [];
+
+    const transactionSortState = { column: 'date', direction: 'desc' };
+    const transactionFilters = {
+      date: '',
+      asset: '',
+      tipo: '',
+      type: '',
+      buyValue: '',
+      pnl: '',
+      note: ''
+    };
+
+    const mmSortState = { column: 'amount', direction: 'desc' };
+    const mmFilters = {
+      name: '',
+      direction: '',
+      amount: '',
+      note: ''
+    };
+
+    let editingTransactionId = null;
+    let editingMonthlyId = null;
+    let assetChart = null;
+    let assetPnlChart = null;
+    let monthlyRiskChart = null;
+    let assetColorMap = {};
+    let showZeroAssets = true;
+    const defaultPreferences = { showZeroAssets: true };
+
+    // ---------- NAV ----------
+    function showPage(pageName) {
+      document.querySelectorAll('.page').forEach(sec => {
+        sec.classList.toggle('active', sec.id === 'page-' + pageName);
+      });
+      document.querySelectorAll('.nav-button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.page === pageName);
+      });
+    }
+
+    // ---------- STORAGE ----------
+    const serverEndpoint = '/api/data';
+    let serverSyncTimer = null;
+    let lastQueuedState = null;
+
+    function normalizeState(raw) {
+      const base = {
+        transactions: [],
+        monthlyMovements: [],
+        monthlySnapshots: [],
+        preferences: { ...defaultPreferences }
+      };
+      if (Array.isArray(raw)) {
+        base.transactions = raw;
+        return base;
+      }
+      if (raw && typeof raw === 'object') {
+        if (Array.isArray(raw.transactions)) base.transactions = raw.transactions;
+        if (Array.isArray(raw.monthlyMovements)) base.monthlyMovements = raw.monthlyMovements;
+        if (Array.isArray(raw.monthlySnapshots)) base.monthlySnapshots = raw.monthlySnapshots;
+        if (raw.preferences && typeof raw.preferences === 'object') {
+          base.preferences = { ...base.preferences, ...raw.preferences };
+        }
+      }
+      return base;
+    }
+
+    function loadFromLocalStorage() {
+      const fallback = normalizeState(null);
+
+      const rawPrimary = localStorage.getItem(primaryStorageKey);
+      if (rawPrimary) {
+        try {
+          return normalizeState(JSON.parse(rawPrimary));
+        } catch (e) {
+          console.error('invalid json in primary storage', e);
+        }
+      }
+
+      const rawLegacy = localStorage.getItem(legacyStorageKey);
+      if (rawLegacy) {
+        try {
+          const parsedLegacy = JSON.parse(rawLegacy);
+          if (Array.isArray(parsedLegacy)) {
+            return normalizeState(parsedLegacy);
+          }
+        } catch (e) {
+          console.error('invalid json in legacy storage', e);
+        }
+      }
+
+      return fallback;
+    }
+
+    function saveToLocalStorage(state) {
+      localStorage.setItem(primaryStorageKey, JSON.stringify(state));
+    }
+
+    function getCurrentState() {
+      return {
+        transactions,
+        monthlyMovements,
+        monthlySnapshots,
+        preferences: {
+          showZeroAssets
+        }
+      };
+    }
+
+    function scheduleServerSave(state) {
+      if (!window.fetch || window.location.protocol === 'file:') return;
+      lastQueuedState = state;
+      if (serverSyncTimer) clearTimeout(serverSyncTimer);
+      serverSyncTimer = setTimeout(() => {
+        serverSyncTimer = null;
+        syncStateToServer(lastQueuedState);
+      }, 150);
+    }
+
+    async function syncStateToServer(state) {
+      try {
+        await fetch(serverEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(state)
+        });
+      } catch (err) {
+        console.warn('server sync failed (using browser storage only)', err);
+      }
+    }
+
+    async function loadState() {
+      const localState = loadFromLocalStorage();
+      if (!window.fetch || window.location.protocol === 'file:') {
+        return localState;
+      }
+      try {
+        const res = await fetch(serverEndpoint, { cache: 'no-store' });
+        if (!res.ok) throw new Error('bad status ' + res.status);
+        const data = await res.json();
+        const normalized = normalizeState(data);
+        saveToLocalStorage(normalized);
+        return normalized;
+      } catch (err) {
+        console.warn('api not reachable, using localStorage', err);
+        return localState;
+      }
+    }
+
+    function saveState() {
+      const state = getCurrentState();
+      saveToLocalStorage(state);
+      scheduleServerSave(state);
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('it-IT', {
+        style: 'currency',
+        currency: 'EUR'
+      }).format(value || 0);
+    }
+
+    function formatCurrencyWithColor(value) {
+      const num = Number(value) || 0;
+      const formatted = formatCurrency(num);
+      let cls = 'value-zero';
+      if (num > 0) cls = 'value-positive';
+      else if (num < 0) cls = 'value-negative';
+      return `<span class="${cls}">${formatted}</span>`;
+    }
+
+    function formatPercentWithColor(value, digits = 1) {
+      const num = Number(value) || 0;
+      let cls = 'value-zero';
+      if (num > 0) cls = 'value-positive';
+      else if (num < 0) cls = 'value-negative';
+      return `<span class="${cls}">${num.toFixed(digits)}%</span>`;
+    }
+
+    // ---------- DASHBOARD ----------
+    function renderDashboard() {
+      const totalInvested = transactions.reduce((sum, t) => sum + (t.currentValue || 0), 0);
+      const totalPnl = transactions.reduce((sum, t) => sum + (t.pnl || 0), 0);
+      document.getElementById('totalInvested').textContent = formatCurrency(totalInvested);
+      document.getElementById('totalPnl').innerHTML = formatCurrencyWithColor(totalPnl);
+
+      const assetSet = new Set();
+      transactions.forEach(t => { if (t.asset) assetSet.add(t.asset); });
+      document.getElementById('assetCount').textContent = String(assetSet.size);
+      document.getElementById('txCount').textContent = String(transactions.length);
+
+      const dates = transactions.map(t => t.date).filter(Boolean).sort();
+      document.getElementById('lastTxDate').textContent = dates.length ? dates[dates.length - 1] : '-';
+    }
+
+    // ---------- TRANSAZIONI: SORT + FILTER ----------
+    function getFilteredSortedTransactions() {
+      const filtered = transactions.filter(t => {
+        const checks = [
+          ['date', 'date'],
+          ['asset', 'asset'],
+          ['tipo', 'tipo'],
+          ['type', 'type'],
+          ['buyValue', 'buyValue'],
+          ['pnl', 'pnl'],
+          ['note', 'note']
+        ];
+        for (const [key, field] of checks) {
+          const filter = (transactionFilters[key] || '').trim().toLowerCase();
+          if (!filter) continue;
+          const value = t[field];
+          if (value == null) return false;
+          const valueStr = String(value).toLowerCase();
+          if (!valueStr.includes(filter)) return false;
+        }
+        return true;
+      });
+
+      const { column, direction } = transactionSortState;
+      filtered.sort((a, b) => {
+        let va = a[column];
+        let vb = b[column];
+
+        if (column === 'buyValue' || column === 'currentValue' || column === 'pnl') {
+          va = Number(va) || 0;
+          vb = Number(vb) || 0;
+        } else if (column === 'date') {
+          va = a.date || '';
+          vb = b.date || '';
+        } else {
+          va = (va || '').toString().toLowerCase();
+          vb = (vb || '').toString().toLowerCase();
+        }
+        if (va < vb) return direction === 'asc' ? -1 : 1;
+        if (va > vb) return direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      return filtered;
+    }
+
+    function updateTransactionSortIndicators() {
+      const ths = document.querySelectorAll('#page-transactions th[data-column]');
+      ths.forEach(th => {
+        const col = th.dataset.column;
+        const span = th.querySelector('.sort-indicator');
+        if (!span) return;
+        if (col === transactionSortState.column) {
+          span.textContent = transactionSortState.direction === 'asc' ? '▲' : '▼';
+        } else {
+          span.textContent = '';
+        }
+      });
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('transactionsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const rows = getFilteredSortedTransactions();
+      rows.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${t.date || ''}</td>
+          <td>${t.asset || ''}</td>
+          <td>${t.tipo || ''}</td>
+          <td>${t.type || ''}</td>
+          <td>${formatCurrencyWithColor(t.buyValue)}</td>
+          <td>${formatCurrencyWithColor(t.pnl)}</td>
+          <td>${t.note || ''}</td>
+          <td class="actions-cell">
+            <button class="btn-small edit-tx" data-id="${t.id}">✏️</button>
+            <button class="btn-small delete-tx" data-id="${t.id}">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function resetTransactionForm() {
+      const addForm = document.getElementById('addForm');
+      if (!addForm) return;
+      addForm.reset();
+      addForm.tipo.value = 'nuovo vincolo';
+      addForm.tipo.dispatchEvent(new Event('change'));
+      const today = new Date().toISOString().slice(0, 10);
+      if (addForm.date) addForm.date.value = today;
+      editingTransactionId = null;
+      const submitBtn = document.getElementById('txSubmitButton');
+      if (submitBtn) submitBtn.textContent = '💾 salva';
+      const cancelBtn = document.getElementById('txCancelEditButton');
+      if (cancelBtn) cancelBtn.style.display = 'none';
+    }
+
+    // ---------- MONTHLY MOVEMENTS: SORT + FILTER ----------
+    function getFilteredSortedMonthlyMovements() {
+      const filtered = monthlyMovements.filter(m => {
+        const checks = [
+          ['name', 'name'],
+          ['direction', 'direction'],
+          ['amount', 'amount'],
+          ['note', 'note']
+        ];
+        for (const [key, field] of checks) {
+          const filter = (mmFilters[key] || '').trim().toLowerCase();
+          if (!filter) continue;
+
+          let value;
+          if (field === 'amount') {
+            const signed = m.direction === 'expense' ? -(m.amount || 0) : (m.amount || 0);
+            value = signed;
+          } else {
+            value = m[field];
+          }
+          if (value == null) return false;
+          const valueStr = String(value).toLowerCase();
+          if (!valueStr.includes(filter)) return false;
+        }
+        return true;
+      });
+
+      const { column, direction } = mmSortState;
+      filtered.sort((a, b) => {
+        let va, vb;
+        if (column === 'amount') {
+          const sa = a.direction === 'expense' ? -(a.amount || 0) : (a.amount || 0);
+          const sb = b.direction === 'expense' ? -(b.amount || 0) : (b.amount || 0);
+          va = sa;
+          vb = sb;
+        } else {
+          va = (a[column] || '').toString().toLowerCase();
+          vb = (b[column] || '').toString().toLowerCase();
+        }
+        if (va < vb) return direction === 'asc' ? -1 : 1;
+        if (va > vb) return direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      return filtered;
+    }
+
+    function updateMmSortIndicators() {
+      const ths = document.querySelectorAll('#page-monthly-movements th[data-mm-column]');
+      ths.forEach(th => {
+        const col = th.dataset.mmColumn;
+        const span = th.querySelector('.sort-indicator');
+        if (!span) return;
+        if (col === mmSortState.column) {
+          span.textContent = mmSortState.direction === 'asc' ? '▲' : '▼';
+        } else {
+          span.textContent = '';
+        }
+      });
+    }
+
+    function renderMonthlyMovements() {
+      const tbody = document.getElementById('monthlyMovementsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const income = monthlyMovements.reduce((sum, m) =>
+        m.direction === 'income' ? sum + (m.amount || 0) : sum, 0);
+      const expense = monthlyMovements.reduce((sum, m) =>
+        m.direction === 'expense' ? sum + (m.amount || 0) : sum, 0);
+      const net = income - expense;
+
+      document.getElementById('mmIncome').innerHTML = formatCurrencyWithColor(income);
+      document.getElementById('mmExpense').innerHTML = formatCurrencyWithColor(-expense);
+      document.getElementById('mmNet').textContent = formatCurrency(net);
+
+      const list = getFilteredSortedMonthlyMovements();
+      list.forEach(m => {
+        const tr = document.createElement('tr');
+        const signedAmount = m.direction === 'expense' ? -m.amount : m.amount;
+        tr.innerHTML = `
+          <td>${m.name || ''}</td>
+          <td>${m.direction === 'income' ? 'entrata' : 'uscita'}</td>
+          <td>${formatCurrencyWithColor(signedAmount)}</td>
+          <td>${m.note || ''}</td>
+          <td>
+            <button class="btn-small edit-monthly" data-id="${m.id}">✏️</button>
+            <button class="btn-small delete-monthly" data-id="${m.id}">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ---------- AGGREGAZIONE ASSET ----------
+    function getAssetAggregation() {
+      const byAsset = {};
+      let totalCurrent = 0;
+
+      transactions.forEach(t => {
+        if (!t.asset) return;
+        if (!byAsset[t.asset]) {
+          byAsset[t.asset] = { buy: 0, current: 0, pnl: 0 };
+        }
+        byAsset[t.asset].buy += t.buyValue || 0;
+        byAsset[t.asset].current += t.currentValue || 0;
+        byAsset[t.asset].pnl += t.pnl || 0;
+        totalCurrent += t.currentValue || 0;
+      });
+
+      const labels = Object.keys(byAsset);
+      const data = labels.map(l => byAsset[l].current);
+      return { byAsset, labels, data, totalCurrent };
+    }
+
+    // ---------- BLOCCHETTI + GRAFICI ----------
+    function renderAssetBlocks() {
+      const container = document.getElementById('assetBlocks');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const { byAsset, labels, totalCurrent } = getAssetAggregation();
+      if (!labels.length || totalCurrent === 0) return;
+
+      const filteredLabels = showZeroAssets
+        ? labels
+        : labels.filter(asset => (byAsset[asset].current || 0) !== 0);
+
+      if (!filteredLabels.length) return;
+
+      filteredLabels.forEach(asset => {
+        const agg = byAsset[asset];
+        const ratio = agg.current / totalCurrent;
+        const profitPerc = agg.buy > 0 ? (agg.pnl / agg.buy) * 100 : 0;
+        const color = assetColorMap[asset] || '#ccc';
+
+        const div = document.createElement('div');
+        div.className = 'asset-block';
+        div.innerHTML = `
+          <div class="asset-block-title" style="color:${color}">📦 ${asset}</div>
+          <div class="asset-block-line">peso portafoglio: ${(ratio * 100).toFixed(1)}%</div>
+          <div class="asset-block-line">valore attuale: ${formatCurrency(agg.current)}</div>
+          <div class="asset-block-line">pnl: ${formatCurrencyWithColor(agg.pnl)}</div>
+          <div class="asset-block-line">rendimento: ${formatPercentWithColor(profitPerc, 2)}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function updateZeroAssetsToggleLabel() {
+      const toggleZeroBtn = document.getElementById('toggleZeroAssetsButton');
+      if (!toggleZeroBtn) return;
+      toggleZeroBtn.textContent = showZeroAssets
+        ? 'nascondi investimenti chiusi (valore = 0)'
+        : 'mostra investimenti chiusi (valore = 0)';
+    }
+
+    function renderAssetChart() {
+      const canvas = document.getElementById('assetAllocationChart');
+      if (!canvas || typeof Chart === 'undefined') return;
+
+      const { labels, data, totalCurrent } = getAssetAggregation();
+
+      if (assetChart) {
+        assetChart.destroy();
+        assetChart = null;
+      }
+      assetColorMap = {};
+
+      if (!labels.length || totalCurrent === 0) return;
+
+      const ctx = canvas.getContext('2d');
+      const palette = [
+        '#ff6b6b', '#4dabf7', '#51cf66', '#ffd43b',
+        '#845ef7', '#f783ac', '#63e6be', '#ffa94d',
+        '#a9e34b', '#74c0fc'
+      ];
+      const colors = labels.map((_, idx) => palette[idx % palette.length]);
+      labels.forEach((label, idx) => {
+        assetColorMap[label] = colors[idx];
+      });
+
+      const total = data.reduce((s, v) => s + v, 0);
+
+      assetChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels,
+          datasets: [{
+            data,
+            backgroundColor: colors
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const perc = total ? (value / total) * 100 : 0;
+                  return `${label}: ${formatCurrency(value)} (${perc.toFixed(1)}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderAssetPnlChart() {
+      const canvas = document.getElementById('assetPnlChart');
+      if (!canvas || typeof Chart === 'undefined') return;
+
+      const { byAsset, labels } = getAssetAggregation();
+
+      if (assetPnlChart) {
+        assetPnlChart.destroy();
+        assetPnlChart = null;
+      }
+      if (!labels.length) return;
+
+      const items = labels.map(l => ({
+        asset: l,
+        pnl: byAsset[l].pnl || 0
+      })).sort((a, b) => b.pnl - a.pnl);
+
+      const sortedAssets = items.map(it => it.asset);
+      const data = items.map(it => it.pnl);
+      const colors = sortedAssets.map(a => assetColorMap[a] || '#ccc');
+
+      const ctx = canvas.getContext('2d');
+      assetPnlChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: sortedAssets.map(() => ''), // niente nomi asse x
+          datasets: [{
+            data,
+            backgroundColor: colors
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              ticks: { display: false },
+              grid: { color: '#333' }
+            },
+            y: {
+              ticks: {
+                color: '#eee',
+                callback: function (value) {
+                  return formatCurrency(value);
+                }
+              },
+              grid: { color: '#333' }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const v = context.raw || 0;
+                  const asset = sortedAssets[context.dataIndex] || '';
+                  return `${asset}: ${formatCurrency(v)}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ---------- MONTHLY REVIEW ----------
+    function getMonthlySnapshotsForRange() {
+      if (!monthlySnapshots.length) return [];
+      const select = document.getElementById('monthlyRangeSelect');
+      const range = select ? select.value : 'all';
+      const monthsMap = {
+        '3m': 3,
+        '6m': 6,
+        '1y': 12,
+        '3y': 36,
+        '10y': 120
+      };
+      const sorted = [...monthlySnapshots].sort((a, b) =>
+        (a.date || '').localeCompare(b.date || '')
+      );
+      const months = monthsMap[range];
+      if (!months || range === 'all') return sorted;
+
+      const latest = sorted[sorted.length - 1];
+      const latestDate = latest && latest.date ? new Date(latest.date) : null;
+      if (!latestDate || Number.isNaN(latestDate)) return sorted;
+
+      const cutoff = new Date(latestDate);
+      cutoff.setMonth(cutoff.getMonth() - months);
+      return sorted.filter(s => {
+        if (!s.date) return false;
+        const d = new Date(s.date);
+        if (Number.isNaN(d)) return false;
+        return d >= cutoff;
+      });
+    }
+
+    function renderMonthlyReview() {
+      const summaryEl = document.getElementById('monthlySummary');
+      const canvas = document.getElementById('monthlyRiskChart');
+      if (!summaryEl || !canvas || typeof Chart === 'undefined') return;
+
+      if (monthlyRiskChart) {
+        monthlyRiskChart.destroy();
+        monthlyRiskChart = null;
+      }
+
+      const sorted = getMonthlySnapshotsForRange();
+      if (!sorted.length) {
+        summaryEl.textContent = 'caricata da monthlySnapshots – nessun dato.';
+        return;
+      }
+
+      const labels = sorted.map(s => s.date || '');
+      const lowArr = sorted.map(s => s.low || 0);
+      const mediumArr = sorted.map(s => s.medium || 0);
+      const highArr = sorted.map(s => s.high || 0);
+      const liqArr = sorted.map(s => s.liquid || 0);
+
+      const last = sorted[sorted.length - 1];
+      const lastLow = last.low || 0;
+      const lastMedium = last.medium || 0;
+      const lastHigh = last.high || 0;
+      const lastLiquid = last.liquid || 0;
+      const totalLast = lastLow + lastMedium + lastHigh + lastLiquid;
+      summaryEl.innerHTML =
+        `ultimo snapshot: <strong>${last.date || '-'}</strong> – ` +
+        `low risk: ${formatCurrency(lastLow)}, ` +
+        `medium risk: ${formatCurrency(lastMedium)}, ` +
+        `high risk: ${formatCurrency(lastHigh)}, ` +
+        `liquido: ${formatCurrency(lastLiquid)}, ` +
+        `totale: ${formatCurrency(totalLast)}.`;
+
+      const ctx = canvas.getContext('2d');
+      monthlyRiskChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'low risk',
+              data: lowArr,
+              backgroundColor: '#4dabf7'
+            },
+            {
+              label: 'medium risk',
+              data: mediumArr,
+              backgroundColor: '#845ef7'
+            },
+            {
+              label: 'high risk',
+              data: highArr,
+              backgroundColor: '#ff6b6b'
+            },
+            {
+              label: 'liquido',
+              data: liqArr,
+              backgroundColor: '#ffd43b'
+            }
+          ]
+        },
+        options: {
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              stacked: true,
+              ticks: { color: '#eee' },
+              grid: { color: '#333' }
+            },
+            y: {
+              stacked: true,
+              ticks: {
+                color: '#eee',
+                callback: value => formatCurrency(value)
+              },
+              grid: { color: '#333' }
+            }
+          },
+          plugins: {
+            legend: { position: 'top', labels: { color: '#eee' } },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const v = context.raw || 0;
+                  return `${context.dataset.label}: ${formatCurrency(v)}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ---------- DATE / TYPE / NORMALIZZAZIONE ----------
+    function excelSerialToISO(serial) {
+      const utcDays = serial - 25569;
+      const utcValue = utcDays * 86400 * 1000;
+      const dateObj = new Date(utcValue);
+      return dateObj.toISOString().slice(0, 10);
+    }
+
+    function getRawDateFromRow(row) {
+      const key = Object.keys(row).find(k =>
+        k && k.toLowerCase().trim().startsWith('data')
+      );
+      if (key) return row[key];
+      return row.data || row['data'] || null;
+    }
+
+    function inferTypeFromValues(buyRaw, pnlRaw) {
+      const buyNum = typeof buyRaw === 'number'
+        ? buyRaw
+        : parseFloat(buyRaw ?? '');
+      const pnlNumRaw = typeof pnlRaw === 'number'
+        ? pnlRaw
+        : parseFloat(pnlRaw ?? '');
+
+      const hasBuy = buyRaw !== null && buyRaw !== undefined && buyRaw !== '' && !Number.isNaN(buyNum);
+      const pnl = Number.isNaN(pnlNumRaw) ? 0 : pnlNumRaw;
+
+      if (hasBuy && buyNum < 0) {
+        return 'SELL';
+      }
+
+      if (!hasBuy) {
+        if (pnl > 0) return 'TRANSFER IN';
+        if (pnl < 0) return 'TRANSFER OUT';
+        return '';
+      } else {
+        if (pnl >= 0) return 'BUY';
+        return 'SELL';
+      }
+    }
+
+    function normalizeRow(row, index) {
+      const rawDate = getRawDateFromRow(row);
+      let dateStr = '';
+
+      if (rawDate instanceof Date) {
+        dateStr = rawDate.toISOString().slice(0, 10);
+      } else if (typeof rawDate === 'number') {
+        dateStr = excelSerialToISO(rawDate);
+      } else if (typeof rawDate === 'string' && rawDate) {
+        dateStr = rawDate.slice(0, 10);
+      }
+
+      const buyRaw = row["valore d'acquisto"];
+      const pnlRaw = row["PNL"] ?? row['pnl'];
+
+      const buyValue = parseFloat(buyRaw ?? '') || 0;
+      const pnl = parseFloat(pnlRaw ?? '') || 0;
+      const currentValue = buyValue + pnl;
+
+      const rawTipo = (row.tipo || row['tipo'] || '').toString().trim();
+      const lower = rawTipo.toLowerCase();
+      const tipoMap = {
+        'nuovo vincolo': 'nuovo vincolo',
+        'cedola': 'cedola',
+        'interessi': 'interessi',
+        'cashback': 'cashback',
+        'variazione valore': 'Variazione Valore'
+      };
+      const tipoNorm = tipoMap[lower] || rawTipo;
+
+      const inferredType = inferTypeFromValues(buyRaw, pnlRaw);
+      const fallbackType = row.Type || row['Type'] || row['type'] || '';
+      const type = inferredType || fallbackType;
+
+      return {
+        id: row.id || (crypto.randomUUID ? crypto.randomUUID() : `tx-${Date.now()}-${index}`),
+        date: dateStr,
+        asset: row.asset || row['asset'] || '',
+        tipo: tipoNorm,
+        type: type,
+        buyValue: buyValue,
+        currentValue: currentValue,
+        pnl: pnl,
+        note: row.Note || row['note'] || ''
+      };
+    }
+
+    function normalizeSnapshotRow(row, index) {
+      const rawDate = row.data ?? row['data'] ?? row['Data'];
+      let dateStr = '';
+
+      if (rawDate instanceof Date) {
+        dateStr = rawDate.toISOString().slice(0, 10);
+      } else if (typeof rawDate === 'number') {
+        dateStr = excelSerialToISO(rawDate);
+      } else if (typeof rawDate === 'string' && rawDate) {
+        dateStr = rawDate.slice(0, 10);
+      }
+
+      const low = parseFloat(row['low risk'] ?? row.lowRisk ?? row.low ?? '') || 0;
+      const medium = parseFloat(row['medium risk'] ?? row.mediumRisk ?? row.medium ?? '') || 0;
+      const high = parseFloat(row['high risk'] ?? row.highRisk ?? row.high ?? '') || 0;
+      const liquid = parseFloat(row['liquido'] ?? row.liquid ?? '') || 0;
+
+      if (!dateStr) return null;
+
+      return {
+        id: row.id || (crypto.randomUUID ? crypto.randomUUID() : `snap-${Date.now()}-${index}`),
+        date: dateStr,
+        low,
+        medium,
+        high,
+        liquid
+      };
+    }
+
+    function parseMovementsSheet(rows) {
+      const list = [];
+      rows.forEach((row, idx) => {
+        const valueRaw =
+          row.valore ?? row['valore'] ?? row['Valore'] ??
+          row.value ?? row['value'] ?? row['Value'];
+        if (valueRaw === null || valueRaw === undefined || valueRaw === '') return;
+        const value = parseFloat(valueRaw);
+        if (Number.isNaN(value)) return;
+
+        const direction = value >= 0 ? 'income' : 'expense';
+        const amount = Math.abs(value);
+        const name = (row.nome ?? row['nome'] ?? row['name'] ?? row['Name'] ?? '').toString();
+        const note = (row.note ?? row['note'] ?? row['Note'] ?? row.tipo ?? row['tipo'] ?? '').toString();
+
+        if (!name && !note) return;
+
+        list.push({
+          id: crypto.randomUUID ? crypto.randomUUID() : `mm-${Date.now()}-${idx}`,
+          name,
+          direction,
+          amount,
+          note
+        });
+      });
+      return list;
+    }
+
+    function renderEverything() {
+      updateTransactionSortIndicators();
+      updateMmSortIndicators();
+      renderDashboard();
+      renderTable();
+      renderMonthlyMovements();
+      renderAssetChart();
+      renderAssetPnlChart();
+      renderAssetBlocks();
+      updateZeroAssetsToggleLabel();
+      renderMonthlyReview();
+    }
+
+    // ---------- EXPORT JSON & XLSX ----------
+    async function exportBackup() {
+      const state = getCurrentState();
+      const json = JSON.stringify(state, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const today = new Date().toISOString().slice(0, 10);
+      const fileName = `investments-backup-${today}.json`;
+
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [{
+              description: 'JSON file',
+              accept: { 'application/json': ['.json'] }
+            }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          return;
+        } catch (e) {
+          console.error('showSaveFilePicker JSON failed, fallback to download', e);
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function buildRawTransactionsSheet() {
+      const header = ['id', 'data', 'asset', 'tipo',
+        "valore d'acquisto", 'valore attuale / vendita', 'PNL', 'Type', 'Note'];
+      const rows = transactions.map(t => {
+        const buy = t.buyValue || 0;
+        const pnl = t.pnl || 0;
+        const current = (t.currentValue != null ? t.currentValue : buy + pnl) || 0;
+        return {
+          id: t.id || '',
+          data: t.date || '',
+          asset: t.asset || '',
+          tipo: t.tipo || '',
+          "valore d'acquisto": buy,
+          "valore attuale / vendita": current,
+          PNL: pnl,
+          Type: t.type || '',
+          Note: t.note || ''
+        };
+      });
+      const data = [header].concat(
+        rows.map(r => header.map(h => r[h]))
+      );
+      return XLSX.utils.aoa_to_sheet(data);
+    }
+
+    function buildMovementsSheet() {
+      const header = ['tipo', 'nome', 'valore'];
+      const rows = monthlyMovements.map(m => {
+        const signed = m.direction === 'income' ? (m.amount || 0) : -(m.amount || 0);
+        const tipoCell = m.note || (m.direction === 'income' ? 'entrata' : 'uscita');
+        return { tipo: tipoCell, nome: m.name || '', valore: signed };
+      });
+      const data = [header].concat(
+        rows.map(r => header.map(h => r[h]))
+      );
+      return XLSX.utils.aoa_to_sheet(data);
+    }
+
+    function buildMonthlySnapshotsSheet() {
+      const header = ['data', 'low risk', 'medium risk', 'high risk', 'liquido'];
+      const rows = monthlySnapshots.map(s => ({
+        data: s.date || '',
+        'low risk': s.low || 0,
+        'medium risk': s.medium || 0,
+        'high risk': s.high || 0,
+        liquido: s.liquid || 0
+      }));
+      const data = [header].concat(
+        rows.map(r => header.map(h => r[h]))
+      );
+      return XLSX.utils.aoa_to_sheet(data);
+    }
+
+    async function exportXlsx() {
+      if (typeof XLSX === 'undefined') {
+        alert('XLSX non disponibile');
+        return;
+      }
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, buildRawTransactionsSheet(), 'rawTransactions');
+      XLSX.utils.book_append_sheet(wb, buildMovementsSheet(), 'movements');
+      XLSX.utils.book_append_sheet(wb, buildMonthlySnapshotsSheet(), 'monthlySnapshots');
+
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([wbout], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const today = new Date().toISOString().slice(0, 10);
+      const fileName = `Investments-export-${today}.xlsx`;
+
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [{
+              description: 'Excel file',
+              accept: {
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+              }
+            }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          return;
+        } catch (e) {
+          console.error('showSaveFilePicker XLSX failed, fallback to download', e);
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    // ---------- IMPORT XLSX ----------
+    document.addEventListener('DOMContentLoaded', () => {
+      const fileInput = document.getElementById('fileInput');
+      if (fileInput) {
+        fileInput.addEventListener('change', event => {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = e => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // rawTransactions
+            const txSheet =
+              workbook.Sheets['rawTransactions'] ||
+              workbook.Sheets[workbook.SheetNames[0]];
+
+            const txRows = XLSX.utils.sheet_to_json(txSheet, {
+              defval: null,
+              cellDates: true
+            });
+            transactions = txRows.map(normalizeRow);
+
+            // movements -> monthlyMovements
+            const movSheet = workbook.Sheets['movements'];
+            if (movSheet) {
+              const movRows = XLSX.utils.sheet_to_json(movSheet, {
+                defval: null,
+                cellDates: false
+              });
+              monthlyMovements = parseMovementsSheet(movRows);
+            } else {
+              monthlyMovements = [];
+            }
+
+            // monthlySnapshots -> monthly review
+            const snapSheet = workbook.Sheets['monthlySnapshots'];
+            if (snapSheet) {
+              const snapRows = XLSX.utils.sheet_to_json(snapSheet, {
+                defval: null,
+                cellDates: true
+              });
+              monthlySnapshots = snapRows
+                .map((row, idx) => normalizeSnapshotRow(row, idx))
+                .filter(x => x && x.date);
+            } else {
+              monthlySnapshots = [];
+            }
+
+            saveState();
+            renderEverything();
+          };
+          reader.readAsArrayBuffer(file);
+        });
+      }
+    });
+
+    // ---------- IMPORT BACKUP JSON / EXPORT / PURGE ----------
+    document.addEventListener('DOMContentLoaded', () => {
+      const exportBtn = document.getElementById('exportBackupButton');
+      if (exportBtn) {
+        exportBtn.addEventListener('click', () => { exportBackup(); });
+      }
+
+      const exportXlsxBtn = document.getElementById('exportXlsxButton');
+      if (exportXlsxBtn) {
+        exportXlsxBtn.addEventListener('click', () => { exportXlsx(); });
+      }
+
+      const purgeBtn = document.getElementById('fullPurgeButton');
+      if (purgeBtn) {
+        purgeBtn.addEventListener('click', () => {
+          const ok = confirm('Sei sicuro di voler cancellare tutti i dati (transazioni, monthly movements, monthly review) e svuotare la memoria locale?');
+          if (!ok) return;
+          transactions = [];
+          monthlyMovements = [];
+          monthlySnapshots = [];
+          showZeroAssets = defaultPreferences.showZeroAssets;
+          localStorage.removeItem(legacyStorageKey);
+          saveState();
+          renderEverything();
+        });
+      }
+
+      const importInput = document.getElementById('importBackupInput');
+      if (importInput) {
+        importInput.addEventListener('change', event => {
+          const file = event.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = e => {
+            try {
+              const data = JSON.parse(e.target.result);
+              if (Array.isArray(data)) {
+                transactions = data;
+                monthlyMovements = [];
+                monthlySnapshots = [];
+                showZeroAssets = defaultPreferences.showZeroAssets;
+              } else if (data && typeof data === 'object') {
+                transactions = Array.isArray(data.transactions) ? data.transactions : [];
+                monthlyMovements = Array.isArray(data.monthlyMovements) ? data.monthlyMovements : [];
+                monthlySnapshots = Array.isArray(data.monthlySnapshots) ? data.monthlySnapshots : [];
+                if (data.preferences && typeof data.preferences === 'object') {
+                  if (typeof data.preferences.showZeroAssets === 'boolean') {
+                    showZeroAssets = data.preferences.showZeroAssets;
+                  } else {
+                    showZeroAssets = defaultPreferences.showZeroAssets;
+                  }
+                } else {
+                  showZeroAssets = defaultPreferences.showZeroAssets;
+                }
+              } else {
+                alert('Backup non valido');
+                return;
+              }
+              saveState();
+              renderEverything();
+            } catch (err) {
+              console.error(err);
+              alert('Errore nel leggere il backup');
+            }
+          };
+          reader.readAsText(file);
+        });
+      }
+    });
+
+    // ---------- INIT FORM / NAV / SORT HEADER / FILTER INPUT ----------
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.nav-button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const page = btn.dataset.page;
+          showPage(page);
+        });
+      });
+
+      const addForm = document.getElementById('addForm');
+      const tipoSelect = document.getElementById('tipoSelect');
+      const groupBuy = document.getElementById('groupBuy');
+      const groupPnl = document.getElementById('groupPnl');
+      const buyInput = addForm ? addForm.buyValue : null;
+      const pnlInput = addForm ? addForm.pnl : null;
+      const dateInput = addForm ? addForm.date : null;
+
+      function setTodayDate() {
+        const today = new Date().toISOString().slice(0, 10);
+        if (dateInput && !dateInput.value) dateInput.value = today;
+      }
+
+      function updateFormVisibility() {
+        if (!tipoSelect || !groupBuy || !groupPnl || !buyInput || !pnlInput) return;
+        const t = tipoSelect.value;
+        if (t === 'nuovo vincolo') {
+          groupBuy.style.display = '';
+          groupPnl.style.display = 'none';
+          pnlInput.value = '';
+        } else if (
+          t === 'cedola' ||
+          t === 'interessi' ||
+          t === 'Variazione Valore' ||
+          t === 'cashback'
+        ) {
+          groupBuy.style.display = 'none';
+          groupPnl.style.display = '';
+          buyInput.value = '';
+        } else {
+          groupBuy.style.display = '';
+          groupPnl.style.display = '';
+        }
+      }
+
+      if (tipoSelect) {
+        tipoSelect.addEventListener('change', updateFormVisibility);
+        updateFormVisibility();
+      }
+      setTodayDate();
+
+      // sort header: transactions
+      document.querySelectorAll('#page-transactions th[data-column]').forEach(th => {
+        th.addEventListener('click', () => {
+          const col = th.dataset.column;
+          if (transactionSortState.column === col) {
+            transactionSortState.direction =
+              transactionSortState.direction === 'asc' ? 'desc' : 'asc';
+          } else {
+            transactionSortState.column = col;
+            transactionSortState.direction = 'desc';
+          }
+          updateTransactionSortIndicators();
+          renderTable();
+        });
+      });
+      updateTransactionSortIndicators();
+
+      // sort header: monthly movements
+      document.querySelectorAll('#page-monthly-movements th[data-mm-column]').forEach(th => {
+        th.addEventListener('click', () => {
+          const col = th.dataset.mmColumn;
+          if (mmSortState.column === col) {
+            mmSortState.direction = mmSortState.direction === 'asc' ? 'desc' : 'asc';
+          } else {
+            mmSortState.column = col;
+            mmSortState.direction = 'asc';
+          }
+          updateMmSortIndicators();
+          renderMonthlyMovements();
+        });
+      });
+      updateMmSortIndicators();
+
+      // filters: transactions
+      document.querySelectorAll('#page-transactions .filter-row input[data-tx-filter]')
+        .forEach(input => {
+          const col = input.dataset.txFilter;
+          input.addEventListener('input', () => {
+            transactionFilters[col] = input.value.toLowerCase();
+            renderTable();
+          });
+        });
+
+      // filters: monthly movements
+      document.querySelectorAll('#page-monthly-movements .filter-row input[data-mm-filter]')
+        .forEach(input => {
+          const col = input.dataset.mmFilter;
+          input.addEventListener('input', () => {
+            mmFilters[col] = input.value.toLowerCase();
+            renderMonthlyMovements();
+          });
+        });
+
+      const monthlyRangeSelect = document.getElementById('monthlyRangeSelect');
+      if (monthlyRangeSelect) {
+        monthlyRangeSelect.addEventListener('change', () => {
+          renderMonthlyReview();
+        });
+      }
+
+      function resetMonthlyForm() {
+        const monthlyForm = document.getElementById('monthlyForm');
+        if (!monthlyForm) return;
+        monthlyForm.reset();
+        document.getElementById('monthlyDirection').value = 'income';
+        editingMonthlyId = null;
+        document.getElementById('monthlySubmitButton').textContent = '💾 salva';
+        document.getElementById('monthlyCancelEditButton').style.display = 'none';
+      }
+
+      // table actions monthly movements
+      const mmTableBody = document.getElementById('monthlyMovementsTableBody');
+      if (mmTableBody) {
+        mmTableBody.addEventListener('click', e => {
+          const btn = e.target.closest('button');
+          if (!btn) return;
+          const id = btn.dataset.id;
+          if (!id) return;
+
+          if (btn.classList.contains('edit-monthly')) {
+            const m = monthlyMovements.find(x => x.id === id);
+            if (!m) return;
+            const monthlyForm = document.getElementById('monthlyForm');
+            monthlyForm.name.value = m.name || '';
+            monthlyForm.direction.value = m.direction || 'income';
+            monthlyForm.amount.value = m.amount || 0;
+            monthlyForm.note.value = m.note || '';
+            editingMonthlyId = id;
+            document.getElementById('monthlySubmitButton').textContent = 'aggiorna';
+            document.getElementById('monthlyCancelEditButton').style.display = 'inline-block';
+          } else if (btn.classList.contains('delete-monthly')) {
+            const ok = confirm('Eliminare questo movimento mensile?');
+            if (!ok) return;
+            monthlyMovements = monthlyMovements.filter(x => x.id !== id);
+            saveState();
+            renderMonthlyMovements();
+            renderDashboard();
+          }
+        });
+      }
+
+      const monthlyCancelBtn = document.getElementById('monthlyCancelEditButton');
+      if (monthlyCancelBtn) {
+        monthlyCancelBtn.addEventListener('click', () => {
+          resetMonthlyForm();
+        });
+      }
+
+      // table actions transactions
+      const txTableBody = document.getElementById('transactionsTableBody');
+      if (txTableBody) {
+        txTableBody.addEventListener('click', e => {
+          const btn = e.target.closest('button');
+          if (!btn) return;
+          const id = btn.dataset.id;
+          if (!id) return;
+
+          if (btn.classList.contains('edit-tx')) {
+            const tx = transactions.find(x => x.id === id);
+            if (!tx || !addForm) return;
+            addForm.date.value = tx.date || '';
+            addForm.asset.value = tx.asset || '';
+            addForm.tipo.value = tx.tipo || 'nuovo vincolo';
+            addForm.pnl.value = tx.pnl ?? '';
+            addForm.buyValue.value = tx.buyValue ?? '';
+            addForm.note.value = tx.note || '';
+            editingTransactionId = id;
+            document.getElementById('txSubmitButton').textContent = 'aggiorna';
+            document.getElementById('txCancelEditButton').style.display = 'inline-block';
+            updateFormVisibility();
+          } else if (btn.classList.contains('delete-tx')) {
+            const ok = confirm('Eliminare questa transazione?');
+            if (!ok) return;
+            transactions = transactions.filter(x => x.id !== id);
+            saveState();
+            renderEverything();
+            resetTransactionForm();
+          }
+        });
+      }
+
+      const txCancelBtn = document.getElementById('txCancelEditButton');
+      if (txCancelBtn) {
+        txCancelBtn.addEventListener('click', () => {
+          resetTransactionForm();
+        });
+      }
+
+      const monthlyForm = document.getElementById('monthlyForm');
+      if (monthlyForm) {
+        monthlyForm.addEventListener('submit', event => {
+          event.preventDefault();
+          const name = monthlyForm.name.value.trim();
+          const direction = monthlyForm.direction.value || 'income';
+          const amount = parseFloat(monthlyForm.amount.value || '0');
+          const note = monthlyForm.note.value || '';
+          if (!name) {
+            alert('Inserisci un nome per il movimento mensile');
+            return;
+          }
+          if (Number.isNaN(amount)) {
+            alert('Importo non valido');
+            return;
+          }
+
+          if (editingMonthlyId) {
+            monthlyMovements = monthlyMovements.map(m =>
+              m.id === editingMonthlyId
+                ? { ...m, name, direction, amount: Math.abs(amount), note }
+                : m
+            );
+          } else {
+            monthlyMovements.push({
+              id: crypto.randomUUID ? crypto.randomUUID() : `mm-${Date.now()}-${monthlyMovements.length}`,
+              name,
+              direction,
+              amount: Math.abs(amount),
+              note
+            });
+          }
+
+          saveState();
+          renderMonthlyMovements();
+          resetMonthlyForm();
+        });
+      }
+
+      const toggleZeroBtn = document.getElementById('toggleZeroAssetsButton');
+      if (toggleZeroBtn) {
+        toggleZeroBtn.addEventListener('click', () => {
+          showZeroAssets = !showZeroAssets;
+          saveState();
+          updateZeroAssetsToggleLabel();
+          renderAssetBlocks();
+        });
+        updateZeroAssetsToggleLabel();
+      }
+
+      // quick snapshot (monthly review)
+      const quickLiquidityInput = document.getElementById('quickLiquidityInput');
+      const addTodaySnapshotButton = document.getElementById('addTodaySnapshotButton');
+      if (quickLiquidityInput && addTodaySnapshotButton) {
+        addTodaySnapshotButton.addEventListener('click', () => {
+          const raw = quickLiquidityInput.value;
+          if (!raw) {
+            alert('Inserisci un valore di liquidità');
+            return;
+          }
+          const liquid = parseFloat(raw);
+          if (Number.isNaN(liquid)) {
+            alert('Valore di liquidità non valido');
+            return;
+          }
+          const today = new Date().toISOString().slice(0, 10);
+
+          let baseLow = 0, baseMedium = 0, baseHigh = 0;
+          if (monthlySnapshots.length) {
+            const sorted = [...monthlySnapshots].sort((a, b) =>
+              (a.date || '').localeCompare(b.date || '')
+            );
+            const last = sorted[sorted.length - 1];
+            baseLow = last.low || 0;
+            baseMedium = last.medium || 0;
+            baseHigh = last.high || 0;
+          }
+
+          monthlySnapshots = monthlySnapshots.filter(s => s.date !== today);
+          monthlySnapshots.push({
+            id: crypto.randomUUID ? crypto.randomUUID() : `snap-${Date.now()}-${monthlySnapshots.length}`,
+            date: today,
+            low: baseLow,
+            medium: baseMedium,
+            high: baseHigh,
+            liquid
+          });
+
+          saveState();
+          renderMonthlyReview();
+          quickLiquidityInput.value = '';
+        });
+      }
+    });
+
+    // ---------- NUOVA TRANSAZIONE ----------
+    document.addEventListener('DOMContentLoaded', () => {
+      const addForm = document.getElementById('addForm');
+      if (!addForm) return;
+
+      addForm.addEventListener('submit', event => {
+        event.preventDefault();
+
+        const tipo = addForm.tipo.value;
+        let buyValue = 0;
+        let pnl = 0;
+
+        if (tipo === 'nuovo vincolo') {
+          buyValue = parseFloat(addForm.buyValue.value || '0');
+          pnl = 0;
+        } else if (
+          tipo === 'cedola' ||
+          tipo === 'interessi' ||
+          tipo === 'Variazione Valore' ||
+          tipo === 'cashback'
+        ) {
+          buyValue = 0;
+          pnl = parseFloat(addForm.pnl.value || '0');
+        } else {
+          buyValue = parseFloat(addForm.buyValue.value || '0');
+          pnl = parseFloat(addForm.pnl.value || '0');
+        }
+
+        const currentValue = buyValue + pnl;
+        const buyForType = (
+          tipo === 'cedola' ||
+          tipo === 'interessi' ||
+          tipo === 'Variazione Valore' ||
+          tipo === 'cashback'
+        ) ? null : buyValue;
+        const type = inferTypeFromValues(buyForType, pnl);
+
+        const base = {
+          date: addForm.date.value,
+          asset: addForm.asset.value,
+          tipo: tipo,
+          type: type,
+          buyValue: buyValue,
+          currentValue: currentValue,
+          pnl: pnl,
+          note: addForm.note.value
+        };
+
+        if (editingTransactionId) {
+          transactions = transactions.map(t =>
+            t.id === editingTransactionId ? { ...t, ...base, id: editingTransactionId } : t
+          );
+        } else {
+          transactions.push({
+            id: crypto.randomUUID ? crypto.randomUUID() : `tx-${Date.now()}-${transactions.length}`,
+            ...base
+          });
+        }
+
+        saveState();
+        renderEverything();
+        resetTransactionForm();
+      });
+    });
+
+    // ---------- INIT ----------
+    async function initApp() {
+      try {
+        const initialState = await loadState();
+        transactions = initialState.transactions;
+        monthlyMovements = initialState.monthlyMovements;
+        monthlySnapshots = initialState.monthlySnapshots;
+        if (initialState.preferences && typeof initialState.preferences === 'object') {
+          if (typeof initialState.preferences.showZeroAssets === 'boolean') {
+            showZeroAssets = initialState.preferences.showZeroAssets;
+          }
+        }
+      } catch (err) {
+        console.error('failed to initialize state, using defaults', err);
+      }
+      renderEverything();
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
