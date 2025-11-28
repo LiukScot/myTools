@@ -610,11 +610,14 @@
       margin-top: 12px;
     }
     .dash-card {
-      padding: 12px;
+      padding: 12px 14px;
       border: 1px solid var(--border);
       border-radius: 12px;
       background: var(--card-strong);
       box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
     .dash-label { color: var(--muted); font-size: 12px; }
     .dash-value { font-size: 18px; font-weight: 700; display: flex; align-items: baseline; gap: 6px; }
@@ -622,6 +625,26 @@
     .delta.positive { color: #4ade80; }
     .delta.negative { color: #f87171; }
     .delta.neutral { color: var(--muted); }
+    .dash-emoji {
+      font-size: 22px;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+    }
+    .dash-divider {
+      width: 2px;
+      height: 44px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1));
+      border-radius: 2px;
+      opacity: 0.7;
+    }
+    .dash-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
     .graph-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -2245,24 +2268,38 @@
       const painPrevLevelAvg = avgField(painPrev, "pain level");
       const fatiguePrevAvg = avgField(painPrev, "fatigue level");
 
+      const emojiMap = {
+        "Journal entries": "📒",
+        "Pain entries": "📓",
+        "Mood avg": "🙂",
+        "Depression avg": "😔",
+        "Anxiety avg": "😨",
+        "Pain avg": "🤕",
+        "Fatigue avg": "🥱",
+      };
+
       const cards = [
-        { label: "Diary entries", value: diaryCount, prev: diaryPrevCount },
+        { label: "Journal entries", value: diaryCount, prev: diaryPrevCount },
         { label: "Pain entries", value: painCount, prev: painPrevCount },
         { label: "Mood avg", value: diaryMoodAvg ?? "–", prev: diaryPrevMoodAvg },
         { label: "Depression avg", value: diaryDepAvg ?? "–", prev: diaryPrevDepAvg },
         { label: "Anxiety avg", value: diaryAnxAvg ?? "–", prev: diaryPrevAnxAvg },
         { label: "Pain avg", value: painLevelAvg ?? "–", prev: painPrevLevelAvg },
         { label: "Fatigue avg", value: fatigueAvg ?? "–", prev: fatiguePrevAvg },
-      ];
+      ].map((c) => ({ ...c, emoji: emojiMap[c.label] || "📊" }));
 
       container.innerHTML = cards
         .map((c) => {
-          const delta = calcDelta(c.value, c.prev);
+          const delta = calcDelta(c.value, c.prev, c.label);
           const deltaHtml = delta ? `<span class="delta ${delta.cls}">${escapeHtml(delta.text)}</span>` : "";
           return `
             <div class="dash-card">
-              <div class="dash-label">${escapeHtml(c.label)}</div>
-              <div class="dash-value">${escapeHtml(c.value)}${deltaHtml}</div>
+              <div class="dash-emoji">${escapeHtml(c.emoji)}</div>
+              <div class="dash-divider"></div>
+              <div class="dash-meta">
+                <div class="dash-label">${escapeHtml(c.label)}</div>
+                <div class="dash-value">${escapeHtml(c.value)}${deltaHtml}</div>
+              </div>
             </div>
           `;
         })
@@ -2306,14 +2343,17 @@
       return parseFloat((sum / count).toFixed(2));
     }
 
-    function calcDelta(current, previous) {
+    function calcDelta(current, previous, label = "") {
       const curNum = toNumber(current);
       const prevNum = toNumber(previous);
       if (curNum === null || prevNum === null || prevNum === 0) return null;
       const pct = ((curNum - prevNum) / prevNum) * 100;
+      const invert = (label || "").toLowerCase().includes("depression") || (label || "").toLowerCase().includes("anxiety");
+      const positive = invert ? pct < 0 : pct > 0;
+      const negative = invert ? pct > 0 : pct < 0;
       return {
         text: `${pct > 0 ? "+" : ""}${pct.toFixed(0)}%`,
-        cls: pct > 0 ? "positive" : pct < 0 ? "negative" : "neutral",
+        cls: positive ? "positive" : negative ? "negative" : "neutral",
       };
     }
 
@@ -2422,7 +2462,7 @@
       ctx.fillStyle = "rgba(226,232,240,0.7)";
       ctx.font = "10px Manrope, sans-serif";
       ctx.textAlign = "right";
-      const yTicks = 5;
+      const yTicks = Math.max(3, Math.min(6, Math.floor(height / 70)));
       for (let i = 0; i <= yTicks; i++) {
         const v = minY + ((maxY - minY) * i) / yTicks;
         const y = scale(v, minY, maxY, height - pad, pad);
@@ -2434,7 +2474,7 @@
         ctx.stroke();
       }
 
-      const xLabels = pickXLabels(data, startTs, maxX);
+      const xLabels = pickXLabels(data, startTs, maxX, width - pad * 2);
       ctx.textAlign = "center";
       xLabels.forEach((lbl) => {
         const x = scale(lbl.time, minX, maxX || minX + 1, pad, width - pad);
@@ -2447,11 +2487,12 @@
       });
     }
 
-    function pickXLabels(data, startTs, endTs) {
+    function pickXLabels(data, startTs, endTs, usableWidth) {
       const labels = [];
       if (!data.length) return labels;
       const formatter = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
-      const steps = 4;
+      const maxSteps = Math.max(2, Math.min(6, Math.floor((usableWidth || 300) / 140)));
+      const steps = Math.max(2, maxSteps);
       for (let i = 0; i <= steps; i++) {
         const frac = i / steps;
         const time = startTs + (endTs - startTs) * frac;
