@@ -35,9 +35,9 @@
       color: var(--text);
     }
     .shell {
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 32px 20px 48px;
+      padding: 32px 22px 48px;
     }
     header { margin-bottom: 18px; }
     .title {
@@ -113,14 +113,81 @@
       margin-top: 12px;
       border: 1px solid var(--border);
       border-radius: 12px;
-      overflow: auto;
-      max-height: none;
+      overflow: hidden;
+      width: 100%;
+      max-width: 90vw;
+      padding-right: 10px;
+      box-sizing: border-box;
     }
+    .table-scroll {
+      width: 100%;
+      max-width: 100%;
+      max-height: 70vh;
+      overflow: auto;
+      padding-bottom: 6px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .table-wrap table {
+      width: max-content;
+      min-width: 1100px;
+      table-layout: auto;
+    }
+    .table-wrap th,
+    .table-wrap td {
+      white-space: nowrap;
+    }
+<<<<<<< ours
+    .table-wrap .actions-cell {
+      position: sticky;
+      right: 0;
+      background: var(--card);
+      z-index: 2;
+      box-shadow: -1px 0 0 var(--border);
+      min-width: 120px;
+    }
+    .table-wrap th.actions-cell {
+      background: rgba(17,24,39,0.9);
+      z-index: 3;
+      box-shadow: -1px 0 0 var(--border), 0 1px 0 var(--border);
+    }
+=======
+>>>>>>> theirs
     .table-wrap.limited {
       max-height: 440px;
     }
+    @media (max-width: 640px) {
+      .table-wrap {
+        margin-left: -12px;
+        margin-right: -12px;
+        border-radius: 10px;
+      }
+      .table-wrap table {
+        width: max-content;
+        min-width: 760px;
+      }
+      .clip-cell {
+        max-width: 180px;
+        width: min(180px, 100%);
+      }
+    }
+    /* Allow longer text columns to wrap */
+    .table-wrap th:nth-child(n+6),
+    .table-wrap td:nth-child(n+6) {
+      white-space: normal;
+    }
     .table-wrap.expanded {
       max-height: none;
+    }
+    .clip-cell {
+      max-width: clamp(200px, 24vw, 260px);
+      width: min(260px, 100%);
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-break: break-word;
     }
     .log-header {
       display: flex;
@@ -131,12 +198,26 @@
     }
     .inline-input {
       width: 100%;
-      padding: 6px 8px;
+      padding: 10px 12px;
       border-radius: 6px;
       border: 1px solid var(--border);
       background: var(--card-strong);
       color: var(--text);
       box-sizing: border-box;
+      height: 40px;
+      line-height: 1.4;
+    }
+    .inline-input.long {
+      min-width: 320px;
+      max-width: 520px;
+    }
+    .inline-input.multiline {
+      min-height: 64px;
+      height: auto;
+      line-height: 1.5;
+      padding-top: 12px;
+      padding-bottom: 12px;
+      resize: vertical;
     }
     .sub-divider {
       display: flex;
@@ -220,8 +301,21 @@
     nav {
       display: flex;
       gap: 10px;
-      margin-bottom: 18px;
+      margin: 0;
       flex-wrap: wrap;
+    }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .top-nav nav {
+      flex: 1;
+    }
+    .logout-btn {
+      margin-left: auto;
     }
     .entry-tabs {
       display: flex;
@@ -523,10 +617,14 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.35);
     }
     .dash-label { color: var(--muted); font-size: 12px; }
-    .dash-value { font-size: 18px; font-weight: 700; }
+    .dash-value { font-size: 18px; font-weight: 700; display: flex; align-items: baseline; gap: 6px; }
+    .delta { font-size: 12px; }
+    .delta.positive { color: #4ade80; }
+    .delta.negative { color: #f87171; }
+    .delta.neutral { color: var(--muted); }
     .graph-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
       gap: 14px;
       margin-top: 16px;
     }
@@ -631,18 +729,20 @@
         <input type="email" id="auth-email" placeholder="Email" autocomplete="username" />
         <input type="password" id="auth-pass" placeholder="Password" autocomplete="current-password" />
         <button class="btn-primary" id="auth-login" type="button">Log in</button>
-        <button class="btn-muted" id="auth-logout" type="button">Log out</button>
       </div>
       <div class="status" id="auth-status"></div>
     </div>
 
     <div id="app-main" class="hidden">
-      <nav>
-        <button class="nav-btn active" data-target="dashboard">Dashboard</button>
-        <button class="nav-btn" data-target="newlog">New Entry</button>
-        <button class="nav-btn" data-target="logs">Logs</button>
-        <button class="nav-btn" data-target="import">Import / Export</button>
-      </nav>
+      <div class="top-nav">
+        <nav>
+          <button class="nav-btn active" data-target="dashboard">Dashboard</button>
+          <button class="nav-btn" data-target="newlog">New Entry</button>
+          <button class="nav-btn" data-target="logs">Logs</button>
+          <button class="nav-btn" data-target="import">Import / Export</button>
+        </nav>
+        <button class="nav-btn danger logout-btn hidden" id="auth-logout" type="button">Log out</button>
+      </div>
 
       <section id="dashboard-section">
         <div class="card" id="dashboard-stats">
@@ -677,7 +777,7 @@
           <div class="hint">Capture a quick log without waiting for a CSV import.</div>
           <div class="entry-tabs" role="tablist" aria-label="New entry categories">
             <button class="nav-btn entry-btn active" data-entry="pain" type="button">Physical pain</button>
-            <button class="nav-btn entry-btn" data-entry="autotherapy" type="button">Autotherapy</button>
+          <button class="nav-btn entry-btn" id="autotherapy-tab" data-entry="autotherapy" type="button">Autotherapy ◀</button>
           </div>
 
           <div class="entry-panel" data-entry-panel="pain">
@@ -689,16 +789,12 @@
                   <small>Stored as separate date + time columns; defaults to now if left empty.</small>
                 </div>
                 <div class="form-group">
-                  <label for="pain-level">Pain level (0-9)</label>
-                  <input id="pain-level" name="pain-level" type="number" min="0" max="9" step="1" placeholder="e.g. 6" />
+                  <label for="pain-level">Pain level (1-9)</label>
+                  <input id="pain-level" name="pain-level" type="number" min="1" max="9" step="1" placeholder="e.g. 6" />
                 </div>
                 <div class="form-group">
-                  <label for="fatigue-level">Fatigue level (0-9)</label>
-                  <input id="fatigue-level" name="fatigue-level" type="number" min="0" max="9" step="1" placeholder="e.g. 4" />
-                </div>
-                <div class="form-group">
-                  <label for="mood-level">Mood level (0-9)</label>
-                  <input id="mood-level" name="mood-level" type="number" min="0" max="9" step="1" placeholder="e.g. 7" />
+                  <label for="fatigue-level">Fatigue level (1-9)</label>
+                  <input id="fatigue-level" name="fatigue-level" type="number" min="1" max="9" step="1" placeholder="e.g. 4" />
                 </div>
                 <div class="form-group">
                   <label>Area <button type="button" class="chip-edit" data-edit="area">Edit</button></label>
@@ -747,13 +843,8 @@
           </div>
 
           <div class="entry-panel hidden" data-entry-panel="autotherapy">
-            <div class="sub-divider">
-              <span class="sub-label">Autotherapy options</span>
-              <button class="nav-btn small" type="button" id="autotherapy-toggle">Show ▶</button>
-            </div>
-            <div id="autotherapy-stack" class="hidden">
+            <div id="autotherapy-stack">
               <div class="entry-tabs autotherapy-subnav" role="tablist" aria-label="Autotherapy entries">
-                <span class="sub-label">Choose one</span>
                 <button class="nav-btn entry-btn secondary" data-autotherapy="journal" type="button">Journal</button>
                 <button class="nav-btn entry-btn secondary" data-autotherapy="cbt" type="button">CBT thought response</button>
                 <button class="nav-btn entry-btn secondary" data-autotherapy="dbt" type="button">DBT distress tolerance</button>
@@ -767,16 +858,16 @@
                       <small>Stored as separate date + time columns; defaults to now if left empty.</small>
                     </div>
                     <div class="form-group">
-                      <label for="journal-mood">Mood level (0-9)</label>
-                      <input id="journal-mood" name="journal-mood" type="number" min="0" max="9" step="1" placeholder="e.g. 6" />
+                      <label for="journal-mood">Mood level (1-9)</label>
+                      <input id="journal-mood" name="journal-mood" type="number" min="1" max="9" step="1" placeholder="e.g. 6" />
                     </div>
                     <div class="form-group">
-                      <label for="journal-depression">Depression (0-9)</label>
-                      <input id="journal-depression" name="journal-depression" type="number" min="0" max="9" step="1" placeholder="e.g. 4" />
+                      <label for="journal-depression">Depression (1-9)</label>
+                      <input id="journal-depression" name="journal-depression" type="number" min="1" max="9" step="1" placeholder="e.g. 4" />
                     </div>
                     <div class="form-group">
-                      <label for="journal-anxiety">Anxiety (0-9)</label>
-                      <input id="journal-anxiety" name="journal-anxiety" type="number" min="0" max="9" step="1" placeholder="e.g. 5" />
+                      <label for="journal-anxiety">Anxiety (1-9)</label>
+                      <input id="journal-anxiety" name="journal-anxiety" type="number" min="1" max="9" step="1" placeholder="e.g. 5" />
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                       <label for="journal-description">description</label>
@@ -813,14 +904,14 @@
           <div class="card">
             <div class="log-header">
               <h2>Journal log</h2>
-              <button class="nav-btn small" data-toggle-log="diary">Expand ▶</button>
+              <button class="nav-btn small" data-toggle-log="diary">Expand ◀</button>
             </div>
             <div class="table-wrap" id="diary-table"></div>
           </div>
           <div class="card">
             <div class="log-header">
               <h2>Pain log</h2>
-              <button class="nav-btn small" data-toggle-log="pain">Expand ▶</button>
+              <button class="nav-btn small" data-toggle-log="pain">Expand ◀</button>
             </div>
             <div class="table-wrap" id="pain-table"></div>
           </div>
@@ -841,7 +932,6 @@
             <div class="status" id="diary-status-import"></div>
             <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
               <button class="nav-btn" data-export="diary" data-type="csv">Export Diary CSV</button>
-              <button class="nav-btn" data-export="diary" data-type="json">Export Diary JSON</button>
               <button class="nav-btn danger" data-purge="diary">Purge Diary Data</button>
             </div>
           </div>
@@ -857,7 +947,6 @@
             <div class="status" id="pain-status-import"></div>
             <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
               <button class="nav-btn" data-export="pain" data-type="csv">Export Pain CSV</button>
-              <button class="nav-btn" data-export="pain" data-type="json">Export Pain JSON</button>
               <button class="nav-btn danger" data-purge="pain">Purge Pain Data</button>
             </div>
           </div>
@@ -913,6 +1002,8 @@
       const toHide = [authUI.email, authUI.pass, authUI.loginBtn, authUI.status];
       toHide.forEach((el) => el?.classList.toggle("hidden", authed));
       authUI.logoutBtn?.classList.toggle("hidden", !authed);
+      const authCard = document.querySelector(".auth-card");
+      authCard?.classList.toggle("hidden", authed);
       if (!authed) {
         setAuthStatus("");
       }
@@ -941,7 +1032,6 @@
         "hour",
         "pain level",
         "fatigue level",
-        "mood level",
         "symptoms",
         "area",
         "activities",
@@ -962,15 +1052,27 @@
         "hour": ["hour", "time"],
         "pain level": ["pain level", "pain"],
         "fatigue level": ["fatigue level", "fatigue"],
-        "mood level": ["mood level", "mood"],
         "habits": ["habits", "good sleep", "healthy food", "sleep"],
         "other": ["other", ">6h day byte", ">1h masturbation", "<1h masturbation", "cum"],
         "coffee": ["coffee"],
         "medicines": ["medicines"],
       },
     };
+    const LONG_TEXT_FIELDS = [
+      "description",
+      "gratitude",
+      "reflection",
+      "note",
+      "medicines",
+      "symptoms",
+      "activities",
+      "area",
+      "habits",
+      "other",
+    ];
     let entryTabSetter = null;
     const optionFields = ["area", "symptoms", "activities", "medicines", "habits", "other"];
+    const OPTION_CACHE_KEY = "myhealth:painOptions:v2";
     const optionsCache = {
       area: [],
       symptoms: [],
@@ -979,6 +1081,44 @@
       habits: [],
       other: [],
     };
+    const removedOptions = {
+      area: [],
+      symptoms: [],
+      activities: [],
+      medicines: [],
+      habits: [],
+      other: [],
+    };
+
+    function loadSavedOptionCache() {
+      try {
+        const raw = localStorage.getItem(OPTION_CACHE_KEY);
+        if (!raw) {
+          return { options: {}, removed: {} };
+        }
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") {
+          return { options: {}, removed: {} };
+        }
+        return {
+          options: parsed.options || {},
+          removed: parsed.removed || {},
+        };
+      } catch (err) {
+        return { options: {}, removed: {} };
+      }
+    }
+
+    function persistOptionCache() {
+      try {
+        localStorage.setItem(
+          OPTION_CACHE_KEY,
+          JSON.stringify({ options: optionsCache, removed: removedOptions })
+        );
+      } catch (err) {
+        // best effort; ignore
+      }
+    }
 
     function wireAuthForm() {
       if (authUI.loginBtn) {
@@ -1031,9 +1171,19 @@
     }
 
     function buildOptionCacheFromStore() {
+      const saved = loadSavedOptionCache();
       optionFields.forEach((field) => {
-        optionsCache[field] = collectOptions(field);
+        const derived = collectOptions(field);
+        const stored = Array.isArray(saved.options?.[field]) ? saved.options[field] : [];
+        const removed = new Set(Array.isArray(saved.removed?.[field]) ? saved.removed[field] : []);
+        const merged = dedupe([
+          ...stored,
+          ...(derived || []).filter((v) => !removed.has(v)),
+        ]);
+        optionsCache[field] = merged;
+        removedOptions[field] = Array.from(removed);
       });
+      persistOptionCache();
     }
 
     function wireJournalForm() {
@@ -1172,20 +1322,31 @@
         cfg.logsTable.innerHTML = "";
         return;
       }
+      const isLongField = (h) =>
+        LONG_TEXT_FIELDS.some((f) => normalizeHeaderName(f) === normalizeHeaderName(h));
       const sortedRows = sortRowsWithIndex(rows, headers);
       const displayRows = limit ? sortedRows.slice(0, limit) : sortedRows;
-      const thead = `<thead><tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join("")}${withActions ? "<th>Actions</th>" : ""}</tr></thead>`;
+      const thead = `<thead><tr>${headers.map((h) => `<th>${escapeHtml(h)}</th>`).join("")}${withActions ? "<th>Actions</th>" : ""}</tr></thead>`;
       const tbody = `<tbody>${displayRows
         .map(({ row, idx: originalIdx }) => {
           const isEditing = editingState.kind === kind && editingState.idx === originalIdx;
           const cells = headers
             .map((h) => {
+              const longField = isLongField(h);
               if (isEditing) {
-                return `<td><input class="inline-input" data-edit-field="${escapeHtml(h)}" data-edit-kind="${kind}" data-edit-idx="${originalIdx}" value="${escapeHtml(
+                const extraClass = longField ? " long" : "";
+                if (longField) {
+                  return `<td><textarea class="inline-input${extraClass} multiline" data-edit-field="${escapeHtml(h)}" data-edit-kind="${kind}" data-edit-idx="${originalIdx}">${escapeHtml(
+                    editingState.draft?.[h] ?? row[h] ?? ""
+                  )}</textarea></td>`;
+                }
+                return `<td><input class="inline-input${extraClass}" data-edit-field="${escapeHtml(h)}" data-edit-kind="${kind}" data-edit-idx="${originalIdx}" value="${escapeHtml(
                   editingState.draft?.[h] ?? row[h] ?? ""
                 )}"/></td>`;
               }
-              return `<td>${escapeHtml(row[h] ?? "")}</td>`;
+              const content = escapeHtml(row[h] ?? "");
+              const wrapped = longField ? `<div class="clip-cell">${content}</div>` : content;
+              return `<td>${wrapped}</td>`;
             })
             .join("");
           let actions = "";
@@ -1199,7 +1360,7 @@
           return `<tr data-row="${originalIdx}">${cells}${actions}</tr>`;
         })
         .join("")}</tbody>`;
-      cfg.logsTable.innerHTML = `<table>${thead}${tbody}</table><div class="rowcount">${rows.length} rows</div>`;
+      cfg.logsTable.innerHTML = `<div class="table-scroll"><table>${thead}${tbody}</table></div><div class="rowcount">${rows.length} rows</div>`;
       if (withActions) wireRowActions(kind);
     }
 
@@ -1338,9 +1499,10 @@
       ];
 
       const allowed = kind && REQUIRED[kind] ? REQUIRED[kind] : null;
+      const allowedNormalized = allowed ? allowed.map(normalizeHeaderName) : null;
       const cleanedHeaders = headers.filter((h) => {
         const norm = normalizeHeaderName(h);
-        if (allowed) return allowed.some((a) => normalizeHeaderName(a) === norm);
+        if (allowedNormalized) return allowedNormalized.includes(norm);
         return ![
           "created time",
           "file name",
@@ -1364,7 +1526,6 @@
           "hour",
           "pain level",
           "fatigue level",
-          "mood level",
           "symptoms",
           "area",
           "activities",
@@ -1450,18 +1611,25 @@
           }
         };
         flagDefs.forEach((f) => addOther(f.label, f.key ? row[f.key] : ""));
-        if (otherKey) {
-          String(row[otherKey] || "")
-            .split(",")
-            .map((s) => s.trim())
-            .filter((s) => s && !["false", "true", "yes", "1", "no", "0"].includes(s.toLowerCase()))
-            .forEach((s) => otherTokens.add(s));
-        }
-        next["other"] = Array.from(otherTokens).join(", ");
-        } else if (allowed) {
+          if (otherKey) {
+            String(row[otherKey] || "")
+              .split(",")
+              .map((s) => s.trim())
+              .filter((s) => s && !["false", "true", "yes", "1", "no", "0"].includes(s.toLowerCase()))
+              .forEach((s) => otherTokens.add(s));
+          }
+          next["other"] = Array.from(otherTokens).join(", ");
+          if (allowedNormalized) {
+            Object.keys(next).forEach((key) => {
+              if (!allowedNormalized.includes(normalizeHeaderName(key))) {
+                delete next[key];
+              }
+            });
+          }
+        } else if (allowedNormalized) {
           // strip any fields not in allowed when not pain
           Object.keys(next).forEach((key) => {
-            if (!allowed.some((a) => normalizeHeaderName(a) === normalizeHeaderName(key))) {
+            if (!allowedNormalized.includes(normalizeHeaderName(key))) {
               delete next[key];
             }
           });
@@ -1491,7 +1659,7 @@
       if (store?.rows?.length) {
         const key = findHeader(store.headers, field) || field;
         store.rows.forEach((row) => {
-          const val = row[key];
+          const val = row?.[key];
           if (!val) return;
           String(val)
             .split(",")
@@ -1505,7 +1673,6 @@
 
     const logCollapsed = { diary: true, pain: true };
     let editingState = { kind: null, idx: null, draft: null };
-    let autotherapyCollapsed = true;
 
     function renderLog(kind) {
       const data = dataStore[kind];
@@ -1514,7 +1681,7 @@
       const wrap = datasets[kind]?.logsTable;
       if (logCollapsed[kind]) {
         if (wrap) wrap.innerHTML = "";
-        if (btn) btn.textContent = "Expand ▶";
+        if (btn) btn.textContent = "Expand ◀";
         return;
       }
       renderTable(kind, data.headers, data.rows, true, null);
@@ -1670,21 +1837,6 @@
       });
     }
 
-    function wireAutotherapyToggle() {
-      const toggle = document.getElementById("autotherapy-toggle");
-      const stack = document.getElementById("autotherapy-stack");
-      if (!toggle || !stack) return;
-      const apply = () => {
-        stack.classList.toggle("hidden", autotherapyCollapsed);
-        toggle.textContent = autotherapyCollapsed ? "Show ▶" : "Hide ▼";
-      };
-      toggle.addEventListener("click", () => {
-        autotherapyCollapsed = !autotherapyCollapsed;
-        apply();
-      });
-      apply();
-    }
-
     function renderPainOptionButtons() {
       renderOptionButtons("area", "area-options", false);
       renderOptionButtons("symptoms", "symptoms-options", false);
@@ -1736,6 +1888,7 @@
         const val = input?.value?.trim();
         if (val) {
           optionsCache[field] = dedupe([...current, val]);
+          removedOptions[field] = (removedOptions[field] || []).filter((v) => v !== val);
           input.value = "";
           renderOptionEditor(field);
           renderPainOptionButtons();
@@ -1743,17 +1896,24 @@
       } else if (action === "delete") {
         const val = dataset.value;
         optionsCache[field] = current.filter((v) => v !== val);
+        if (!removedOptions[field]) removedOptions[field] = [];
+        if (!removedOptions[field].includes(val)) removedOptions[field].push(val);
         renderOptionEditor(field);
         renderPainOptionButtons();
       } else if (action === "edit") {
         const val = dataset.value;
         const next = prompt(`Rename ${field}`, val);
         if (next && next.trim()) {
-          optionsCache[field] = dedupe(current.map((v) => (v === val ? next.trim() : v)));
+          const trimmed = next.trim();
+          optionsCache[field] = dedupe(current.map((v) => (v === val ? trimmed : v)));
+          if (!removedOptions[field]) removedOptions[field] = [];
+          if (!removedOptions[field].includes(val)) removedOptions[field].push(val);
+          removedOptions[field] = removedOptions[field].filter((v) => v !== trimmed);
           renderOptionEditor(field);
           renderPainOptionButtons();
         }
       }
+      persistOptionCache();
       const listContainer = document.getElementById(`${field}-options`);
       if (listContainer) listContainer.classList.add("hidden");
     }
@@ -1896,10 +2056,17 @@
     function wireEntryTabs() {
       const buttons = document.querySelectorAll(".entry-btn");
       const panels = document.querySelectorAll("[data-entry-panel]");
+      const autotherapyTab = document.getElementById("autotherapy-tab");
+      const setAutotherapyLabel = (key) => {
+        if (!autotherapyTab) return;
+        const arrow = key === "autotherapy" ? "▼" : "◀";
+        autotherapyTab.textContent = `Autotherapy ${arrow}`;
+      };
       const setActive = (key) => {
         if (!key) return;
         buttons.forEach((btn) => btn.classList.toggle("active", btn.dataset.entry === key));
         panels.forEach((panel) => panel.classList.toggle("hidden", panel.dataset.entryPanel !== key));
+        setAutotherapyLabel(key);
       };
       buttons.forEach((btn) => {
         btn.addEventListener("click", () => setActive(btn.dataset.entry));
@@ -1955,7 +2122,6 @@
           "hour": parts.time,
           "pain level": data.get("pain-level") || "",
           "fatigue level": data.get("fatigue-level") || "",
-          "mood level": data.get("mood-level") || "",
           "symptoms": symptoms,
           "area": areas,
           "activities": activities,
@@ -2026,12 +2192,37 @@
       });
     }
 
+    function getDateRange() {
+      const fromInput = document.getElementById("filter-from");
+      const toInput = document.getElementById("filter-to");
+      const fromVal = fromInput?.value ? new Date(fromInput.value) : null;
+      const toVal = toInput?.value ? new Date(toInput.value) : null;
+      return {
+        from: fromVal && !isNaN(fromVal) ? fromVal : null,
+        to: toVal && !isNaN(toVal) ? toVal : null,
+      };
+    }
+
+    function previousRange(range) {
+      if (!range?.from) return null;
+      const to = range.to && !isNaN(range.to) ? range.to : new Date();
+      const duration = to.getTime() - range.from.getTime();
+      if (duration <= 0) return null;
+      const prevTo = new Date(range.from.getTime() - 24 * 60 * 60 * 1000);
+      const prevFrom = new Date(prevTo.getTime() - duration);
+      return { from: prevFrom, to: prevTo };
+    }
+
     function renderDashboard() {
       const container = document.getElementById("dash-cards");
       const graphs = document.getElementById("dash-graphs");
       if (!container || !graphs) return;
-      const diary = applyDateFilter(dataStore.diary);
-      const pain = applyDateFilter(dataStore.pain);
+      const range = getDateRange();
+      const diary = applyDateFilter(dataStore.diary, range);
+      const pain = applyDateFilter(dataStore.pain, range);
+      const prevRange = previousRange(range);
+      const diaryPrev = prevRange ? applyDateFilter(dataStore.diary, prevRange) : null;
+      const painPrev = prevRange ? applyDateFilter(dataStore.pain, prevRange) : null;
 
       const diaryCount = diary?.rows?.length || 0;
       const painCount = pain?.rows?.length || 0;
@@ -2040,32 +2231,40 @@
       const diaryAnxAvg = avgField(diary, "anxiety");
       const painLevelAvg = avgField(pain, "pain level");
       const fatigueAvg = avgField(pain, "fatigue level");
+      const diaryPrevCount = diaryPrev?.rows?.length ?? null;
+      const painPrevCount = painPrev?.rows?.length ?? null;
+      const diaryPrevMoodAvg = avgField(diaryPrev, "mood level");
+      const diaryPrevDepAvg = avgField(diaryPrev, "depression");
+      const diaryPrevAnxAvg = avgField(diaryPrev, "anxiety");
+      const painPrevLevelAvg = avgField(painPrev, "pain level");
+      const fatiguePrevAvg = avgField(painPrev, "fatigue level");
 
       const cards = [
-        { label: "Diary entries", value: diaryCount },
-        { label: "Pain entries", value: painCount },
-        { label: "Mood avg", value: diaryMoodAvg ?? "–" },
-        { label: "Depression avg", value: diaryDepAvg ?? "–" },
-        { label: "Anxiety avg", value: diaryAnxAvg ?? "–" },
-        { label: "Pain avg", value: painLevelAvg ?? "–" },
-        { label: "Fatigue avg", value: fatigueAvg ?? "–" },
+        { label: "Diary entries", value: diaryCount, prev: diaryPrevCount },
+        { label: "Pain entries", value: painCount, prev: painPrevCount },
+        { label: "Mood avg", value: diaryMoodAvg ?? "–", prev: diaryPrevMoodAvg },
+        { label: "Depression avg", value: diaryDepAvg ?? "–", prev: diaryPrevDepAvg },
+        { label: "Anxiety avg", value: diaryAnxAvg ?? "–", prev: diaryPrevAnxAvg },
+        { label: "Pain avg", value: painLevelAvg ?? "–", prev: painPrevLevelAvg },
+        { label: "Fatigue avg", value: fatigueAvg ?? "–", prev: fatiguePrevAvg },
       ];
 
       container.innerHTML = cards
-        .map(
-          (c) => `
+        .map((c) => {
+          const delta = calcDelta(c.value, c.prev);
+          const deltaHtml = delta ? `<span class="delta ${delta.cls}">${escapeHtml(delta.text)}</span>` : "";
+          return `
             <div class="dash-card">
               <div class="dash-label">${escapeHtml(c.label)}</div>
-              <div class="dash-value">${escapeHtml(c.value)}</div>
+              <div class="dash-value">${escapeHtml(c.value)}${deltaHtml}</div>
             </div>
-          `
-        )
+          `;
+        })
         .join("");
 
       const graphDefs = [
         { id: "graph-diary-mood", title: "Diary: Mood over time", yLabel: "Mood level", data: timeSeries(diary, "mood level") },
         { id: "graph-pain-level", title: "Pain: Pain level over time", yLabel: "Pain level", data: timeSeries(pain, "pain level") },
-        { id: "graph-fatigue", title: "Pain: Fatigue level over time", yLabel: "Fatigue level", data: timeSeries(pain, "fatigue level") },
       ];
 
       graphs.innerHTML = graphDefs
@@ -2098,7 +2297,23 @@
         }
       });
       if (!count) return null;
-      return (sum / count).toFixed(2);
+      return parseFloat((sum / count).toFixed(2));
+    }
+
+    function calcDelta(current, previous) {
+      const curNum = toNumber(current);
+      const prevNum = toNumber(previous);
+      if (curNum === null || prevNum === null || prevNum === 0) return null;
+      const pct = ((curNum - prevNum) / prevNum) * 100;
+      return {
+        text: `${pct > 0 ? "+" : ""}${pct.toFixed(0)}%`,
+        cls: pct > 0 ? "positive" : pct < 0 ? "negative" : "neutral",
+      };
+    }
+
+    function toNumber(val) {
+      const n = Number(val);
+      return Number.isFinite(n) ? n : null;
     }
 
     function timeSeries(store, field) {
@@ -2136,6 +2351,7 @@
       const maxY = yBounds.max;
       const minX = data[0].t.getTime();
       const maxX = data[data.length - 1].t.getTime();
+      const startTs = minX;
       const pad = 28;
       ctx.beginPath();
       const points = [];
@@ -2156,22 +2372,10 @@
         ctx.fill();
       });
 
-      // axis labels
-      ctx.fillStyle = "rgba(226,232,240,0.7)";
-      ctx.font = "11px Manrope, sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("Date", width / 2, height - 6);
-      ctx.save();
-      ctx.translate(10, height / 2);
-      ctx.rotate(-Math.PI / 2);
-      ctx.textAlign = "center";
-      ctx.fillText(opts.yLabel || "Value", 0, 0);
-      ctx.restore();
-
       // axis ticks
-      drawAxes(ctx, width, height, pad, minX, maxX, minY, maxY, data);
+      drawAxes(ctx, width, height, pad, minX, maxX, minY, maxY, data, startTs);
 
-      graphMeta[canvas.id] = { points, yLabel: opts.yLabel || "Value" };
+      graphMeta[canvas.id] = { points, yLabel: opts.yLabel || "Value", startTime: startTs };
       canvas.onmousemove = (e) => handleHover(canvas, e);
       canvas.onmouseleave = () => hideTooltip();
     }
@@ -2200,7 +2404,7 @@
       return { min, max };
     }
 
-    function drawAxes(ctx, width, height, pad, minX, maxX, minY, maxY, data) {
+    function drawAxes(ctx, width, height, pad, minX, maxX, minY, maxY, data, startTs) {
       ctx.strokeStyle = "rgba(226,232,240,0.2)";
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -2224,7 +2428,7 @@
         ctx.stroke();
       }
 
-      const xLabels = pickXLabels(data);
+      const xLabels = pickXLabels(data, startTs, maxX);
       ctx.textAlign = "center";
       xLabels.forEach((lbl) => {
         const x = scale(lbl.time, minX, maxX || minX + 1, pad, width - pad);
@@ -2237,18 +2441,15 @@
       });
     }
 
-    function pickXLabels(data) {
+    function pickXLabels(data, startTs, endTs) {
       const labels = [];
-      const total = data.length;
-      const step = Math.max(1, Math.floor(total / 4));
-      for (let i = 0; i < total; i += step) {
-        const d = data[i];
-        const text = d.t instanceof Date ? d.t.toISOString().slice(5, 10) : String(d.t);
-        labels.push({ time: d.t.getTime(), text });
-      }
-      if (labels.length && labels[labels.length - 1].time !== data[total - 1].t.getTime()) {
-        const last = data[total - 1];
-        labels.push({ time: last.t.getTime(), text: last.t.toISOString().slice(5, 10) });
+      if (!data.length) return labels;
+      const formatter = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
+      const steps = 4;
+      for (let i = 0; i <= steps; i++) {
+        const frac = i / steps;
+        const time = startTs + (endTs - startTs) * frac;
+        labels.push({ time, text: formatter.format(new Date(time)) });
       }
       return labels;
     }
@@ -2272,8 +2473,9 @@
       });
       if (!closest || minDist > 12) return hideTooltip();
       const tooltip = getTooltip();
-      const dateStr = closest.t instanceof Date ? closest.t.toISOString().slice(0, 10) : String(closest.t);
-      tooltip.innerHTML = `<strong>${meta.yLabel}:</strong> ${closest.v}<br/><span style="color:${'var(--muted)'}">${dateStr}</span>`;
+      const start = meta.startTime || (meta.points[0]?.t?.getTime?.() ?? 0);
+      const dateText = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(closest.t);
+      tooltip.innerHTML = `<strong>${meta.yLabel}:</strong> ${closest.v}<br/><span style="color:${'var(--muted)'}">${dateText}</span>`;
       tooltip.style.left = `${evt.clientX + 12}px`;
       tooltip.style.top = `${evt.clientY + 12}px`;
       tooltip.style.opacity = "1";
@@ -2321,21 +2523,13 @@
       document.querySelectorAll("[data-export]").forEach(btn => {
         btn.addEventListener("click", () => {
           const kind = btn.dataset.export;
-          const type = btn.dataset.type;
           const data = dataStore[kind];
           try {
             if (!data || !data.headers || !data.rows) {
               throw new Error("No data loaded yet. Import first.");
             }
-            let blob;
-            let filename;
-            if (type === "csv") {
-              blob = new Blob([toCSV(data.headers, data.rows)], { type: "text/csv;charset=utf-8" });
-              filename = `${kind}.csv`;
-            } else {
-              blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-              filename = `${kind}.json`;
-            }
+            const blob = new Blob([toCSV(data.headers, data.rows)], { type: "text/csv;charset=utf-8" });
+            const filename = `${kind}.csv`;
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
@@ -2398,13 +2592,11 @@
       }
     }
 
-    function applyDateFilter(store) {
+    function applyDateFilter(store, range = getDateRange()) {
       if (!store?.rows?.length) return store;
-      const fromInput = document.getElementById("filter-from");
-      const toInput = document.getElementById("filter-to");
-      const fromVal = fromInput?.value ? new Date(fromInput.value) : null;
-      const toVal = toInput?.value ? new Date(toInput.value) : null;
-      if ((!fromVal || isNaN(fromVal)) && (!toVal || isNaN(toVal))) return store;
+      const fromVal = range?.from instanceof Date ? range.from : null;
+      const toVal = range?.to instanceof Date ? range.to : null;
+      if (!fromVal && !toVal) return store;
       const filteredRows = store.rows.filter((row) => {
         const d = entryDateFromRow(row, store.headers);
         if (!d) return false;
@@ -2420,7 +2612,6 @@
     wireAuthForm();
     wireEntryTabs();
     wireAutotherapyTabs();
-    wireAutotherapyToggle();
     wirePainForm();
     wireJournalForm();
     wireOptionEditors();
@@ -2438,31 +2629,37 @@
         });
       }
     });
+    function applyQuickRange(range) {
+      const fromInput = document.getElementById("filter-from");
+      const toInput = document.getElementById("filter-to");
+      const today = new Date();
+      const toStr = today.toISOString().slice(0, 10);
+      if (range === "all") {
+        if (fromInput) fromInput.value = "";
+        if (toInput) toInput.value = "";
+      } else {
+        const days = parseInt(range, 10);
+        const from = new Date(today.getTime() - days * 24 * 60 * 60 * 1000);
+        const fromStr = from.toISOString().slice(0, 10);
+        if (fromInput) fromInput.value = fromStr;
+        if (toInput) toInput.value = toStr;
+      }
+      const btn = document.querySelector(`.quick-btn[data-range="${range}"]`);
+      if (btn) setQuickActive(btn);
+      renderDashboard();
+    }
+
     document.querySelectorAll(".quick-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const range = btn.dataset.range;
-        const fromInput = document.getElementById("filter-from");
-        const toInput = document.getElementById("filter-to");
-        const today = new Date();
-        const toStr = today.toISOString().slice(0, 10);
-        if (range === "all") {
-          if (fromInput) fromInput.value = "";
-          if (toInput) toInput.value = "";
-        } else {
-          const days = parseInt(range, 10);
-          const from = new Date(today.getTime() - days * 24 * 60 * 60 * 1000);
-          const fromStr = from.toISOString().slice(0, 10);
-          if (fromInput) fromInput.value = fromStr;
-          if (toInput) toInput.value = toStr;
-        }
-        setQuickActive(btn);
-        renderDashboard();
+        applyQuickRange(range);
       });
     });
     setAuthVisibility(false);
     setAppVisible(false);
     resetAppState();
     restoreSessionIfPossible();
+    applyQuickRange("365");
   </script>
 </body>
 </html>
