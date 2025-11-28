@@ -4,7 +4,9 @@
 // Then point your frontend requests to /api/files/...
 
 // ---- DB credentials are provided via environment (.env file or hosting panel) ----
+$_ENV_PATHS_LOADED = [];
 function load_env_files(array $paths) {
+    global $_ENV_PATHS_LOADED;
     foreach ($paths as $path) {
         if (!is_file($path)) continue;
         $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -13,13 +15,19 @@ function load_env_files(array $paths) {
             if (strpos($line, '=') === false) continue;
             [$key, $val] = explode('=', $line, 2);
             $key = trim($key);
+            if (stripos($key, 'export ') === 0) {
+                $key = trim(substr($key, 7));
+            }
             $val = trim($val);
             $val = trim($val, "\"'");
             if ($key === '') continue;
-            putenv("$key=$val");
+            if (function_exists('putenv')) {
+                @putenv("$key=$val");
+            }
             $_ENV[$key] = $val;
             $_SERVER[$key] = $val;
         }
+        $_ENV_PATHS_LOADED[] = $path;
     }
 }
 
@@ -69,11 +77,27 @@ $env_candidates = [
 ];
 load_env_files($env_candidates);
 function env_or_fail($key) {
-    $val = getenv($key);
-    if ($val === false || $val === '') {
-        respond(500, ['error' => "missing env $key"]);
+    global $_ENV_PATHS_LOADED;
+    $candidates = [
+        getenv($key),
+        $_ENV[$key] ?? null,
+        $_SERVER[$key] ?? null,
+    ];
+    foreach ($candidates as $val) {
+        if ($val !== false && $val !== null && $val !== '') {
+            return $val;
+        }
     }
-    return $val;
+    $hint = 'set it via hosting env vars or a .env file';
+    if ($_ENV_PATHS_LOADED) {
+        $short = array_map(static function ($p) {
+            $root = dirname(__DIR__, 2);
+            $rel = ltrim(str_replace($root, '', $p), '/');
+            return $rel ?: $p;
+        }, $_ENV_PATHS_LOADED);
+        $hint .= ' (checked: ' . implode(', ', $short) . ')';
+    }
+    respond(500, ['error' => "missing env $key", 'hint' => $hint]);
 }
 $DB_HOST = env_or_fail('DB_HOST');
 $DB_USER = env_or_fail('DB_USER');
