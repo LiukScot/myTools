@@ -1,5 +1,7 @@
 <?php
 // Tiny JSON file API for Hetzner Webhosting (PHP + MySQL) with simple login.
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
 // Drop this file (and the .htaccess in the same folder) into public_html/myhealth/api/files/
 // Then point your frontend requests to /api/files/...
 
@@ -94,6 +96,21 @@ function set_session_cookie_params($isSecure) {
         ]);
     } else {
         session_set_cookie_params(0, '/', '', $isSecure, true);
+    }
+}
+
+function send_session_cookie($isSecure) {
+    if (PHP_VERSION_ID >= 70300) {
+        setcookie(session_name(), session_id(), [
+            'expires' => 0,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $isSecure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    } else {
+        setcookie(session_name(), session_id(), 0, '/', '', $isSecure, true);
     }
 }
 function env_or_fail($key) {
@@ -200,38 +217,30 @@ if (preg_match('#/api(?:/files)?/register/?$#', $rawUri)) {
 
 // Login endpoint: POST /api/login or /api/files/login {email, password}
 if (preg_match('#/api(?:/files)?/login/?$#', $rawUri)) {
-    if ($method !== 'POST') respond(405, ['error' => 'method not allowed']);
-    $body = read_json();
-    $email = trim($body['email'] ?? '');
-    $password = $body['password'] ?? '';
-    if ($email === '' || $password === '') respond(400, ['error' => 'email and password required']);
-    $stmt = $mysqli->prepare("SELECT id, email, password_hash, name, role FROM users WHERE email=? LIMIT 1");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result ? $result->fetch_assoc() : null;
-    if (!$user || !password_verify($password, $user['password_hash'])) {
-        respond(401, ['error' => 'invalid credentials']);
+    try {
+        if ($method !== 'POST') respond(405, ['error' => 'method not allowed']);
+        $body = read_json();
+        $email = trim($body['email'] ?? '');
+        $password = $body['password'] ?? '';
+        if ($email === '' || $password === '') respond(400, ['error' => 'email and password required']);
+        $stmt = $mysqli->prepare("SELECT id, email, password_hash, name, role FROM users WHERE email=? LIMIT 1");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result ? $result->fetch_assoc() : null;
+        if (!$user || !password_verify($password, $user['password_hash'])) {
+            respond(401, ['error' => 'invalid credentials']);
+        }
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['email'] = $user['email'];
+        $_SESSION['name'] = $user['name'];
+        $_SESSION['role'] = $user['role'];
+        session_regenerate_id(true);
+        send_session_cookie($isSecure);
+        respond(200, ['status' => 'ok', 'email' => $user['email'], 'name' => $user['name'], 'role' => $user['role']]);
+    } catch (Throwable $e) {
+        respond(500, ['error' => 'login failed', 'detail' => $e->getMessage()]);
     }
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['email'] = $user['email'];
-    $_SESSION['name'] = $user['name'];
-    $_SESSION['role'] = $user['role'];
-    session_regenerate_id(true);
-    // Re-send cookie with the new session id
-    if (PHP_VERSION_ID >= 70300) {
-        setcookie(session_name(), session_id(), [
-            'lifetime' => 0,
-            'path' => '/',
-            'domain' => '',
-            'secure' => $isSecure,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
-    } else {
-        setcookie(session_name(), session_id(), 0, '/', '', $isSecure, true);
-    }
-    respond(200, ['status' => 'ok', 'email' => $user['email'], 'name' => $user['name'], 'role' => $user['role']]);
 }
 
 // Logout endpoint: POST /api/logout or /api/files/logout

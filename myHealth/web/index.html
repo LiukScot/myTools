@@ -108,6 +108,17 @@
       margin-top: 10px;
       min-height: 18px;
     }
+    .debug-log {
+      font-size: 12px;
+      color: #f59e0b;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      margin-top: 6px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
     .status .ok { color: var(--accent-2); font-weight: 700; }
     .status .err { color: var(--danger); font-weight: 700; }
     .table-wrap {
@@ -827,6 +838,7 @@
         <button class="btn-primary" id="auth-login" type="button">Log in</button>
       </div>
       <div class="status" id="auth-status"></div>
+      <pre class="debug-log hidden" id="auth-debug"></pre>
     </div>
 
     <div id="app-main" class="hidden">
@@ -1077,6 +1089,7 @@
       email: document.getElementById("auth-email"),
       pass: document.getElementById("auth-pass"),
       status: document.getElementById("auth-status"),
+      debug: document.getElementById("auth-debug"),
       loginBtn: document.getElementById("auth-login"),
       logoutBtn: document.getElementById("auth-logout"),
       hubBtn: document.getElementById("go-hub"),
@@ -1118,6 +1131,11 @@
       authUI.status.innerHTML = message
         ? `<span class="${ok ? "ok" : "err"}">${ok ? "OK" : "Error"}:</span> ${escapeHtml(message)}`
         : "";
+    }
+    function setAuthDebug(text) {
+      if (!authUI.debug) return;
+      authUI.debug.textContent = text || "";
+      authUI.debug.classList.toggle("hidden", !text);
     }
     function setAuthVisibility(authed) {
       isAuthed = authed;
@@ -1394,8 +1412,12 @@
           body: JSON.stringify({ email, password }),
         });
         const data = await safeParseJson(res);
-        if (!res.ok) throw new Error((data && data.error) || (typeof data === "string" ? data : "") || "Login failed");
+        if (!res.ok) {
+          setAuthDebug(`HTTP ${res.status}\n${typeof data === "string" ? data : JSON.stringify(data)}`);
+          throw new Error((data && data.error) || (typeof data === "string" ? data : "") || "Login failed");
+        }
         setAuthStatus(`Logged in as ${data.email || email}`, true);
+        setAuthDebug("");
         if (authUI.pass) authUI.pass.value = "";
         setAuthVisibility(true);
         setAppVisible(true);
@@ -1404,6 +1426,9 @@
         renderDashboard();
       } catch (err) {
         setAuthStatus(err.message || "Login failed");
+        if (!authUI.debug?.textContent) {
+          setAuthDebug(err?.stack || err?.message || String(err));
+        }
       }
     }
 
