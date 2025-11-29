@@ -39,24 +39,8 @@ $FILES_TABLE = 'files';
 
 // Broader cookie scope so auth persists across API calls
 $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') === '443';
-// Backward-compatible session name: reuse existing cookie if present, otherwise use dedicated name
-$sessionCookieName = null;
-foreach (['MYMONEYSESS', 'PHPSESSID'] as $candidate) {
-    if (!empty($_COOKIE[$candidate])) { $sessionCookieName = $candidate; break; }
-}
-session_name($sessionCookieName ?: 'MYMONEYSESS');
-if (PHP_VERSION_ID >= 70300) {
-    session_set_cookie_params([
-        'lifetime' => 0,
-        'path' => '/',
-        'domain' => '',
-        'secure' => $isSecure,
-        'httponly' => true,
-        'samesite' => 'Lax',
-    ]);
-} else {
-    session_set_cookie_params(0, '/', '', $isSecure, true);
-}
+session_name('PHPSESSID');
+set_session_cookie_params($isSecure);
 session_start();
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -119,6 +103,21 @@ function env_or_fail($key) {
         $hint .= ' (checked: ' . implode(', ', $short) . ')';
     }
     respond(500, ['error' => "missing env $key", 'hint' => $hint]);
+}
+
+function set_session_cookie_params($isSecure) {
+    if (PHP_VERSION_ID >= 70300) {
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $isSecure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    } else {
+        session_set_cookie_params(0, '/', '', $isSecure, true);
+    }
 }
 $DB_HOST = env_or_fail('DB_HOST');
 $DB_USER = env_or_fail('DB_USER');
@@ -218,6 +217,19 @@ if (preg_match('#/api(?:/files)?/login/?$#', $rawUri)) {
     $_SESSION['email'] = $user['email'];
     $_SESSION['name'] = $user['name'];
     $_SESSION['role'] = $user['role'];
+    session_regenerate_id(true);
+    if (PHP_VERSION_ID >= 70300) {
+        setcookie(session_name(), session_id(), [
+            'lifetime' => 0,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $isSecure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    } else {
+        setcookie(session_name(), session_id(), 0, '/', '', $isSecure, true);
+    }
     respond(200, ['status' => 'ok', 'email' => $user['email'], 'name' => $user['name'], 'role' => $user['role']]);
 }
 
