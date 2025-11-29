@@ -41,6 +41,7 @@ $FILES_TABLE = 'files';
 
 // Broader cookie scope so auth persists across API calls
 $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') === '443';
+session_save_path(sys_get_temp_dir());
 session_name('MYTOOLSS');
 set_session_cookie_params($isSecure);
 session_start();
