@@ -39,7 +39,12 @@ $FILES_TABLE = 'files';
 
 // Ensure session cookie is scoped broadly so subsequent requests keep auth
 $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') === '443';
-session_name('MYHEALTHSESS');
+// Backward-compatible session name: reuse existing cookie if present, otherwise use dedicated name
+$sessionCookieName = null;
+foreach (['MYHEALTHSESS', 'PHPSESSID'] as $candidate) {
+    if (!empty($_COOKIE[$candidate])) { $sessionCookieName = $candidate; break; }
+}
+session_name($sessionCookieName ?: 'MYHEALTHSESS');
 if (PHP_VERSION_ID >= 70300) {
     session_set_cookie_params([
         'lifetime' => 0,

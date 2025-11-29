@@ -39,7 +39,12 @@ $FILES_TABLE = 'files';
 
 // Broader cookie scope so auth persists across API calls
 $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') === '443';
-session_name('MYMONEYSESS');
+// Backward-compatible session name: reuse existing cookie if present, otherwise use dedicated name
+$sessionCookieName = null;
+foreach (['MYMONEYSESS', 'PHPSESSID'] as $candidate) {
+    if (!empty($_COOKIE[$candidate])) { $sessionCookieName = $candidate; break; }
+}
+session_name($sessionCookieName ?: 'MYMONEYSESS');
 if (PHP_VERSION_ID >= 70300) {
     session_set_cookie_params([
         'lifetime' => 0,
