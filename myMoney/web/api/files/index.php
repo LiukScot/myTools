@@ -44,6 +44,13 @@ $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SER
 session_save_path(sys_get_temp_dir());
 session_name('MYTOOLSS');
 set_session_cookie_params($isSecure);
+if (empty($_COOKIE[session_name()])) {
+    try {
+        session_id(bin2hex(random_bytes(16)));
+    } catch (Throwable $e) {
+        session_id(uniqid('sess', true));
+    }
+}
 session_start();
 if (session_id() === '') {
     session_regenerate_id(true);
