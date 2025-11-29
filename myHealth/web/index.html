@@ -136,7 +136,6 @@
     .table-wrap td {
       white-space: nowrap;
     }
-<<<<<<< ours
     .table-wrap .actions-cell {
       position: sticky;
       right: 0;
@@ -150,8 +149,6 @@
       z-index: 3;
       box-shadow: -1px 0 0 var(--border), 0 1px 0 var(--border);
     }
-=======
->>>>>>> theirs
     .table-wrap.limited {
       max-height: 440px;
     }
@@ -1014,8 +1011,10 @@
       opts.headers = { ...(options.headers || {}) };
       let finalUrl = url;
       if (url.startsWith("/")) {
-        const pathBase = (window.location.pathname || "").replace(/\/[^/]*$/, "");
-        const scopedBase = pathBase === "/" ? "" : pathBase;
+        // Keep requests scoped to the app root (works even when loaded at /myhealth without a trailing slash)
+        const path = window.location.pathname || "";
+        const match = path.match(/^\/[^/]+/);
+        const scopedBase = match ? match[0] : "";
         finalUrl = `${scopedBase}${url}`;
       }
       return fetch(finalUrl, opts);

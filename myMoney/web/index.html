@@ -1,0 +1,1862 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>myMoney – investments dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #05080f;
+      --panel: #0c111a;
+      --card: #111827;
+      --card-strong: #182133;
+      --accent: #7be6a6;
+      --accent-2: #b9f6d2;
+      --text: #e6eefc;
+      --muted: #9fb0c8;
+      --border: #1f2a3d;
+      --danger: #f97373;
+      --shadow: 0 20px 55px rgba(0, 0, 0, 0.45);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(140% 120% at 20% 10%, rgba(123,230,166,0.10), rgba(0,0,0,0)),
+        radial-gradient(120% 100% at 80% 5%, rgba(111,143,194,0.08), rgba(0,0,0,0)),
+        var(--bg);
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-attachment: fixed;
+      color: var(--text);
+    }
+    .shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+    header { margin-bottom: 16px; }
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 30% 30%, #7be6a6, #4bbf87);
+      display: grid;
+      place-items: center;
+      color: #081019;
+      font-size: 20px;
+      box-shadow: 0 6px 14px rgba(75,191,135,0.28);
+    }
+    .title-main { font-size: 26px; }
+    .title-sub { color: var(--muted); font-size: 13px; }
+
+    h1, h2, h3, h4 {
+      margin: 0 0 10px 0;
+      letter-spacing: -0.01em;
+    }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .card h2 strong, .card h3 strong { color: var(--accent); }
+    .divider {
+      border-top: 1px solid var(--border);
+      margin: 16px 0;
+    }
+    .hint, .small-text {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .row, .two-columns, .dash-top-row, .charts-row, .asset-blocks, .top-bar, .heading-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .row > .card, .two-columns > .column { flex: 1; min-width: 260px; }
+    .form-column { flex: 1 1 320px; max-width: 460px; }
+    .table-column { flex: 3 1 520px; }
+    .two-columns > .column + .column { border-left: 1px solid var(--border); padding-left: 12px; }
+    .heading-row { align-items: center; }
+    .dash-top-row { align-items: flex-start; gap: 20px; }
+    .dash-metrics { min-width: 220px; flex: 0 0 260px; }
+    .dash-charts { flex: 1; min-width: 340px; border-left: 1px solid var(--border); padding-left: 16px; }
+    .charts-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+      align-items: stretch;
+    }
+    .chart-card, .asset-block {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: var(--card-strong);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    }
+    .chart-card h4 { margin: 0 0 8px 0; text-align: center; color: var(--muted); }
+    .chart-card canvas { width: 100%; max-width: 320px; max-height: 260px; }
+    .asset-blocks { margin-top: 10px; }
+    .asset-block { min-width: 200px; }
+    .asset-block-title { font-weight: 700; margin-bottom: 4px; }
+    .asset-block-line { font-size: 13px; color: var(--muted); }
+    .monthly-chart-box { height: 260px; margin-top: 10px; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+    .hidden { display: none !important; }
+
+    .top-bar {
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .top-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .nav-button {
+      border-radius: 12px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      background: var(--card-strong);
+      color: var(--text);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.01em;
+    }
+    .nav-button.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(123,230,166,0.35), var(--shadow);
+    }
+    .nav-button:hover { border-color: var(--accent); }
+    .nav-button.danger { color: var(--danger); border-color: rgba(249,115,115,0.5); }
+
+    .actions-cell { white-space: nowrap; }
+    .field-group { margin-bottom: 10px; }
+    label { font-size: 13px; color: var(--muted); }
+
+    input, select, textarea {
+      padding: 10px 12px;
+      margin: 4px 0;
+      background: var(--card-strong);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      width: 100%;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      background: rgba(123,230,166,0.06);
+    }
+    textarea { resize: vertical; min-height: 72px; }
+
+    button {
+      padding: 10px 14px;
+      margin-top: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card-strong);
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      letter-spacing: 0.01em;
+    }
+    button:hover { border-color: var(--accent); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #0c1510;
+      border: none;
+      box-shadow: 0 6px 12px rgba(123,230,166,0.25);
+    }
+    .btn-accent {
+      background: rgba(123,230,166,0.14);
+      border-color: rgba(123,230,166,0.45);
+      color: var(--text);
+    }
+    .btn-danger {
+      background: rgba(249,115,115,0.16);
+      border-color: rgba(249,115,115,0.45);
+      color: #ffdfe1;
+    }
+    .btn-small {
+      padding: 6px 10px;
+      font-size: 12px;
+      margin-right: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      background: var(--card-strong);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 10px;
+      font-size: 13px;
+      text-align: left;
+      color: var(--text);
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: rgba(19, 27, 42, 0.95);
+      cursor: pointer;
+      user-select: none;
+      z-index: 1;
+    }
+    th .sort-indicator {
+      margin-left: 6px;
+      opacity: 0.6;
+      font-size: 11px;
+    }
+    tr:nth-child(odd) { background: rgba(255,255,255,0.02); }
+    tr:hover { background: rgba(255,255,255,0.04); }
+    .filter-row input { width: 100%; font-size: 12px; padding: 6px 8px; }
+
+    .value-positive { color: #7be6a6; font-weight: 700; }
+    .value-negative { color: #f29ea0; font-weight: 700; }
+    .value-zero { color: var(--muted); font-weight: 600; }
+
+    .status {
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 18px;
+    }
+    .status .ok { color: var(--accent); font-weight: 700; }
+    .status .err { color: var(--danger); font-weight: 700; }
+    .auth-card { margin-bottom: 18px; }
+    .auth-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .auth-row input { flex: 1 1 220px; }
+
+    @media (max-width: 720px) {
+      .shell { padding: 22px 14px 36px; }
+      .two-columns > .column + .column,
+      .dash-charts { border-left: none; padding-left: 0; margin-left: 0; }
+      th, td { padding: 8px; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="title">
+        <span class="logo">💸</span>
+        <div>
+          <div class="title-main">myMoney</div>
+          <div class="title-sub">Manage money, investments, movements, and growth</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="card auth-card">
+      <div class="auth-row">
+        <input type="email" id="auth-email" placeholder="Email" autocomplete="username" />
+        <input type="password" id="auth-pass" placeholder="Password" autocomplete="current-password" />
+        <button class="btn-primary" id="auth-login" type="button">Log in</button>
+      </div>
+      <div class="status" id="auth-status"></div>
+    </div>
+
+    <div id="app-main" class="hidden">
+      <div class="top-bar">
+        <nav class="top-nav">
+          <button class="nav-button active" data-page="dashboard">🏠 dashboard</button>
+          <button class="nav-button" data-page="monthly-review">📅 monthly review</button>
+          <button class="nav-button" data-page="monthly-movements">📆 monthly movements</button>
+          <button class="nav-button" data-page="transactions">🧾 transactions</button>
+          <button class="nav-button" data-page="import-backup">📥 import / backup</button>
+        </nav>
+        <button class="nav-button danger hidden" id="auth-logout" type="button">Log out</button>
+      </div>
+
+      <!-- DASHBOARD -->
+      <section id="page-dashboard" class="page active">
+        <div class="card">
+          <div class="dash-top-row">
+            <div class="dash-metrics">
+              <h2>📊 <strong>Dashboard</strong></h2>
+              <div><strong>💰 totale investito:</strong> <span id="totalInvested">-</span></div>
+              <div><strong>📈 pnl totale:</strong> <span id="totalPnl">-</span></div>
+              <div><strong>📦 asset diversi:</strong> <span id="assetCount">-</span></div>
+              <div><strong>🧾 numero transazioni:</strong> <span id="txCount">-</span></div>
+              <div><strong>🕒 ultima transazione:</strong> <span id="lastTxDate">-</span></div>
+            </div>
+            <div class="dash-charts">
+              <div class="charts-row">
+                <div class="chart-card">
+                  <h4>🥧 allocazione per asset</h4>
+                  <canvas id="assetAllocationChart" height="150"></canvas>
+                </div>
+                <div class="chart-card">
+                  <h4>📉 PnL per asset</h4>
+                  <canvas id="assetPnlChart" height="150"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3>📦 dettaglio per asset</h3>
+          <button id="toggleZeroAssetsButton" style="margin-bottom:0.4rem;" class="btn-accent">nascondi investimenti chiusi (valore = 0)</button>
+          <div id="assetBlocks" class="asset-blocks"></div>
+        </div>
+      </section>
+
+      <!-- MONTHLY REVIEW -->
+      <section id="page-monthly-review" class="page">
+        <div class="card">
+          <div class="heading-row">
+            <h2>📅 <strong>Monthly review</strong></h2>
+          </div>
+
+          <div class="field-group">
+            <label><strong>liquidità attuale (snapshot rapido)</strong></label><br>
+            <input type="number" step="0.01" id="quickLiquidityInput" />
+            <button type="button" id="addTodaySnapshotButton" class="btn-primary">➕ aggiungi snapshot di oggi</button>
+          </div>
+          <div class="field-group">
+            <span class="small-text" style="opacity:0.85;">filter by date:</span><br>
+            <select id="monthlyRangeSelect" aria-label="Filtro intervallo mensile">
+              <option value="all">since beginning</option>
+              <option value="3m">last 3 months</option>
+              <option value="6m">last 6 months</option>
+              <option value="1y">last 1 year</option>
+              <option value="3y">last 3 years</option>
+              <option value="10y">last 10 years</option>
+            </select>
+          </div>
+          <p class="small-text">
+            crea una nuova colonna nel grafico con data di oggi usando low/medium/high dell’ultimo snapshot
+            e la liquidità inserita qui.
+          </p>
+
+          <div id="monthlySummary" class="small-text">
+            caricata da <code>monthlySnapshots</code> (xlsx) – nessun dato ancora.
+          </div>
+          <div class="monthly-chart-box">
+            <canvas id="monthlyRiskChart" height="200"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- MONTHLY MOVEMENTS -->
+      <section id="page-monthly-movements" class="page">
+        <div class="card">
+          <div class="two-columns">
+            <div class="column form-column">
+              <h2>📆 <strong>Monthly movements</strong></h2>
+              <div>📥 entrate mensili: <span id="mmIncome">-</span></div>
+              <div>📤 uscite mensili: <span id="mmExpense">-</span></div>
+              <div>⚖️ netto mensile: <span id="mmNet">-</span></div>
+
+              <form id="monthlyForm" style="margin-top:0.8rem;">
+                <div class="field-group">
+                  <label><strong>nome</strong></label><br>
+                  <input type="text" name="name" required />
+                </div>
+                <div class="field-group">
+                  <label><strong>tipo</strong></label><br>
+                  <select name="direction" id="monthlyDirection">
+                    <option value="income">entrata</option>
+                    <option value="expense">uscita</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label><strong>importo mensile</strong></label><br>
+                  <input type="number" step="0.01" name="amount" required />
+                </div>
+                <div class="field-group">
+                  <label><strong>note</strong></label><br>
+                  <input type="text" name="note" />
+                </div>
+                <button type="submit" id="monthlySubmitButton" class="btn-primary">💾 salva</button>
+                <button type="button" id="monthlyCancelEditButton" style="display:none; margin-left:0.5rem;" class="btn-accent">↩️ annulla</button>
+              </form>
+              <p class="small-text" style="margin-top:0.6rem;">
+                i monthly movements <strong>non influiscono</strong> sul totale investito: servono solo come riepilogo di entrate/uscite mensili 💡
+              </p>
+            </div>
+
+            <div class="column table-column">
+              <h3>📋 elenco movimenti</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th data-mm-column="name">nome <span class="sort-indicator"></span></th>
+                    <th data-mm-column="direction">tipo <span class="sort-indicator"></span></th>
+                    <th data-mm-column="amount">importo <span class="sort-indicator"></span></th>
+                    <th data-mm-column="note">note <span class="sort-indicator"></span></th>
+                    <th>azioni</th>
+                  </tr>
+                  <tr class="filter-row">
+                    <th><input type="text" data-mm-filter="name" placeholder="filtra" /></th>
+                    <th><input type="text" data-mm-filter="direction" placeholder="filtra" /></th>
+                    <th><input type="text" data-mm-filter="amount" placeholder="filtra" /></th>
+                    <th><input type="text" data-mm-filter="note" placeholder="filtra" /></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="monthlyMovementsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TRANSACTIONS -->
+      <section id="page-transactions" class="page">
+        <div class="card">
+          <div class="two-columns">
+            <div class="column form-column">
+              <h2>➕ <strong>Nuova transazione</strong></h2>
+              <form id="addForm">
+                <div class="field-group">
+                  <label><strong>data</strong></label><br>
+                  <input type="date" name="date" required />
+                </div>
+
+                <div class="field-group">
+                  <label><strong>asset</strong></label><br>
+                  <input type="text" name="asset" placeholder="cherrybank" required />
+                </div>
+
+                <div class="field-group">
+                  <label><strong>tipo (descrizione)</strong></label><br>
+                  <select name="tipo" id="tipoSelect">
+                    <option value="nuovo vincolo">nuovo vincolo</option>
+                    <option value="cedola">cedola</option>
+                    <option value="interessi">interessi</option>
+                    <option value="cashback">cashback</option>
+                    <option value="Variazione Valore">Variazione Valore</option>
+                  </select>
+                </div>
+
+                <div class="field-group" id="groupBuy">
+                  <label><strong>valore d'acquisto</strong></label><br>
+                  <input type="number" step="1" name="buyValue" />
+                </div>
+
+                <div class="field-group" id="groupPnl">
+                  <label><strong>pnl</strong></label><br>
+                  <input type="number" step="1" name="pnl" />
+                </div>
+
+                <div class="field-group">
+                  <label><strong>note</strong></label><br>
+                  <input type="text" name="note" />
+                </div>
+
+                <button type="submit" id="txSubmitButton" class="btn-primary">💾 salva</button>
+                <button type="button" id="txCancelEditButton" style="display:none; margin-left:0.5rem;" class="btn-accent">↩️ annulla</button>
+              </form>
+            </div>
+
+            <div class="column table-column">
+              <h2>📋 <strong>Transazioni</strong></h2>
+              <table id="transactionsTable">
+                <thead>
+                  <tr>
+                    <th data-column="date">data <span class="sort-indicator"></span></th>
+                    <th data-column="asset">asset <span class="sort-indicator"></span></th>
+                    <th data-column="tipo">tipo <span class="sort-indicator"></span></th>
+                    <th data-column="type">type <span class="sort-indicator"></span></th>
+                    <th data-column="buyValue">buy/sell <span class="sort-indicator"></span></th>
+                    <th data-column="pnl">pnl <span class="sort-indicator"></span></th>
+                    <th data-column="note">note <span class="sort-indicator"></span></th>
+                    <th>azioni</th>
+                  </tr>
+                  <tr class="filter-row">
+                    <th><input type="text" data-tx-filter="date" placeholder="filtra" /></th>
+                    <th><input type="text" data-tx-filter="asset" placeholder="filtra" /></th>
+                    <th><input type="text" data-tx-filter="tipo" placeholder="filtra" /></th>
+                    <th><input type="text" data-tx-filter="type" placeholder="filtra" /></th>
+                    <th><input type="text" data-tx-filter="buyValue" placeholder="filtra" /></th>
+                    <th><input type="text" data-tx-filter="pnl" placeholder="filtra" /></th>
+                    <th><input type="text" data-tx-filter="note" placeholder="filtra" /></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="transactionsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- IMPORT / BACKUP -->
+      <section id="page-import-backup" class="page">
+        <div class="card">
+          <h2>📥 <strong>Import / backup</strong></h2>
+
+          <!-- XLSX area -->
+          <div class="field-group">
+            <label><strong>importa xlsx</strong> (fogli: <code>rawTransactions</code>, <code>movements</code>, <code>monthlySnapshots</code>)</label><br>
+            <input type="file" id="fileInput" accept=".xlsx,.xls" />
+          </div>
+          <div class="field-group">
+            <button id="exportXlsxButton" class="btn-accent">📤 esporta dati (.xlsx)</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- JSON area -->
+          <div class="field-group">
+            <label><strong>importa dati da backup (.json)</strong></label><br>
+            <input type="file" id="importBackupInput" accept=".json" />
+          </div>
+          <div class="field-group">
+            <button id="exportBackupButton" class="btn-primary">🗃️ salva dati (.json)</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Purge -->
+          <div class="field-group">
+            <button id="fullPurgeButton" class="btn-danger">🧨 full purge dati</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const primaryStorageKey = 'investments_state_v2';
+    const legacyStorageKey = 'investments_transactions_v1';
+    const STATE_FILE = 'money.json';
+
+    let transactions = [];
+    let monthlyMovements = [];
+    let monthlySnapshots = [];
+
+    const transactionSortState = { column: 'date', direction: 'desc' };
+    const transactionFilters = {
+      date: '',
+      asset: '',
+      tipo: '',
+      type: '',
+      buyValue: '',
+      pnl: '',
+      note: ''
+    };
+
+    const mmSortState = { column: 'amount', direction: 'desc' };
+    const mmFilters = {
+      name: '',
+      direction: '',
+      amount: '',
+      note: ''
+    };
+
+    let editingTransactionId = null;
+    let editingMonthlyId = null;
+    let assetChart = null;
+    let assetPnlChart = null;
+    let monthlyRiskChart = null;
+    let assetColorMap = {};
+    let showZeroAssets = true;
+    const defaultPreferences = { showZeroAssets: true };
+
+    const authUI = {
+      email: document.getElementById('auth-email'),
+      pass: document.getElementById('auth-pass'),
+      loginBtn: document.getElementById('auth-login'),
+      logoutBtn: document.getElementById('auth-logout'),
+      status: document.getElementById('auth-status'),
+    };
+    const appMain = document.getElementById('app-main');
+    let isAuthed = false;
+    let serverSaveTimer = null;
+    let lastQueuedState = null;
+
+    function apiFetch(url, options = {}) {
+      const opts = { credentials: 'include', ...options };
+      let finalUrl = url;
+      if (url.startsWith('/')) {
+        // Scope requests to the app root (works even when loaded from /mymoney without trailing slash)
+        const path = window.location.pathname || '';
+        const match = path.match(/^\/[^/]+/);
+        const scopedBase = match ? match[0] : '';
+        finalUrl = `${scopedBase}${url}`;
+      }
+      return fetch(finalUrl, opts);
+    }
+
+    function setAuthStatus(message, ok = false) {
+      if (!authUI.status) return;
+      authUI.status.innerHTML = message
+        ? `<span class="${ok ? 'ok' : 'err'}">${ok ? 'OK' : 'Error'}:</span> ${message}`
+        : '';
+    }
+
+    function setAuthVisibility(authed) {
+      isAuthed = authed;
+      const toHide = [authUI.email, authUI.pass, authUI.loginBtn, authUI.status];
+      toHide.forEach(el => el?.classList.toggle('hidden', authed));
+      authUI.logoutBtn?.classList.toggle('hidden', !authed);
+      const card = document.querySelector('.auth-card');
+      card?.classList.toggle('hidden', authed);
+      if (!authed) setAuthStatus('');
+    }
+
+    function setAppVisible(authed) {
+      if (appMain) appMain.classList.toggle('hidden', !authed);
+    }
+
+    function resetAppState() {
+      transactions = [];
+      monthlyMovements = [];
+      monthlySnapshots = [];
+      renderEverything();
+    }
+
+    async function doLogin() {
+      const email = authUI.email?.value?.trim();
+      const password = authUI.pass?.value || '';
+      if (!email || !password) {
+        setAuthStatus('Email and password required');
+        return;
+      }
+      try {
+        const res = await apiFetch('/api/files/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || 'Login failed');
+        setAuthVisibility(true);
+        setAppVisible(true);
+        setAuthStatus(`Logged in as ${data.email || email}`, true);
+        if (authUI.pass) authUI.pass.value = '';
+        await initApp();
+      } catch (err) {
+        setAuthStatus(err.message || 'Login failed');
+      }
+    }
+
+    async function doLogout() {
+      try {
+        await apiFetch('/api/files/logout', { method: 'POST' });
+      } catch (err) {
+        // ignore
+      }
+      setAuthStatus('Logged out', true);
+      resetAppState();
+      setAppVisible(false);
+      setAuthVisibility(false);
+    }
+
+    function wireAuthForm() {
+      authUI.loginBtn?.addEventListener('click', () => doLogin());
+      authUI.logoutBtn?.addEventListener('click', () => doLogout());
+    }
+
+    function defaultState() {
+      return {
+        transactions: [],
+        monthlyMovements: [],
+        monthlySnapshots: [],
+        preferences: { ...defaultPreferences },
+      };
+    }
+
+    function normalizeState(raw) {
+      const base = defaultState();
+      if (Array.isArray(raw)) {
+        base.transactions = raw;
+        return base;
+      }
+      if (raw && typeof raw === 'object') {
+        if (Array.isArray(raw.transactions)) base.transactions = raw.transactions;
+        if (Array.isArray(raw.monthlyMovements)) base.monthlyMovements = raw.monthlyMovements;
+        if (Array.isArray(raw.monthlySnapshots)) base.monthlySnapshots = raw.monthlySnapshots;
+        if (raw.preferences && typeof raw.preferences === 'object') {
+          base.preferences = { ...base.preferences, ...raw.preferences };
+          base.preferences.showZeroAssets = Boolean(base.preferences.showZeroAssets);
+        }
+      }
+      return base;
+    }
+
+    function loadFromLocalStorage() {
+      const fallback = normalizeState(null);
+
+      const rawPrimary = localStorage.getItem(primaryStorageKey);
+      if (rawPrimary) {
+        try {
+          return normalizeState(JSON.parse(rawPrimary));
+        } catch (e) {
+          console.error('invalid json in primary storage', e);
+        }
+      }
+
+      const rawLegacy = localStorage.getItem(legacyStorageKey);
+      if (rawLegacy) {
+        try {
+          const parsedLegacy = JSON.parse(rawLegacy);
+          if (Array.isArray(parsedLegacy)) {
+            return normalizeState(parsedLegacy);
+          }
+        } catch (e) {
+          console.error('invalid json in legacy storage', e);
+        }
+      }
+
+      return fallback;
+    }
+
+    function saveToLocalStorage(state) {
+      localStorage.setItem(primaryStorageKey, JSON.stringify(state));
+    }
+
+    function getCurrentState() {
+      return {
+        transactions,
+        monthlyMovements,
+        monthlySnapshots,
+        preferences: { showZeroAssets }
+      };
+    }
+
+    async function loadStateFromServer() {
+      const res = await apiFetch(`/api/files/${STATE_FILE}`, { cache: 'no-store' });
+      if (res.status === 401) throw new Error('unauthorized');
+      if (res.status === 404) return defaultState();
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      const data = await res.json();
+      return normalizeState(data);
+    }
+
+    async function saveStateToServer(state) {
+      try {
+        const res = await apiFetch(`/api/files/${STATE_FILE}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(state),
+        });
+        if (res.status === 401) {
+          setAuthStatus('Session expired. Please log in again.');
+          setAuthVisibility(false);
+          setAppVisible(false);
+          resetAppState();
+          return;
+        }
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      } catch (err) {
+        console.warn('Failed to save to server', err);
+      }
+    }
+
+    async function loadState() {
+      const localState = loadFromLocalStorage();
+      try {
+        const remote = await loadStateFromServer();
+        saveToLocalStorage(remote);
+        return remote;
+      } catch (err) {
+        if ((err.message || '').includes('unauthorized')) {
+          throw err;
+        }
+        console.warn('API not reachable, using localStorage', err);
+        return localState;
+      }
+    }
+
+    function queueServerSave(state) {
+      lastQueuedState = state;
+      if (serverSaveTimer) clearTimeout(serverSaveTimer);
+      serverSaveTimer = setTimeout(() => {
+        serverSaveTimer = null;
+        saveStateToServer(lastQueuedState);
+      }, 200);
+    }
+
+    function saveState() {
+      const state = getCurrentState();
+      saveToLocalStorage(state);
+      queueServerSave(state);
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('it-IT', {
+        style: 'currency',
+        currency: 'EUR'
+      }).format(value || 0);
+    }
+
+    function formatCurrencyWithColor(value) {
+      const num = Number(value) || 0;
+      const formatted = formatCurrency(num);
+      let cls = 'value-zero';
+      if (num > 0) cls = 'value-positive';
+      else if (num < 0) cls = 'value-negative';
+      return `<span class="${cls}">${formatted}</span>`;
+    }
+
+    function formatPercentWithColor(value, digits = 1) {
+      const num = Number(value) || 0;
+      let cls = 'value-zero';
+      if (num > 0) cls = 'value-positive';
+      else if (num < 0) cls = 'value-negative';
+      return `<span class="${cls}">${num.toFixed(digits)}%</span>`;
+    }
+
+    // ---------- DASHBOARD ----------
+    function renderDashboard() {
+      const totalInvested = transactions.reduce((sum, t) => sum + (t.currentValue || 0), 0);
+      const totalPnl = transactions.reduce((sum, t) => sum + (t.pnl || 0), 0);
+      document.getElementById('totalInvested').textContent = formatCurrency(totalInvested);
+      document.getElementById('totalPnl').innerHTML = formatCurrencyWithColor(totalPnl);
+
+      const assetSet = new Set();
+      transactions.forEach(t => { if (t.asset) assetSet.add(t.asset); });
+      document.getElementById('assetCount').textContent = String(assetSet.size);
+      document.getElementById('txCount').textContent = String(transactions.length);
+
+      const dates = transactions.map(t => t.date).filter(Boolean).sort();
+      document.getElementById('lastTxDate').textContent = dates.length ? dates[dates.length - 1] : '-';
+    }
+
+    // ---------- TRANSAZIONI: SORT + FILTER ----------
+    function getFilteredSortedTransactions() {
+      const filtered = transactions.filter(t => {
+        const checks = [
+          ['date', 'date'],
+          ['asset', 'asset'],
+          ['tipo', 'tipo'],
+          ['type', 'type'],
+          ['buyValue', 'buyValue'],
+          ['pnl', 'pnl'],
+          ['note', 'note']
+        ];
+        for (const [key, field] of checks) {
+          const filter = (transactionFilters[key] || '').trim().toLowerCase();
+          if (!filter) continue;
+          const value = t[field];
+          if (value == null) return false;
+          const valueStr = String(value).toLowerCase();
+          if (!valueStr.includes(filter)) return false;
+        }
+        return true;
+      });
+
+      const { column, direction } = transactionSortState;
+      filtered.sort((a, b) => {
+        let va = a[column];
+        let vb = b[column];
+
+        if (column === 'buyValue' || column === 'currentValue' || column === 'pnl') {
+          va = Number(va) || 0;
+          vb = Number(vb) || 0;
+        } else if (column === 'date') {
+          va = a.date || '';
+          vb = b.date || '';
+        } else {
+          va = (va || '').toString().toLowerCase();
+          vb = (vb || '').toString().toLowerCase();
+        }
+        if (va < vb) return direction === 'asc' ? -1 : 1;
+        if (va > vb) return direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      return filtered;
+    }
+
+    function updateTransactionSortIndicators() {
+      const ths = document.querySelectorAll('#page-transactions th[data-column]');
+      ths.forEach(th => {
+        const col = th.dataset.column;
+        const span = th.querySelector('.sort-indicator');
+        if (!span) return;
+        if (col === transactionSortState.column) {
+          span.textContent = transactionSortState.direction === 'asc' ? '▲' : '▼';
+        } else {
+          span.textContent = '';
+        }
+      });
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('transactionsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const rows = getFilteredSortedTransactions();
+      rows.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${t.date || ''}</td>
+          <td>${t.asset || ''}</td>
+          <td>${t.tipo || ''}</td>
+          <td>${t.type || ''}</td>
+          <td>${formatCurrencyWithColor(t.buyValue)}</td>
+          <td>${formatCurrencyWithColor(t.pnl)}</td>
+          <td>${t.note || ''}</td>
+          <td class="actions-cell">
+            <button class="btn-small edit-tx" data-id="${t.id}">✏️</button>
+            <button class="btn-small delete-tx" data-id="${t.id}">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function resetTransactionForm() {
+      const addForm = document.getElementById('addForm');
+      if (!addForm) return;
+      addForm.reset();
+      addForm.tipo.value = 'nuovo vincolo';
+      addForm.tipo.dispatchEvent(new Event('change'));
+      const today = new Date().toISOString().slice(0, 10);
+      if (addForm.date) addForm.date.value = today;
+      editingTransactionId = null;
+      const submitBtn = document.getElementById('txSubmitButton');
+      if (submitBtn) submitBtn.textContent = '💾 salva';
+      const cancelBtn = document.getElementById('txCancelEditButton');
+      if (cancelBtn) cancelBtn.style.display = 'none';
+    }
+
+    // ---------- MONTHLY MOVEMENTS: SORT + FILTER ----------
+    function getFilteredSortedMonthlyMovements() {
+      const filtered = monthlyMovements.filter(m => {
+        const checks = [
+          ['name', 'name'],
+          ['direction', 'direction'],
+          ['amount', 'amount'],
+          ['note', 'note']
+        ];
+        for (const [key, field] of checks) {
+          const filter = (mmFilters[key] || '').trim().toLowerCase();
+          if (!filter) continue;
+
+          let value;
+          if (field === 'amount') {
+            const signed = m.direction === 'expense' ? -(m.amount || 0) : (m.amount || 0);
+            value = signed;
+          } else {
+            value = m[field];
+          }
+          if (value == null) return false;
+          const valueStr = String(value).toLowerCase();
+          if (!valueStr.includes(filter)) return false;
+        }
+        return true;
+      });
+
+      const { column, direction } = mmSortState;
+      filtered.sort((a, b) => {
+        let va, vb;
+        if (column === 'amount') {
+          const sa = a.direction === 'expense' ? -(a.amount || 0) : (a.amount || 0);
+          const sb = b.direction === 'expense' ? -(b.amount || 0) : (b.amount || 0);
+          va = sa;
+          vb = sb;
+        } else {
+          va = (a[column] || '').toString().toLowerCase();
+          vb = (b[column] || '').toString().toLowerCase();
+        }
+        if (va < vb) return direction === 'asc' ? -1 : 1;
+        if (va > vb) return direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      return filtered;
+    }
+
+    function updateMmSortIndicators() {
+      const ths = document.querySelectorAll('#page-monthly-movements th[data-mm-column]');
+      ths.forEach(th => {
+        const col = th.dataset.mmColumn;
+        const span = th.querySelector('.sort-indicator');
+        if (!span) return;
+        if (col === mmSortState.column) {
+          span.textContent = mmSortState.direction === 'asc' ? '▲' : '▼';
+        } else {
+          span.textContent = '';
+        }
+      });
+    }
+
+    function renderMonthlyMovements() {
+      const tbody = document.getElementById('monthlyMovementsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const income = monthlyMovements.reduce((sum, m) =>
+        m.direction === 'income' ? sum + (m.amount || 0) : sum, 0);
+      const expense = monthlyMovements.reduce((sum, m) =>
+        m.direction === 'expense' ? sum + (m.amount || 0) : sum, 0);
+      const net = income - expense;
+
+      document.getElementById('mmIncome').innerHTML = formatCurrencyWithColor(income);
+      document.getElementById('mmExpense').innerHTML = formatCurrencyWithColor(-expense);
+      document.getElementById('mmNet').textContent = formatCurrency(net);
+
+      const list = getFilteredSortedMonthlyMovements();
+      list.forEach(m => {
+        const tr = document.createElement('tr');
+        const signedAmount = m.direction === 'expense' ? -m.amount : m.amount;
+        tr.innerHTML = `
+          <td>${m.name || ''}</td>
+          <td>${m.direction === 'income' ? 'entrata' : 'uscita'}</td>
+          <td>${formatCurrencyWithColor(signedAmount)}</td>
+          <td>${m.note || ''}</td>
+          <td>
+            <button class="btn-small edit-monthly" data-id="${m.id}">✏️</button>
+            <button class="btn-small delete-monthly" data-id="${m.id}">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ---------- AGGREGAZIONE ASSET ----------
+    function getAssetAggregation() {
+      const byAsset = {};
+      let totalCurrent = 0;
+
+      transactions.forEach(t => {
+        if (!t.asset) return;
+        if (!byAsset[t.asset]) {
+          byAsset[t.asset] = { buy: 0, current: 0, pnl: 0 };
+        }
+        byAsset[t.asset].buy += t.buyValue || 0;
+        byAsset[t.asset].current += t.currentValue || 0;
+        byAsset[t.asset].pnl += t.pnl || 0;
+        totalCurrent += t.currentValue || 0;
+      });
+
+      const labels = Object.keys(byAsset);
+      const data = labels.map(l => byAsset[l].current);
+      return { byAsset, labels, data, totalCurrent };
+    }
+
+    // ---------- BLOCCHETTI + GRAFICI ----------
+    function renderAssetBlocks() {
+      const container = document.getElementById('assetBlocks');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const { byAsset, labels, totalCurrent } = getAssetAggregation();
+      if (!labels.length || totalCurrent === 0) return;
+
+      const filteredLabels = showZeroAssets
+        ? labels
+        : labels.filter(asset => (byAsset[asset].current || 0) !== 0);
+
+      if (!filteredLabels.length) return;
+
+      filteredLabels.forEach(asset => {
+        const agg = byAsset[asset];
+        const ratio = agg.current / totalCurrent;
+        const profitPerc = agg.buy > 0 ? (agg.pnl / agg.buy) * 100 : 0;
+        const color = assetColorMap[asset] || '#7be6a6';
+
+        const block = document.createElement('div');
+        block.className = 'asset-block';
+        block.innerHTML = `
+          <div class="asset-block-title" style="color:${color}">${asset}</div>
+          <div class="asset-block-line">valore attuale: ${formatCurrencyWithColor(agg.current)}</div>
+          <div class="asset-block-line">investito: ${formatCurrency(agg.buy)}</div>
+          <div class="asset-block-line">pnl: ${formatCurrencyWithColor(agg.pnl)}</div>
+          <div class="asset-block-line">peso: ${(ratio * 100).toFixed(1)}%</div>
+          <div class="asset-block-line">profitto %: ${formatPercentWithColor(profitPerc)}</div>
+        `;
+        container.appendChild(block);
+      });
+    }
+
+    function renderAssetChart() {
+      const ctx = document.getElementById('assetAllocationChart');
+      if (!ctx) return;
+      const { labels, data, totalCurrent } = getAssetAggregation();
+      if (assetChart) assetChart.destroy();
+
+      if (!labels.length || totalCurrent === 0) {
+        ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+        return;
+      }
+
+      const colors = labels.map(label => assetColorMap[label] || randomColor(label));
+      labels.forEach((label, idx) => { assetColorMap[label] = colors[idx]; });
+
+      assetChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [{ data, backgroundColor: colors }]
+        },
+        options: {
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+
+    function renderAssetPnlChart() {
+      const ctx = document.getElementById('assetPnlChart');
+      if (!ctx) return;
+      const { byAsset, labels } = getAssetAggregation();
+      if (assetPnlChart) assetPnlChart.destroy();
+
+      if (!labels.length) {
+        ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+        return;
+      }
+
+      const data = labels.map(l => byAsset[l].pnl || 0);
+      const colors = labels.map(label => assetColorMap[label] || randomColor(label));
+      labels.forEach((label, idx) => { assetColorMap[label] = colors[idx]; });
+
+      assetPnlChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{ data, backgroundColor: colors }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              ticks: {
+                callback: value => formatCurrency(value)
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function randomColor(seed) {
+      let hash = 0;
+      for (let i = 0; i < seed.length; i++) {
+        hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const r = (hash >> 16) & 0xff;
+      const g = (hash >> 8) & 0xff;
+      const b = hash & 0xff;
+      return `rgb(${(r + 128) % 255}, ${(g + 128) % 255}, ${(b + 128) % 255})`;
+    }
+
+    function updateZeroAssetsToggleLabel() {
+      const btn = document.getElementById('toggleZeroAssetsButton');
+      if (!btn) return;
+      btn.textContent = showZeroAssets
+        ? 'nascondi investimenti chiusi (valore = 0)'
+        : 'mostra investimenti chiusi (valore = 0)';
+    }
+
+    // ---------- MONTHLY REVIEW ----------
+    function renderMonthlyReview(range = 'all') {
+      const select = document.getElementById('monthlyRangeSelect');
+      if (select && select.value !== range) {
+        range = select.value;
+      }
+
+      let filtered = [...monthlySnapshots];
+      if (range !== 'all') {
+        const now = new Date();
+        let cutoff;
+        if (range === '3m') cutoff = new Date(now.setMonth(now.getMonth() - 3));
+        else if (range === '6m') cutoff = new Date(now.setMonth(now.getMonth() - 6));
+        else if (range === '1y') cutoff = new Date(now.setFullYear(now.getFullYear() - 1));
+        else if (range === '3y') cutoff = new Date(now.setFullYear(now.getFullYear() - 3));
+        else if (range === '10y') cutoff = new Date(now.setFullYear(now.getFullYear() - 10));
+        if (cutoff) {
+          filtered = filtered.filter(s => new Date(s.date) >= cutoff);
+        }
+      }
+
+      filtered.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      const summary = document.getElementById('monthlySummary');
+      if (summary) {
+        const count = filtered.length;
+        const last = count ? filtered[filtered.length - 1] : null;
+        summary.innerHTML = count
+          ? `Snapshot totali: <strong>${count}</strong> • ultimo: <strong>${last?.date || ''}</strong>`
+          : 'caricata da <code>monthlySnapshots</code> (xlsx) – nessun dato ancora.';
+      }
+
+      const ctx = document.getElementById('monthlyRiskChart');
+      if (!ctx) return;
+      if (monthlyRiskChart) monthlyRiskChart.destroy();
+
+      const labels = filtered.map(s => s.date || '');
+      const lowData = filtered.map(s => s.low || 0);
+      const mediumData = filtered.map(s => s.medium || 0);
+      const highData = filtered.map(s => s.high || 0);
+      const liquidData = filtered.map(s => s.liquid || 0);
+
+      monthlyRiskChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label: 'low', data: lowData, borderColor: '#8bc34a', tension: 0.2 },
+            { label: 'medium', data: mediumData, borderColor: '#4caf50', tension: 0.2 },
+            { label: 'high', data: highData, borderColor: '#2e7d32', tension: 0.2 },
+            { label: 'liquid', data: liquidData, borderColor: '#7be6a6', tension: 0.2 }
+          ]
+        },
+        options: {
+          plugins: { legend: { position: 'bottom' } },
+          scales: {
+            y: { ticks: { callback: value => formatCurrency(value) } }
+          }
+        }
+      });
+    }
+
+    function inferTypeFromValues(buyValue, pnl) {
+      if (buyValue === null || buyValue === undefined) {
+        return pnl >= 0 ? 'return' : 'fee';
+      }
+      if (buyValue >= 0 && pnl >= 0) return 'buy';
+      if (buyValue >= 0 && pnl < 0) return 'buy-loss';
+      if (buyValue < 0 && pnl >= 0) return 'sell';
+      return 'sell-loss';
+    }
+
+    // ---------- IMPORT XLSX ----------
+    function parseXlsx(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            resolve(workbook);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = err => reject(err);
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function parseTransactionsSheet(rows) {
+      const list = [];
+      rows.forEach((row, idx) => {
+        const base = {
+          date: row.date || row['data'] || row['Data'] || '',
+          asset: row.asset || row['asset'] || row['Asset'] || '',
+          tipo: row.tipo || row['tipo'] || row['Tipo'] || '',
+          buyValue: Number(row.buyValue || row['buyValue'] || row['valore'] || 0),
+          pnl: Number(row.pnl || row['pnl'] || 0),
+          note: row.note || row['note'] || row['Note'] || ''
+        };
+        const currentValue = base.buyValue + base.pnl;
+        const type = inferTypeFromValues(base.buyValue, base.pnl);
+        list.push({
+          id: crypto.randomUUID ? crypto.randomUUID() : `tx-${Date.now()}-${idx}`,
+          ...base,
+          currentValue,
+          type
+        });
+      });
+      return list;
+    }
+
+    function normalizeSnapshotRow(row, index) {
+      const dateStr = (row.date || row['Date'] || row['data'] || row['Data'] || '').toString().slice(0, 10);
+      const low = parseFloat(row['low risk'] ?? row.lowRisk ?? row.low ?? '') || 0;
+      const medium = parseFloat(row['medium risk'] ?? row.mediumRisk ?? row.medium ?? '') || 0;
+      const high = parseFloat(row['high risk'] ?? row.highRisk ?? row.high ?? '') || 0;
+      const liquid = parseFloat(row['liquido'] ?? row.liquid ?? '') || 0;
+
+      if (!dateStr) return null;
+
+      return {
+        id: row.id || (crypto.randomUUID ? crypto.randomUUID() : `snap-${Date.now()}-${index}`),
+        date: dateStr,
+        low,
+        medium,
+        high,
+        liquid
+      };
+    }
+
+    function parseMovementsSheet(rows) {
+      const list = [];
+      rows.forEach((row, idx) => {
+        const valueRaw =
+          row.valore ?? row['valore'] ?? row['Valore'] ??
+          row.value ?? row['value'] ?? row['Value'];
+        if (valueRaw === null || valueRaw === undefined || valueRaw === '') return;
+        const value = parseFloat(valueRaw);
+        if (Number.isNaN(value)) return;
+
+        const direction = value >= 0 ? 'income' : 'expense';
+        const amount = Math.abs(value);
+        const name = (row.nome ?? row['nome'] ?? row['name'] ?? row['Name'] ?? '').toString();
+        const note = (row.note ?? row['note'] ?? row['Note'] ?? row.tipo ?? row['tipo'] ?? '').toString();
+
+        if (!name && !note) return;
+
+        list.push({
+          id: crypto.randomUUID ? crypto.randomUUID() : `mm-${Date.now()}-${idx}`,
+          name,
+          direction,
+          amount,
+          note
+        });
+      });
+      return list;
+    }
+
+    function renderEverything() {
+      updateTransactionSortIndicators();
+      updateMmSortIndicators();
+      renderDashboard();
+      renderTable();
+      renderMonthlyMovements();
+      renderAssetChart();
+      renderAssetPnlChart();
+      renderAssetBlocks();
+      updateZeroAssetsToggleLabel();
+      renderMonthlyReview();
+    }
+
+    // ---------- EXPORT JSON & XLSX ----------
+    async function exportBackup() {
+      const state = getCurrentState();
+      const json = JSON.stringify(state, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const today = new Date().toISOString().slice(0, 10);
+      const fileName = `investments-backup-${today}.json`;
+
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [{
+              description: 'JSON file',
+              accept: { 'application/json': ['.json'] }
+            }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          return;
+        } catch (err) {
+          console.warn('saveFilePicker failed, falling back', err);
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadXlsx() {
+      const wb = XLSX.utils.book_new();
+
+      const txRows = transactions.map(t => ({
+        date: t.date,
+        asset: t.asset,
+        tipo: t.tipo,
+        type: t.type,
+        buyValue: t.buyValue,
+        pnl: t.pnl,
+        note: t.note
+      }));
+      const mmRows = monthlyMovements.map(m => ({
+        name: m.name,
+        direction: m.direction,
+        amount: m.amount,
+        note: m.note
+      }));
+      const snapRows = monthlySnapshots.map(s => ({
+        date: s.date,
+        lowRisk: s.low,
+        mediumRisk: s.medium,
+        highRisk: s.high,
+        liquid: s.liquid
+      }));
+
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(txRows), 'rawTransactions');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(mmRows), 'movements');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(snapRows), 'monthlySnapshots');
+
+      XLSX.writeFile(wb, `investments-export-${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    function updateTxSort(column) {
+      if (transactionSortState.column === column) {
+        transactionSortState.direction = transactionSortState.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        transactionSortState.column = column;
+        transactionSortState.direction = 'desc';
+      }
+      renderTable();
+      updateTransactionSortIndicators();
+    }
+
+    function updateMmSort(column) {
+      if (mmSortState.column === column) {
+        mmSortState.direction = mmSortState.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        mmSortState.column = column;
+        mmSortState.direction = 'desc';
+      }
+      renderMonthlyMovements();
+      updateMmSortIndicators();
+    }
+
+    // ---------- NAV ----------
+    function showPage(pageName) {
+      document.querySelectorAll('.page').forEach(sec => {
+        sec.classList.toggle('active', sec.id === 'page-' + pageName);
+      });
+      document.querySelectorAll('.nav-button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.page === pageName);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.nav-button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.page;
+          if (target) showPage(target);
+        });
+      });
+
+      const tipoSelect = document.getElementById('tipoSelect');
+      const groupBuy = document.getElementById('groupBuy');
+      const groupPnl = document.getElementById('groupPnl');
+      if (tipoSelect && groupBuy && groupPnl) {
+        tipoSelect.addEventListener('change', () => {
+          const tipo = tipoSelect.value;
+          if (tipo === 'nuovo vincolo') {
+            groupBuy.style.display = 'block';
+            groupPnl.style.display = 'none';
+          } else if (
+            tipo === 'cedola' ||
+            tipo === 'interessi' ||
+            tipo === 'Variazione Valore' ||
+            tipo === 'cashback'
+          ) {
+            groupBuy.style.display = 'none';
+            groupPnl.style.display = 'block';
+          } else {
+            groupBuy.style.display = 'block';
+            groupPnl.style.display = 'block';
+          }
+        });
+        tipoSelect.dispatchEvent(new Event('change'));
+      }
+
+      // sort headers
+      document.querySelectorAll('#page-transactions th[data-column]').forEach(th => {
+        th.addEventListener('click', () => updateTxSort(th.dataset.column));
+      });
+      document.querySelectorAll('#page-monthly-movements th[data-mm-column]').forEach(th => {
+        th.addEventListener('click', () => updateMmSort(th.dataset.mmColumn));
+      });
+
+      // filters
+      document.querySelectorAll('[data-tx-filter]').forEach(input => {
+        input.addEventListener('input', () => {
+          const key = input.dataset.txFilter;
+          transactionFilters[key] = input.value;
+          renderTable();
+        });
+      });
+      document.querySelectorAll('[data-mm-filter]').forEach(input => {
+        input.addEventListener('input', () => {
+          const key = input.dataset.mmFilter;
+          mmFilters[key] = input.value;
+          renderMonthlyMovements();
+        });
+      });
+
+      const txTable = document.getElementById('transactionsTable');
+      if (txTable) {
+        txTable.addEventListener('click', event => {
+          const target = event.target;
+          if (!(target instanceof HTMLElement)) return;
+          if (target.classList.contains('edit-tx')) {
+            const id = target.dataset.id;
+            const tx = transactions.find(t => t.id === id);
+            if (!tx) return;
+            const addForm = document.getElementById('addForm');
+            if (!addForm) return;
+            addForm.date.value = tx.date || '';
+            addForm.asset.value = tx.asset || '';
+            addForm.tipo.value = tx.tipo || 'nuovo vincolo';
+            addForm.tipo.dispatchEvent(new Event('change'));
+            addForm.buyValue.value = tx.buyValue ?? '';
+            addForm.pnl.value = tx.pnl ?? '';
+            addForm.note.value = tx.note || '';
+            editingTransactionId = id;
+            const submitBtn = document.getElementById('txSubmitButton');
+            if (submitBtn) submitBtn.textContent = '✅ salva modifica';
+            const cancelBtn = document.getElementById('txCancelEditButton');
+            if (cancelBtn) cancelBtn.style.display = 'inline-block';
+          } else if (target.classList.contains('delete-tx')) {
+            const id = target.dataset.id;
+            const ok = confirm('Eliminare questa transazione?');
+            if (!ok) return;
+            transactions = transactions.filter(x => x.id !== id);
+            saveState();
+            renderEverything();
+            resetTransactionForm();
+          }
+        });
+      }
+
+      const txCancelBtn = document.getElementById('txCancelEditButton');
+      if (txCancelBtn) {
+        txCancelBtn.addEventListener('click', () => {
+          resetTransactionForm();
+        });
+      }
+
+      const monthlyForm = document.getElementById('monthlyForm');
+      if (monthlyForm) {
+        monthlyForm.addEventListener('submit', event => {
+          event.preventDefault();
+          const name = monthlyForm.name.value.trim();
+          const direction = monthlyForm.direction.value || 'income';
+          const amount = parseFloat(monthlyForm.amount.value || '0');
+          const note = monthlyForm.note.value || '';
+          if (!name) {
+            alert('Inserisci un nome per il movimento mensile');
+            return;
+          }
+          if (Number.isNaN(amount)) {
+            alert('Importo non valido');
+            return;
+          }
+
+          if (editingMonthlyId) {
+            monthlyMovements = monthlyMovements.map(m =>
+              m.id === editingMonthlyId
+                ? { ...m, name, direction, amount: Math.abs(amount), note }
+                : m
+            );
+          } else {
+            monthlyMovements.push({
+              id: crypto.randomUUID ? crypto.randomUUID() : `mm-${Date.now()}-${monthlyMovements.length}`,
+              name,
+              direction,
+              amount: Math.abs(amount),
+              note
+            });
+          }
+
+          saveState();
+          renderMonthlyMovements();
+          resetMonthlyForm();
+        });
+      }
+
+      const toggleZeroBtn = document.getElementById('toggleZeroAssetsButton');
+      if (toggleZeroBtn) {
+        toggleZeroBtn.addEventListener('click', () => {
+          showZeroAssets = !showZeroAssets;
+          saveState();
+          updateZeroAssetsToggleLabel();
+          renderAssetBlocks();
+        });
+        updateZeroAssetsToggleLabel();
+      }
+
+      // quick snapshot (monthly review)
+      const quickLiquidityInput = document.getElementById('quickLiquidityInput');
+      const addTodaySnapshotButton = document.getElementById('addTodaySnapshotButton');
+      if (quickLiquidityInput && addTodaySnapshotButton) {
+        addTodaySnapshotButton.addEventListener('click', () => {
+          const raw = quickLiquidityInput.value;
+          if (!raw) {
+            alert('Inserisci un valore di liquidità');
+            return;
+          }
+          const liquid = parseFloat(raw);
+          if (Number.isNaN(liquid)) {
+            alert('Valore di liquidità non valido');
+            return;
+          }
+          const today = new Date().toISOString().slice(0, 10);
+
+          let baseLow = 0, baseMedium = 0, baseHigh = 0;
+          if (monthlySnapshots.length) {
+            const sorted = [...monthlySnapshots].sort((a, b) =>
+              (a.date || '').localeCompare(b.date || '')
+            );
+            const last = sorted[sorted.length - 1];
+            baseLow = last.low || 0;
+            baseMedium = last.medium || 0;
+            baseHigh = last.high || 0;
+          }
+
+          monthlySnapshots = monthlySnapshots.filter(s => s.date !== today);
+          monthlySnapshots.push({
+            id: crypto.randomUUID ? crypto.randomUUID() : `snap-${Date.now()}-${monthlySnapshots.length}`,
+            date: today,
+            low: baseLow,
+            medium: baseMedium,
+            high: baseHigh,
+            liquid
+          });
+
+          saveState();
+          renderMonthlyReview();
+          quickLiquidityInput.value = '';
+        });
+      }
+    });
+
+    // ---------- NUOVA TRANSAZIONE ----------
+    document.addEventListener('DOMContentLoaded', () => {
+      const addForm = document.getElementById('addForm');
+      if (!addForm) return;
+
+      addForm.addEventListener('submit', event => {
+        event.preventDefault();
+
+        const tipo = addForm.tipo.value;
+        let buyValue = 0;
+        let pnl = 0;
+
+        if (tipo === 'nuovo vincolo') {
+          buyValue = parseFloat(addForm.buyValue.value || '0');
+          pnl = 0;
+        } else if (
+          tipo === 'cedola' ||
+          tipo === 'interessi' ||
+          tipo === 'Variazione Valore' ||
+          tipo === 'cashback'
+        ) {
+          buyValue = 0;
+          pnl = parseFloat(addForm.pnl.value || '0');
+        } else {
+          buyValue = parseFloat(addForm.buyValue.value || '0');
+          pnl = parseFloat(addForm.pnl.value || '0');
+        }
+
+        const currentValue = buyValue + pnl;
+        const buyForType = (
+          tipo === 'cedola' ||
+          tipo === 'interessi' ||
+          tipo === 'Variazione Valore' ||
+          tipo === 'cashback'
+        ) ? null : buyValue;
+        const type = inferTypeFromValues(buyForType, pnl);
+
+        const base = {
+          date: addForm.date.value,
+          asset: addForm.asset.value,
+          tipo: tipo,
+          type: type,
+          buyValue: buyValue,
+          currentValue: currentValue,
+          pnl: pnl,
+          note: addForm.note.value
+        };
+
+        if (editingTransactionId) {
+          transactions = transactions.map(t =>
+            t.id === editingTransactionId ? { ...t, ...base, id: editingTransactionId } : t
+          );
+        } else {
+          transactions.push({
+            id: crypto.randomUUID ? crypto.randomUUID() : `tx-${Date.now()}-${transactions.length}`,
+            ...base
+          });
+        }
+
+        saveState();
+        renderEverything();
+        resetTransactionForm();
+      });
+    });
+
+    function resetMonthlyForm() {
+      const monthlyForm = document.getElementById('monthlyForm');
+      if (!monthlyForm) return;
+      monthlyForm.reset();
+      monthlyForm.direction.value = 'income';
+      editingMonthlyId = null;
+      const submitBtn = document.getElementById('monthlySubmitButton');
+      if (submitBtn) submitBtn.textContent = '💾 salva';
+      const cancelBtn = document.getElementById('monthlyCancelEditButton');
+      if (cancelBtn) cancelBtn.style.display = 'none';
+    }
+
+    // ---------- IMPORT/EXPORT ----------
+    document.addEventListener('DOMContentLoaded', () => {
+      const fileInput = document.getElementById('fileInput');
+      const importBackupInput = document.getElementById('importBackupInput');
+      const exportBackupButton = document.getElementById('exportBackupButton');
+      const exportXlsxButton = document.getElementById('exportXlsxButton');
+      const fullPurgeButton = document.getElementById('fullPurgeButton');
+
+      if (fileInput) {
+        fileInput.addEventListener('change', async event => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+          try {
+            const wb = await parseXlsx(file);
+            const txSheet = wb.Sheets['rawTransactions'];
+            const mmSheet = wb.Sheets['movements'];
+            const snapSheet = wb.Sheets['monthlySnapshots'];
+
+            if (txSheet) {
+              const rows = XLSX.utils.sheet_to_json(txSheet);
+              transactions = parseTransactionsSheet(rows);
+            }
+            if (mmSheet) {
+              const rows = XLSX.utils.sheet_to_json(mmSheet);
+              monthlyMovements = parseMovementsSheet(rows);
+            }
+            if (snapSheet) {
+              const rows = XLSX.utils.sheet_to_json(snapSheet);
+              monthlySnapshots = rows
+                .map((row, idx) => normalizeSnapshotRow(row, idx))
+                .filter(Boolean);
+            }
+
+            saveState();
+            renderEverything();
+          } catch (err) {
+            alert('Import fallita: ' + err.message);
+          } finally {
+            fileInput.value = '';
+          }
+        });
+      }
+
+      if (importBackupInput) {
+        importBackupInput.addEventListener('change', event => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = e => {
+            try {
+              const parsed = JSON.parse(e.target.result);
+              const state = normalizeState(parsed);
+              transactions = state.transactions;
+              monthlyMovements = state.monthlyMovements;
+              monthlySnapshots = state.monthlySnapshots;
+              showZeroAssets = !!(state.preferences?.showZeroAssets ?? true);
+              saveState();
+              renderEverything();
+            } catch (err) {
+              alert('JSON non valido');
+            }
+          };
+          reader.readAsText(file);
+          importBackupInput.value = '';
+        });
+      }
+
+      exportBackupButton?.addEventListener('click', () => exportBackup());
+      exportXlsxButton?.addEventListener('click', () => downloadXlsx());
+      fullPurgeButton?.addEventListener('click', () => {
+        const ok = confirm('Confermi purge completa di tutti i dati?');
+        if (!ok) return;
+        transactions = [];
+        monthlyMovements = [];
+        monthlySnapshots = [];
+        showZeroAssets = true;
+        saveState();
+        renderEverything();
+      });
+
+      const monthlyRangeSelect = document.getElementById('monthlyRangeSelect');
+      if (monthlyRangeSelect) {
+        monthlyRangeSelect.addEventListener('change', () => renderMonthlyReview(monthlyRangeSelect.value));
+      }
+    });
+
+    // ---------- INIT ----------
+    function applyState(state) {
+      transactions = state.transactions || [];
+      monthlyMovements = state.monthlyMovements || [];
+      monthlySnapshots = state.monthlySnapshots || [];
+      if (state.preferences && typeof state.preferences === 'object') {
+        showZeroAssets = Boolean(state.preferences.showZeroAssets);
+      } else {
+        showZeroAssets = true;
+      }
+      renderEverything();
+    }
+
+    async function initApp() {
+      try {
+        const initialState = await loadState();
+        applyState(initialState);
+      } catch (err) {
+        setAuthStatus(err.message || 'Failed to load state');
+        console.error('failed to initialize state', err);
+      }
+    }
+
+    async function restoreSessionIfPossible() {
+      try {
+        const state = await loadState();
+        setAuthVisibility(true);
+        setAppVisible(true);
+        applyState(state);
+        return true;
+      } catch (err) {
+        if ((err.message || '').includes('unauthorized')) {
+          setAuthVisibility(false);
+          setAppVisible(false);
+          return false;
+        }
+        console.warn('could not restore session', err);
+        return false;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      wireAuthForm();
+      setAuthVisibility(false);
+      setAppVisible(false);
+      resetAppState();
+      await restoreSessionIfPossible();
+    });
+  </script>
+</body>
+</html>
