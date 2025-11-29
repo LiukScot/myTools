@@ -1,11 +1,14 @@
-name: Deploy myHealth (FTP)
+name: Deploy site (hub + myHealth + myMoney)
 
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
+      - 'hub/**'
       - 'myHealth/**'
+      - 'myMoney/**'
+      - 'deploy.sh'
       - '.github/workflows/deploy.yml'
 
 jobs:
@@ -23,17 +26,14 @@ jobs:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.FTP_USER }}
           FTP_PASS: ${{ secrets.FTP_PASS }}
-          REMOTE_BASE: ${{ secrets.REMOTE_BASE }}
+          BASE_REMOTE: ${{ secrets.BASE_REMOTE }}
+          REMOTE_HUB: ${{ secrets.REMOTE_HUB }}
+          REMOTE_HEALTH: ${{ secrets.REMOTE_HEALTH }}
+          REMOTE_MONEY: ${{ secrets.REMOTE_MONEY }}
         run: |
           set -euo pipefail
           : "${FTP_HOST:?FTP_HOST secret missing}"
           : "${FTP_USER:?FTP_USER secret missing}"
           : "${FTP_PASS:?FTP_PASS secret missing}"
-          REMOTE_BASE="${REMOTE_BASE:-/public_html/myhealth}"
-          LOCAL_DIR="$(realpath myHealth/web)"
-          if [[ ! -d "$LOCAL_DIR" ]]; then
-            echo "Local dir not found: $LOCAL_DIR" >&2
-            exit 1
-          fi
-          echo "Deploying $LOCAL_DIR -> $REMOTE_BASE on $FTP_HOST as $FTP_USER"
-          lftp -u "$FTP_USER","$FTP_PASS" sftp://"$FTP_HOST" -e "set ssl:verify-certificate no; set sftp:auto-confirm yes; mirror -R --delete --verbose --parallel=4 --exclude-glob .DS_Store --include-glob .htaccess \"$LOCAL_DIR\" \"$REMOTE_BASE\"; bye"
+          chmod +x deploy.sh
+          ./deploy.sh

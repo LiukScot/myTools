@@ -15,10 +15,9 @@ Personal site stack for `liukscot.com`, housing multiple sub-apps.
   - myMoney at `http://127.0.0.1:8000/mymoney`
 
 ## Deploy (shared script)
-- Use `deploy.sh` from repo root with `APP` set:
-  - Hub: `APP=hub FTP_HOST=... FTP_USER=... FTP_PASS=... ./deploy.sh`
-  - myHealth: `APP=myhealth FTP_HOST=... FTP_USER=... FTP_PASS=... ./deploy.sh`
-  - myMoney: `APP=mymoney FTP_HOST=... FTP_USER=... FTP_PASS=... ./deploy.sh`
+- Use `deploy.sh` from repo root to push hub + myHealth + myMoney in one go:
+  - `FTP_HOST=... FTP_USER=... FTP_PASS=... ./deploy.sh`
+  - Optional overrides: `BASE_REMOTE=/public_html`, `REMOTE_HUB=/public_html`, `REMOTE_HEALTH=/public_html/myhealth`, `REMOTE_MONEY=/public_html/mymoney`.
 
 ## Notes
 - Both apps share the same DB and FTP credentials; `.env` at repo root is the single source for local dev.
