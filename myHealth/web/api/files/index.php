@@ -41,7 +41,7 @@ $FILES_TABLE = 'files';
 
 // Ensure session cookie is scoped broadly so subsequent requests keep auth
 $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') === '443';
-session_name('PHPSESSID');
+session_name('MYTOOLSS');
 set_session_cookie_params($isSecure);
 session_start();
 
@@ -242,7 +242,14 @@ if (preg_match('#/api(?:/files)?/login/?$#', $rawUri)) {
         $_SESSION['role'] = $user['role'];
         session_regenerate_id(true);
         send_session_cookie($isSecure);
-        respond(200, ['status' => 'ok', 'email' => $user['email'], 'name' => $user['name'], 'role' => $user['role']]);
+        respond(200, [
+            'status' => 'ok',
+            'email' => $user['email'],
+            'name' => $user['name'],
+            'role' => $user['role'],
+            'session_name' => session_name(),
+            'session_id' => session_id(),
+        ]);
     } catch (Throwable $e) {
         respond(500, ['error' => 'login failed', 'detail' => $e->getMessage()]);
     }
