@@ -37,6 +37,16 @@ $FILES_TABLE = 'files';
 
 // ---- No edits needed below unless you want to customize behavior ----
 
+// Ensure session cookie is scoped broadly so subsequent requests keep auth
+$isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') === '443';
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => $isSecure,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
 session_start();
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
