@@ -9,17 +9,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #05080f;
-      --panel: #0c111a;
-      --card: #111827;
-      --card-strong: #182133;
+      --bg: #000000;
+      --panel: #0b0b0d;
+      --card: #1f1f23;
+      --card-strong: #26262b;
       --accent: #7be6a6;
       --accent-2: #b9f6d2;
-      --text: #e6eefc;
-      --muted: #9fb0c8;
-      --border: #1f2a3d;
+      --text: #f5f5f7;
+      --muted: #a1a1ad;
+      --border: #35353b;
       --danger: #f97373;
-      --shadow: 0 20px 55px rgba(0, 0, 0, 0.45);
+      --shadow: 0 20px 55px rgba(0,0,0,0.5);
     }
     * { box-sizing: border-box; }
     body {
@@ -125,11 +125,21 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 12px;
+      gap: 12px;
+      flex-wrap: wrap;
     }
     .top-nav {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+      flex: 1 1 auto;
+    }
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
     }
     .nav-button {
       border-radius: 12px;
@@ -149,6 +159,16 @@
     }
     .nav-button:hover { border-color: var(--accent); }
     .nav-button.danger { color: var(--danger); border-color: rgba(249,115,115,0.5); }
+    .hub-link {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .hub-link svg { stroke: currentColor; width: 14px; height: 14px; }
 
     .actions-cell { white-space: nowrap; }
     .field-group { margin-bottom: 10px; }
@@ -300,7 +320,15 @@
           <button class="nav-button" data-page="transactions">🧾 transactions</button>
           <button class="nav-button" data-page="import-backup">📥 import / backup</button>
         </nav>
-        <button class="nav-button danger hidden" id="auth-logout" type="button">Log out</button>
+        <div class="top-actions">
+          <a class="nav-button hub-link hidden" id="go-hub" href="/" aria-label="Back to hub">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M15 5l-7 7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Back to hub</span>
+          </a>
+          <button class="nav-button danger hidden" id="auth-logout" type="button">Log out</button>
+        </div>
       </div>
 
       <!-- DASHBOARD -->
@@ -596,6 +624,7 @@
       pass: document.getElementById('auth-pass'),
       loginBtn: document.getElementById('auth-login'),
       logoutBtn: document.getElementById('auth-logout'),
+      hubBtn: document.getElementById('go-hub'),
       status: document.getElementById('auth-status'),
     };
     const appMain = document.getElementById('app-main');
@@ -628,6 +657,7 @@
       const toHide = [authUI.email, authUI.pass, authUI.loginBtn, authUI.status];
       toHide.forEach(el => el?.classList.toggle('hidden', authed));
       authUI.logoutBtn?.classList.toggle('hidden', !authed);
+      authUI.hubBtn?.classList.toggle('hidden', !authed);
       const card = document.querySelector('.auth-card');
       card?.classList.toggle('hidden', authed);
       if (!authed) setAuthStatus('');
