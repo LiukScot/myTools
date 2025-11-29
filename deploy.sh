@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-# Shared deploy script for myHealth and myMoney (Hetzner webhosting, same provider).
-# Usage examples (run from repo root):
-#   APP=myhealth FTP_HOST=host FTP_USER=user FTP_PASS='pass' ./deploy.sh
-#   APP=mymoney  FTP_HOST=host FTP_USER=user FTP_PASS='pass' ./deploy.sh
-# Optional overrides: REMOTE_BASE=/public_html/custom LOCAL_DIR=/path/to/web
+# Deploy hub + myHealth + myMoney (Hetzner webhosting) in one go.
+# Usage (run from repo root):
+#   FTP_HOST=host FTP_USER=user FTP_PASS='pass' ./deploy.sh
+# Optional overrides:
+#   BASE_REMOTE=/public_html/custom
+#   REMOTE_HUB=/public_html
+#   REMOTE_HEALTH=/public_html/myhealth
+#   REMOTE_MONEY=/public_html/mymoney
 
 set -euo pipefail
 
@@ -12,14 +15,18 @@ if ! command -v lftp >/dev/null 2>&1; then
   exit 1
 fi
 
-APP="${APP:-myhealth}"
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
-case "$APP" in
-  myhealth|myHealth) LOCAL_DIR="${LOCAL_DIR:-$ROOT_DIR/myHealth/web}"; REMOTE_BASE="${REMOTE_BASE:-/public_html/myhealth}";;
-  mymoney|myMoney)   LOCAL_DIR="${LOCAL_DIR:-$ROOT_DIR/myMoney/web}";  REMOTE_BASE="${REMOTE_BASE:-/public_html/mymoney}";;
-  hub|root)          LOCAL_DIR="${LOCAL_DIR:-$ROOT_DIR/hub}";          REMOTE_BASE="${REMOTE_BASE:-/public_html}";;
-  *) echo "Unknown APP '$APP' (use myhealth, mymoney, or hub/root)" >&2; exit 1;;
-esac
+BASE_REMOTE="${BASE_REMOTE:-/public_html}"
+
+REMOTE_HUB="${REMOTE_HUB:-${BASE_REMOTE}}"
+REMOTE_HEALTH="${REMOTE_HEALTH:-${BASE_REMOTE}/myhealth}"
+REMOTE_MONEY="${REMOTE_MONEY:-${BASE_REMOTE}/mymoney}"
+
+TARGETS=(
+  "$ROOT_DIR/hub:${REMOTE_HUB}"
+  "$ROOT_DIR/myHealth/web:${REMOTE_HEALTH}"
+  "$ROOT_DIR/myMoney/web:${REMOTE_MONEY}"
+)
 
 FTP_HOST="${FTP_HOST:-}"
 FTP_USER="${FTP_USER:-}"
@@ -30,21 +37,28 @@ if [[ -z "$FTP_HOST" || -z "$FTP_USER" || -z "$FTP_PASS" ]]; then
   exit 1
 fi
 
-if [[ ! -d "$LOCAL_DIR" ]]; then
-  echo "Local directory not found: $LOCAL_DIR" >&2
-  exit 1
-fi
-
-echo "Deploying $LOCAL_DIR -> $REMOTE_BASE on $FTP_HOST as $FTP_USER (cleanup enabled)"
-
-lftp -u "$FTP_USER","$FTP_PASS" sftp://"$FTP_HOST" <<EOF
+deploy_one() {
+  local src="$1"
+  local dest="$2"
+  if [[ ! -d "$src" ]]; then
+    echo "Local directory not found: $src" >&2
+    return 1
+  }
+  echo "Deploying $src -> $dest on $FTP_HOST as $FTP_USER (cleanup enabled)"
+  lftp -u "$FTP_USER","$FTP_PASS" sftp://"$FTP_HOST" <<EOF
 set ssl:verify-certificate no
 set sftp:auto-confirm yes
 mirror -R --delete --verbose --parallel=4 \
   --exclude-glob ".DS_Store" \
   --include-glob ".htaccess" \
-  "$LOCAL_DIR" "$REMOTE_BASE"
+  "$src" "$dest"
 bye
 EOF
+}
+
+for pair in "${TARGETS[@]}"; do
+  IFS=':' read -r src dest <<<"$pair"
+  deploy_one "$src" "$dest"
+done
 
 echo "Deploy complete."
