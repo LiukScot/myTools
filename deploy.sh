@@ -43,7 +43,7 @@ deploy_one() {
   if [[ ! -d "$src" ]]; then
     echo "Local directory not found: $src" >&2
     return 1
-  }
+  fi
   echo "Deploying $src -> $dest on $FTP_HOST as $FTP_USER (cleanup enabled)"
   lftp -u "$FTP_USER","$FTP_PASS" sftp://"$FTP_HOST" <<EOF
 set ssl:verify-certificate no
