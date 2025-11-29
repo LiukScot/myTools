@@ -735,6 +735,15 @@
       return fetch(finalUrl, opts);
     }
 
+    async function safeParseJson(res) {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        return text;
+      }
+    }
+
     function setAuthStatus(message, ok = false) {
       if (!authUI.status) return;
       authUI.status.innerHTML = message
@@ -777,8 +786,8 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.error || 'Login failed');
+        const data = await safeParseJson(res);
+        if (!res.ok) throw new Error((data && data.error) || (typeof data === 'string' ? data : '') || 'Login failed');
         setAuthVisibility(true);
         setAppVisible(true);
         setAuthStatus(`Logged in as ${data.email || email}`, true);
