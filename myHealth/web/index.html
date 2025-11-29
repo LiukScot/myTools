@@ -1530,10 +1530,15 @@
         const res = await apiFetch(`/api/files/${cfg.file}`);
         if (res.status === 401) {
           if (!silentAuthFail) setAuthStatus("Please log in to load data");
-          setBackupError(`401 unauthorized loading ${cfg.file}`);
+          const body = await res.text();
+          setBackupError(`401 unauthorized loading ${cfg.file}\n${body}`);
           return false;
         }
-        if (!res.ok) return false;
+        if (!res.ok) {
+          const body = await res.text();
+          setBackupError(`Error ${res.status} loading ${cfg.file}\n${body}`);
+          return false;
+        }
         const data = await res.json();
         if (data && data.rows && data.headers) {
         const normalized = normalizeDataset(data, kind);

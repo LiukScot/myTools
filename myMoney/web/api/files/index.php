@@ -183,7 +183,12 @@ function require_auth() {
         return;
     }
     if (!is_authed()) {
-        respond(401, ['error' => 'unauthorized']);
+        respond(401, [
+            'error' => 'unauthorized',
+            'session_name' => session_name(),
+            'session_id' => session_id(),
+            'has_user' => isset($_SESSION['user_id']),
+        ]);
     }
 }
 
