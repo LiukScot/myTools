@@ -39,14 +39,19 @@ $FILES_TABLE = 'files';
 
 // Ensure session cookie is scoped broadly so subsequent requests keep auth
 $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') === '443';
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path' => '/',
-    'domain' => '',
-    'secure' => $isSecure,
-    'httponly' => true,
-    'samesite' => 'Lax',
-]);
+if (PHP_VERSION_ID >= 70300) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => $isSecure,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+} else {
+    // Older PHP versions: no array signature and no sameSite support
+    session_set_cookie_params(0, '/', '', $isSecure, true);
+}
 session_start();
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';

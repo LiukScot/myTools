@@ -50,6 +50,7 @@ set ssl:verify-certificate no
 set sftp:auto-confirm yes
 mirror -R --delete --verbose --parallel=4 \
   --exclude-glob ".DS_Store" \
+  --exclude-glob ".env" \
   --include-glob ".htaccess" \
   "$src" "$dest"
 bye
