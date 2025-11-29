@@ -5,14 +5,18 @@
 
 // ---- DB credentials are provided via environment (.env file or hosting panel) ----
 $_ENV_PATHS_LOADED = [];
-function load_env_files(array $paths) {
+function load_env_files(array $paths)
+{
     global $_ENV_PATHS_LOADED;
     foreach ($paths as $path) {
-        if (!is_file($path)) continue;
+        if (!is_file($path))
+            continue;
         $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
-            if (preg_match('/^\s*#/', $line)) continue;
-            if (strpos($line, '=') === false) continue;
+            if (preg_match('/^\s*#/', $line))
+                continue;
+            if (strpos($line, '=') === false)
+                continue;
             [$key, $val] = explode('=', $line, 2);
             $key = trim($key);
             if (stripos($key, 'export ') === 0) {
@@ -20,7 +24,8 @@ function load_env_files(array $paths) {
             }
             $val = trim($val);
             $val = trim($val, "\"'");
-            if ($key === '') continue;
+            if ($key === '')
+                continue;
             if (function_exists('putenv')) {
                 @putenv("$key=$val");
             }
@@ -37,6 +42,15 @@ $FILES_TABLE = 'files';
 
 // ---- No edits needed below unless you want to customize behavior ----
 
+$isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => $isSecure,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 session_start();
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -54,13 +68,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-function respond($code, $data) {
+function respond($code, $data)
+{
     http_response_code($code);
     echo json_encode($data);
     exit;
 }
 
-function read_json() {
+function read_json()
+{
     $body = file_get_contents('php://input');
     $data = json_decode($body, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
@@ -77,7 +93,8 @@ $env_candidates = [
     __DIR__ . '/.env',
 ];
 load_env_files($env_candidates);
-function env_or_fail($key) {
+function env_or_fail($key)
+{
     global $_ENV_PATHS_LOADED;
     $candidates = [
         getenv($key),
@@ -101,8 +118,17 @@ function env_or_fail($key) {
     respond(500, ['error' => "missing env $key", 'hint' => $hint]);
 }
 
-function set_session_cookie_params($isSecure) {
-    // legacy no-op kept for compatibility; using default session behavior
+function send_session_cookie($isSecure)
+{
+    $params = session_get_cookie_params();
+    setcookie(session_name(), session_id(), [
+        'expires' => time() + 60 * 60 * 24 * 30, // 30 days, or use 0 for session
+        'path' => $params['path'],
+        'domain' => $params['domain'],
+        'secure' => $isSecure,
+        'httponly' => $params['httponly'],
+        'samesite' => 'Lax' // or Strict
+    ]);
 }
 $DB_HOST = env_or_fail('DB_HOST');
 $DB_USER = env_or_fail('DB_USER');
@@ -140,11 +166,13 @@ $mysqli->query(
 );
 
 // Helpers
-function is_authed() {
+function is_authed()
+{
     return isset($_SESSION['user_id']);
 }
 
-function require_auth() {
+function require_auth()
+{
     $appKey = getenv('APP_KEY') ?: ($_ENV['APP_KEY'] ?? null);
     $headerKey = $_SERVER['HTTP_X_APP_KEY'] ?? null;
     if ($appKey && $headerKey && hash_equals($appKey, $headerKey)) {
@@ -161,19 +189,24 @@ $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
 // Register endpoint: POST /api/register or /api/files/register {email, password, name}
 if (preg_match('#/api(?:/files)?/register/?$#', $rawUri)) {
-    if (!$ALLOW_SIGNUP) respond(403, ['error' => 'signup disabled']);
-    if ($method !== 'POST') respond(405, ['error' => 'method not allowed']);
+    if (!$ALLOW_SIGNUP)
+        respond(403, ['error' => 'signup disabled']);
+    if ($method !== 'POST')
+        respond(405, ['error' => 'method not allowed']);
     $body = read_json();
     $email = trim($body['email'] ?? '');
     $password = $body['password'] ?? '';
     $name = trim($body['name'] ?? '');
-    if ($email === '' || $password === '') respond(400, ['error' => 'email and password required']);
-    if (strlen($password) < 8) respond(400, ['error' => 'password too short']);
+    if ($email === '' || $password === '')
+        respond(400, ['error' => 'email and password required']);
+    if (strlen($password) < 8)
+        respond(400, ['error' => 'password too short']);
     $stmt = $mysqli->prepare("SELECT id FROM users WHERE email=? LIMIT 1");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $stmt->store_result();
-    if ($stmt->num_rows > 0) respond(400, ['error' => 'email already exists']);
+    if ($stmt->num_rows > 0)
+        respond(400, ['error' => 'email already exists']);
     $hash = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $mysqli->prepare("INSERT INTO users (email, password_hash, name, role) VALUES (?, ?, ?, 'user')");
     $stmt->bind_param("sss", $email, $hash, $name);
@@ -186,11 +219,13 @@ if (preg_match('#/api(?:/files)?/register/?$#', $rawUri)) {
 // Login endpoint: POST /api/login or /api/files/login {email, password}
 if (preg_match('#/api(?:/files)?/login/?$#', $rawUri)) {
     try {
-        if ($method !== 'POST') respond(405, ['error' => 'method not allowed']);
+        if ($method !== 'POST')
+            respond(405, ['error' => 'method not allowed']);
         $body = read_json();
         $email = trim($body['email'] ?? '');
         $password = $body['password'] ?? '';
-        if ($email === '' || $password === '') respond(400, ['error' => 'email and password required']);
+        if ($email === '' || $password === '')
+            respond(400, ['error' => 'email and password required']);
         $stmt = $mysqli->prepare("SELECT id, email, password_hash, name, role FROM users WHERE email=? LIMIT 1");
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -220,13 +255,19 @@ if (preg_match('#/api(?:/files)?/login/?$#', $rawUri)) {
 
 // Logout endpoint: POST /api/logout or /api/files/logout
 if (preg_match('#/api(?:/files)?/logout/?$#', $rawUri)) {
-    if ($method !== 'POST') respond(405, ['error' => 'method not allowed']);
+    if ($method !== 'POST')
+        respond(405, ['error' => 'method not allowed']);
     $_SESSION = [];
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 42000,
-            $params["path"], $params["domain"],
-            $params["secure"], $params["httponly"]
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params["path"],
+            $params["domain"],
+            $params["secure"],
+            $params["httponly"]
         );
     }
     session_destroy();

@@ -37,6 +37,15 @@ $FILES_TABLE = 'files';
 
 // ---- No edits needed below unless you want to customize behavior ----
 
+$isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => $isSecure,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 session_start();
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -78,8 +87,16 @@ $env_candidates = [
 ];
 load_env_files($env_candidates);
 
-function set_session_cookie_params($isSecure) {
-    // legacy no-op kept for compatibility; using default session behavior
+function send_session_cookie($isSecure) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), session_id(), [
+        'expires' => time() + 60 * 60 * 24 * 30, // 30 days, or use 0 for session
+        'path' => $params['path'],
+        'domain' => $params['domain'],
+        'secure' => $isSecure,
+        'httponly' => $params['httponly'],
+        'samesite' => 'Lax' // or Strict
+    ]);
 }
 function env_or_fail($key) {
     global $_ENV_PATHS_LOADED;
