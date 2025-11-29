@@ -39,6 +39,7 @@ $FILES_TABLE = 'files';
 
 // Ensure session cookie is scoped broadly so subsequent requests keep auth
 $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') === '443';
+session_name('MYHEALTHSESS');
 if (PHP_VERSION_ID >= 70300) {
     session_set_cookie_params([
         'lifetime' => 0,
@@ -156,6 +157,11 @@ function is_authed() {
 }
 
 function require_auth() {
+    $appKey = getenv('APP_KEY') ?: ($_ENV['APP_KEY'] ?? null);
+    $headerKey = $_SERVER['HTTP_X_APP_KEY'] ?? null;
+    if ($appKey && $headerKey && hash_equals($appKey, $headerKey)) {
+        return;
+    }
     if (!is_authed()) {
         respond(401, ['error' => 'unauthorized']);
     }

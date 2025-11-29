@@ -37,6 +37,21 @@ $FILES_TABLE = 'files';
 
 // ---- No edits needed below unless you want to customize behavior ----
 
+// Broader cookie scope so auth persists across API calls
+$isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') === '443';
+session_name('MYMONEYSESS');
+if (PHP_VERSION_ID >= 70300) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => $isSecure,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+} else {
+    session_set_cookie_params(0, '/', '', $isSecure, true);
+}
 session_start();
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -141,6 +156,11 @@ function is_authed() {
 }
 
 function require_auth() {
+    $appKey = getenv('APP_KEY') ?: ($_ENV['APP_KEY'] ?? null);
+    $headerKey = $_SERVER['HTTP_X_APP_KEY'] ?? null;
+    if ($appKey && $headerKey && hash_equals($appKey, $headerKey)) {
+        return;
+    }
     if (!is_authed()) {
         respond(401, ['error' => 'unauthorized']);
     }
