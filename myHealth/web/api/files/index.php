@@ -45,6 +45,10 @@ session_save_path(sys_get_temp_dir());
 session_name('MYTOOLSS');
 set_session_cookie_params($isSecure);
 session_start();
+if (session_id() === '') {
+    session_regenerate_id(true);
+    send_session_cookie($isSecure);
+}
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 header('Content-Type: application/json');
