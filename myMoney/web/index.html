@@ -113,7 +113,25 @@
     .chart-card canvas { width: 100%; max-width: 320px; max-height: 260px; }
     .asset-blocks { margin-top: 10px; }
     .asset-block { min-width: 200px; }
+    .asset-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
     .asset-block-title { font-weight: 700; margin-bottom: 4px; }
+    .asset-color-controls { display: flex; align-items: center; gap: 6px; }
+    .asset-color-input {
+      width: 32px;
+      height: 28px;
+      padding: 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      cursor: pointer;
+    }
+    .color-btn { padding: 6px 10px; font-size: 12px; }
     .asset-block-line { font-size: 13px; color: var(--muted); }
     .monthly-chart-box { height: 260px; margin-top: 10px; }
 
@@ -192,6 +210,35 @@
       background: rgba(123,230,166,0.06);
     }
     textarea { resize: vertical; min-height: 72px; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .form-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: var(--card);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+    }
+    .form-card .field-group { margin-bottom: 0; }
+    .section-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0;
+      opacity: 0.7;
+    }
+    .stacked-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .stacked-card {
+      margin-top: 12px;
+    }
 
     button {
       padding: 10px 14px;
@@ -264,6 +311,23 @@
     .value-negative { color: #f29ea0; font-weight: 700; }
     .value-zero { color: var(--muted); font-weight: 600; }
 
+    .table-wrap {
+      margin-top: 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      width: 100%;
+      padding-right: 10px;
+      box-sizing: border-box;
+    }
+    .table-scroll {
+      width: 100%;
+      max-width: 100%;
+      overflow: auto;
+      padding-bottom: 6px;
+      -webkit-overflow-scrolling: touch;
+    }
+
     .status {
       font-size: 13px;
       color: var(--muted);
@@ -314,11 +378,11 @@
     <div id="app-main" class="hidden">
       <div class="top-bar">
         <nav class="top-nav">
-          <button class="nav-button active" data-page="dashboard">🏠 dashboard</button>
-          <button class="nav-button" data-page="monthly-review">📅 monthly review</button>
-          <button class="nav-button" data-page="monthly-movements">📆 monthly movements</button>
-          <button class="nav-button" data-page="transactions">🧾 transactions</button>
-          <button class="nav-button" data-page="import-backup">📥 import / backup</button>
+          <button class="nav-button active" data-page="dashboard">dashboard</button>
+          <button class="nav-button" data-page="monthly-review">monthly review</button>
+          <button class="nav-button" data-page="monthly-movements">monthly movements</button>
+          <button class="nav-button" data-page="transactions">transactions</button>
+          <button class="nav-button" data-page="import-backup">import / backup</button>
         </nav>
         <div class="top-actions">
           <a class="nav-button hub-link hidden" id="go-hub" href="/" aria-label="Back to hub">
@@ -405,18 +469,20 @@
       <!-- MONTHLY MOVEMENTS -->
       <section id="page-monthly-movements" class="page">
         <div class="card">
-          <div class="two-columns">
-            <div class="column form-column">
-              <h2>📆 <strong>Monthly movements</strong></h2>
-              <div>📥 entrate mensili: <span id="mmIncome">-</span></div>
-              <div>📤 uscite mensili: <span id="mmExpense">-</span></div>
-              <div>⚖️ netto mensile: <span id="mmNet">-</span></div>
+          <h2>📆 <strong>Monthly movements</strong></h2>
+          <div>📥 entrate mensili: <span id="mmIncome">-</span></div>
+          <div>📤 uscite mensili: <span id="mmExpense">-</span></div>
+          <div>⚖️ netto mensile: <span id="mmNet">-</span></div>
 
-              <form id="monthlyForm" style="margin-top:0.8rem;">
+          <form id="monthlyForm" style="margin-top:0.8rem;">
+            <div class="form-grid">
+              <div class="form-card">
                 <div class="field-group">
                   <label><strong>nome</strong></label><br>
                   <input type="text" name="name" required />
                 </div>
+              </div>
+              <div class="form-card">
                 <div class="field-group">
                   <label><strong>tipo</strong></label><br>
                   <select name="direction" id="monthlyDirection">
@@ -424,24 +490,32 @@
                     <option value="expense">uscita</option>
                   </select>
                 </div>
+              </div>
+              <div class="form-card">
                 <div class="field-group">
                   <label><strong>importo mensile</strong></label><br>
                   <input type="number" step="0.01" name="amount" required />
                 </div>
+              </div>
+              <div class="form-card">
                 <div class="field-group">
                   <label><strong>note</strong></label><br>
                   <input type="text" name="note" />
                 </div>
-                <button type="submit" id="monthlySubmitButton" class="btn-primary">💾 salva</button>
-                <button type="button" id="monthlyCancelEditButton" style="display:none; margin-left:0.5rem;" class="btn-accent">↩️ annulla</button>
-              </form>
-              <p class="small-text" style="margin-top:0.6rem;">
-                i monthly movements <strong>non influiscono</strong> sul totale investito: servono solo come riepilogo di entrate/uscite mensili 💡
-              </p>
+              </div>
             </div>
+            <button type="submit" id="monthlySubmitButton" class="btn-primary">💾 salva</button>
+            <button type="button" id="monthlyCancelEditButton" style="display:none; margin-left:0.5rem;" class="btn-accent">↩️ annulla</button>
+          </form>
+          <p class="small-text" style="margin-top:0.6rem;">
+            i monthly movements <strong>non influiscono</strong> sul totale investito: servono solo come riepilogo di entrate/uscite mensili 💡
+          </p>
+        </div>
 
-            <div class="column table-column">
-              <h3>📋 elenco movimenti</h3>
+        <div class="card stacked-card">
+          <h3>📋 elenco movimenti</h3>
+          <div class="table-wrap">
+            <div class="table-scroll">
               <table>
                 <thead>
                   <tr>
@@ -469,20 +543,24 @@
       <!-- TRANSACTIONS -->
       <section id="page-transactions" class="page">
         <div class="card">
-          <div class="two-columns">
-            <div class="column form-column">
-              <h2>➕ <strong>Nuova transazione</strong></h2>
-              <form id="addForm">
+          <h2>➕ <strong>Nuova transazione</strong></h2>
+          <form id="addForm">
+            <div class="form-grid">
+              <div class="form-card">
                 <div class="field-group">
                   <label><strong>data</strong></label><br>
                   <input type="date" name="date" required />
                 </div>
+              </div>
 
+              <div class="form-card">
                 <div class="field-group">
                   <label><strong>asset</strong></label><br>
                   <input type="text" name="asset" placeholder="cherrybank" required />
                 </div>
+              </div>
 
+              <div class="form-card">
                 <div class="field-group">
                   <label><strong>tipo (descrizione)</strong></label><br>
                   <select name="tipo" id="tipoSelect">
@@ -493,29 +571,39 @@
                     <option value="Variazione Valore">Variazione Valore</option>
                   </select>
                 </div>
+              </div>
 
-                <div class="field-group" id="groupBuy">
+              <div class="form-card" id="groupBuy">
+                <div class="field-group">
                   <label><strong>valore d'acquisto</strong></label><br>
                   <input type="number" step="1" name="buyValue" />
                 </div>
+              </div>
 
-                <div class="field-group" id="groupPnl">
+              <div class="form-card" id="groupPnl">
+                <div class="field-group">
                   <label><strong>pnl</strong></label><br>
                   <input type="number" step="1" name="pnl" />
                 </div>
+              </div>
 
+              <div class="form-card">
                 <div class="field-group">
                   <label><strong>note</strong></label><br>
                   <input type="text" name="note" />
                 </div>
-
-                <button type="submit" id="txSubmitButton" class="btn-primary">💾 salva</button>
-                <button type="button" id="txCancelEditButton" style="display:none; margin-left:0.5rem;" class="btn-accent">↩️ annulla</button>
-              </form>
+              </div>
             </div>
 
-            <div class="column table-column">
-              <h2>📋 <strong>Transazioni</strong></h2>
+            <button type="submit" id="txSubmitButton" class="btn-primary">💾 salva</button>
+            <button type="button" id="txCancelEditButton" style="display:none; margin-left:0.5rem;" class="btn-accent">↩️ annulla</button>
+          </form>
+        </div>
+
+        <div class="card stacked-card">
+          <h2>📋 <strong>Transazioni</strong></h2>
+          <div class="table-wrap">
+            <div class="table-scroll">
               <table id="transactionsTable">
                 <thead>
                   <tr>
@@ -551,31 +639,33 @@
         <div class="card">
           <h2>📥 <strong>Import / backup</strong></h2>
 
-          <!-- XLSX area -->
-          <div class="field-group">
-            <label><strong>importa xlsx</strong> (fogli: <code>rawTransactions</code>, <code>movements</code>, <code>monthlySnapshots</code>)</label><br>
-            <input type="file" id="fileInput" accept=".xlsx,.xls" />
-          </div>
-          <div class="field-group">
-            <button id="exportXlsxButton" class="btn-accent">📤 esporta dati (.xlsx)</button>
-          </div>
+          <div class="stacked-fields">
+            <!-- JSON area -->
+            <div class="field-group">
+              <label><strong>importa dati da backup (.json)</strong></label><br>
+              <input type="file" id="importBackupInput" accept=".json" />
+            </div>
+            <div class="field-group">
+              <button id="exportBackupButton" class="btn-primary">🗃️ salva dati (.json)</button>
+            </div>
 
-          <div class="divider"></div>
+            <div class="section-divider"></div>
 
-          <!-- JSON area -->
-          <div class="field-group">
-            <label><strong>importa dati da backup (.json)</strong></label><br>
-            <input type="file" id="importBackupInput" accept=".json" />
-          </div>
-          <div class="field-group">
-            <button id="exportBackupButton" class="btn-primary">🗃️ salva dati (.json)</button>
-          </div>
+            <!-- Purge -->
+            <div class="field-group">
+              <button id="fullPurgeButton" class="btn-danger">🧨 delete all data</button>
+            </div>
 
-          <div class="divider"></div>
+            <div class="section-divider"></div>
 
-          <!-- Purge -->
-          <div class="field-group">
-            <button id="fullPurgeButton" class="btn-danger">🧨 full purge dati</button>
+            <!-- XLSX area -->
+            <div class="field-group">
+              <label><strong>importa xlsx</strong> (fogli: <code>rawTransactions</code>, <code>movements</code>, <code>monthlySnapshots</code>)</label><br>
+              <input type="file" id="fileInput" accept=".xlsx,.xls" />
+            </div>
+            <div class="field-group">
+              <button id="exportXlsxButton" class="btn-accent">📤 esporta dati (.xlsx)</button>
+            </div>
           </div>
         </div>
       </section>
@@ -721,6 +811,7 @@
         transactions: [],
         monthlyMovements: [],
         monthlySnapshots: [],
+        assetColors: {},
         preferences: { ...defaultPreferences },
       };
     }
@@ -735,6 +826,7 @@
         if (Array.isArray(raw.transactions)) base.transactions = raw.transactions;
         if (Array.isArray(raw.monthlyMovements)) base.monthlyMovements = raw.monthlyMovements;
         if (Array.isArray(raw.monthlySnapshots)) base.monthlySnapshots = raw.monthlySnapshots;
+        if (raw.assetColors && typeof raw.assetColors === 'object') base.assetColors = { ...raw.assetColors };
         if (raw.preferences && typeof raw.preferences === 'object') {
           base.preferences = { ...base.preferences, ...raw.preferences };
           base.preferences.showZeroAssets = Boolean(base.preferences.showZeroAssets);
@@ -779,6 +871,7 @@
         transactions,
         monthlyMovements,
         monthlySnapshots,
+        assetColors: assetColorMap,
         preferences: { showZeroAssets }
       };
     }
@@ -1116,18 +1209,55 @@
         const agg = byAsset[asset];
         const ratio = agg.current / totalCurrent;
         const profitPerc = agg.buy > 0 ? (agg.pnl / agg.buy) * 100 : 0;
-        const color = assetColorMap[asset] || '#7be6a6';
+        const rawColor = assetColorMap[asset] || '#7be6a6';
+        const color = normalizeColor(rawColor);
+        assetColorMap[asset] = color;
 
         const block = document.createElement('div');
         block.className = 'asset-block';
-        block.innerHTML = `
-          <div class="asset-block-title" style="color:${color}">${asset}</div>
-          <div class="asset-block-line">valore attuale: ${formatCurrencyWithColor(agg.current)}</div>
-          <div class="asset-block-line">investito: ${formatCurrency(agg.buy)}</div>
-          <div class="asset-block-line">pnl: ${formatCurrencyWithColor(agg.pnl)}</div>
-          <div class="asset-block-line">peso: ${(ratio * 100).toFixed(1)}%</div>
-          <div class="asset-block-line">profitto %: ${formatPercentWithColor(profitPerc)}</div>
-        `;
+
+        const header = document.createElement('div');
+        header.className = 'asset-block-header';
+        const title = document.createElement('div');
+        title.className = 'asset-block-title';
+        title.style.color = color;
+        title.textContent = asset;
+
+        const controls = document.createElement('div');
+        controls.className = 'asset-color-controls';
+        const colorInput = document.createElement('input');
+        colorInput.type = 'color';
+        colorInput.value = color;
+        colorInput.className = 'asset-color-input';
+        colorInput.addEventListener('input', () => {
+          const val = normalizeColor(colorInput.value);
+          assetColorMap[asset] = val;
+          const state = getCurrentState();
+          saveToLocalStorage(state);
+          queueServerSave(state);
+          renderAssetBlocks();
+          renderAssetChart();
+          renderAssetPnlChart();
+        });
+        controls.appendChild(colorInput);
+        header.appendChild(title);
+        header.appendChild(controls);
+        block.appendChild(header);
+
+        const lines = [
+          `valore attuale: ${formatCurrencyWithColor(agg.current)}`,
+          `investito: ${formatCurrency(agg.buy)}`,
+          `pnl: ${formatCurrencyWithColor(agg.pnl)}`,
+          `peso: ${(ratio * 100).toFixed(1)}%`,
+          `profitto %: ${formatPercentWithColor(profitPerc)}`
+        ];
+        lines.forEach(text => {
+          const line = document.createElement('div');
+          line.className = 'asset-block-line';
+          line.innerHTML = text;
+          block.appendChild(line);
+        });
+
         container.appendChild(block);
       });
     }
@@ -1143,7 +1273,7 @@
         return;
       }
 
-      const colors = labels.map(label => assetColorMap[label] || randomColor(label));
+      const colors = labels.map(label => assetColorMap[label] || normalizeColor(randomColor(label)));
       labels.forEach((label, idx) => { assetColorMap[label] = colors[idx]; });
 
       assetChart = new Chart(ctx, {
@@ -1170,7 +1300,7 @@
       }
 
       const data = labels.map(l => byAsset[l].pnl || 0);
-      const colors = labels.map(label => assetColorMap[label] || randomColor(label));
+      const colors = labels.map(label => assetColorMap[label] || normalizeColor(randomColor(label)));
       labels.forEach((label, idx) => { assetColorMap[label] = colors[idx]; });
 
       assetPnlChart = new Chart(ctx, {
@@ -1201,6 +1331,17 @@
       const g = (hash >> 8) & 0xff;
       const b = hash & 0xff;
       return `rgb(${(r + 128) % 255}, ${(g + 128) % 255}, ${(b + 128) % 255})`;
+    }
+
+    function normalizeColor(color) {
+      if (!color) return '#7be6a6';
+      if (color.startsWith('#')) return color;
+      const m = color.match(/rgb\\((\\d+),\\s*(\\d+),\\s*(\\d+)\\)/i);
+      if (m) {
+        const toHex = v => Number(v).toString(16).padStart(2, '0');
+        return `#${toHex(m[1])}${toHex(m[2])}${toHex(m[3])}`;
+      }
+      return '#7be6a6';
     }
 
     function updateZeroAssetsToggleLabel() {
@@ -1823,7 +1964,7 @@
       exportBackupButton?.addEventListener('click', () => exportBackup());
       exportXlsxButton?.addEventListener('click', () => downloadXlsx());
       fullPurgeButton?.addEventListener('click', () => {
-        const ok = confirm('Confermi purge completa di tutti i dati?');
+        const ok = confirm('Are you sure you want to delete all data?');
         if (!ok) return;
         transactions = [];
         monthlyMovements = [];
@@ -1844,6 +1985,7 @@
       transactions = state.transactions || [];
       monthlyMovements = state.monthlyMovements || [];
       monthlySnapshots = state.monthlySnapshots || [];
+      assetColorMap = state.assetColors && typeof state.assetColors === 'object' ? { ...state.assetColors } : {};
       if (state.preferences && typeof state.preferences === 'object') {
         showZeroAssets = Boolean(state.preferences.showZeroAssets);
       } else {

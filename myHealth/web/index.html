@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
       --bg: #000000;
@@ -422,9 +423,6 @@
       box-sizing: border-box;
       margin: 0 0 10px 0;
     }
-    #logs-section .grid {
-      grid-template-columns: 1fr;
-    }
     .form-group label {
       font-size: 12px;
       color: var(--muted);
@@ -462,6 +460,25 @@
       gap: 10px;
       align-items: center;
       flex-wrap: wrap;
+    }
+    .form-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0 12px;
+      opacity: 0.6;
+    }
+    .section-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0;
+      opacity: 0.7;
+    }
+    .stacked-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
     .btn-primary {
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
@@ -646,6 +663,7 @@
       place-items: center;
       width: 34px;
       height: 34px;
+      cursor: pointer;
     }
     .dash-divider {
       width: 2px;
@@ -658,6 +676,41 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+    }
+    .emoji-picker {
+      position: absolute;
+      z-index: 2000;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px;
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-width: 220px;
+    }
+    .emoji-picker button.emoji-choice {
+      border: 1px solid var(--border);
+      background: var(--card-strong);
+      border-radius: 8px;
+      padding: 6px 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .emoji-picker input.emoji-input {
+      border: 1px solid var(--border);
+      background: var(--card-strong);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 6px 8px;
+      min-width: 90px;
+    }
+    .emoji-mart {
+      background: var(--card) !important;
+      color: var(--text) !important;
+      border: 1px solid var(--border) !important;
+      box-shadow: var(--shadow) !important;
     }
     .graph-grid {
       display: grid;
@@ -780,8 +833,7 @@
       <div class="top-nav">
         <nav>
           <button class="nav-btn active" data-target="dashboard">Dashboard</button>
-          <button class="nav-btn" data-target="newlog">New Entry</button>
-          <button class="nav-btn" data-target="logs">Logs</button>
+          <button class="nav-btn" data-target="newlog">Logs and new entries</button>
           <button class="nav-btn" data-target="import">Import / Export</button>
         </nav>
         <div class="top-actions">
@@ -886,16 +938,23 @@
                   <div id="other-editor" class="chip-editor hidden" data-field="other"></div>
                 </div>
               </div>
-              <div class="form-actions">
-                <button class="btn-primary btn-plain" type="submit">Save new entry</button>
-                <div id="pain-form-status" class="status"></div>
-              </div>
-            </form>
+            <div class="form-actions">
+              <button class="btn-primary btn-plain" type="submit">Save new entry</button>
+              <div id="pain-form-status" class="status"></div>
+            </div>
+          </form>
+          <div class="form-divider"></div>
+          <div class="card">
+            <div class="log-header">
+              <h2>Pain log</h2>
+            </div>
+            <div class="table-wrap" id="pain-table"></div>
           </div>
+        </div>
 
-          <div class="entry-panel hidden" data-entry-panel="autotherapy">
-            <div id="autotherapy-stack">
-              <div class="entry-tabs autotherapy-subnav" role="tablist" aria-label="Autotherapy entries">
+        <div class="entry-panel hidden" data-entry-panel="autotherapy">
+          <div id="autotherapy-stack">
+            <div class="entry-tabs autotherapy-subnav" role="tablist" aria-label="Autotherapy entries">
                 <button class="nav-btn entry-btn secondary" data-autotherapy="journal" type="button">Journal</button>
                 <button class="nav-btn entry-btn secondary" data-autotherapy="cbt" type="button">CBT thought response</button>
                 <button class="nav-btn entry-btn secondary" data-autotherapy="dbt" type="button">DBT distress tolerance</button>
@@ -938,6 +997,13 @@
                     <div id="journal-form-status" class="status"></div>
                   </div>
                 </form>
+                <div class="form-divider"></div>
+                <div class="card">
+                  <div class="log-header">
+                    <h2>Journal log</h2>
+                  </div>
+                  <div class="table-wrap" id="diary-table"></div>
+                </div>
               </div>
               <div class="entry-panel hidden" data-autotherapy-panel="cbt">
                 <div class="hint">CBT thought response coming soon.</div>
@@ -950,57 +1016,41 @@
         </div>
       </section>
 
-      <section id="logs-section" class="hidden">
-        <div class="grid">
-          <div class="card">
-            <div class="log-header">
-              <h2>Journal log</h2>
-              <button class="nav-btn small" data-toggle-log="diary">Expand ◀</button>
-            </div>
-            <div class="table-wrap" id="diary-table"></div>
-          </div>
-          <div class="card">
-            <div class="log-header">
-              <h2>Pain log</h2>
-              <button class="nav-btn small" data-toggle-log="pain">Expand ◀</button>
-            </div>
-            <div class="table-wrap" id="pain-table"></div>
-          </div>
-        </div>
-      </section>
-
       <section id="import-section" class="hidden">
-        <div class="grid">
-          <div class="card">
-            <h2></h2>
-            <label class="drop">
-              <div>
-                <strong>Select or drop Diary CSV</strong>
-              </div>
-              <input type="file" accept=".csv,text/csv" data-kind="diary" />
-              <span class="badge">Import</span>
-            </label>
-            <div class="status" id="diary-status-import"></div>
-            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="nav-btn" data-export="diary" data-type="csv">Export Diary CSV</button>
-              <button class="nav-btn danger" data-purge="diary">Purge Diary Data</button>
+        <div class="card">
+          <h2>📥 <strong>Import / backup</strong></h2>
+
+          <div class="stacked-fields">
+            <div class="field-group">
+              <label><strong>Importa dati da backup (.json)</strong></label><br>
+              <input type="file" id="import-backup-input" accept=".json" />
+            </div>
+            <div class="field-group">
+              <button class="nav-btn" id="export-backup-button">📤 esporta dati (.json)</button>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="field-group">
+              <button class="nav-btn danger" id="full-purge-button">🧨 delete all data</button>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="field-group">
+              <label><strong>Importa da XLSX</strong> (fogli: <code>diary</code>, <code>pain</code>)</label><br>
+              <input type="file" id="import-xlsx-input" accept=".xlsx,.xls" />
+            </div>
+            <div class="field-group">
+              <button class="nav-btn" id="export-xlsx-button">📤 esporta dati (.xlsx)</button>
             </div>
           </div>
-          <div class="card">
-            <h2></h2>
-            <label class="drop">
-              <div>
-                <strong>Select or drop Pain CSV</strong>
-              </div>
-              <input type="file" accept=".csv,text/csv" data-kind="pain" />
-              <span class="badge">Import</span>
-            </label>
-            <div class="status" id="pain-status-import"></div>
-            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="nav-btn" data-export="pain" data-type="csv">Export Pain CSV</button>
-              <button class="nav-btn danger" data-purge="pain">Purge Pain Data</button>
-            </div>
-          </div>
+
+      <div class="status" id="backup-status"></div>
+
+      <!-- hidden status nodes to satisfy existing refs -->
+          <div class="status hidden" id="diary-status-import"></div>
+          <div class="status hidden" id="pain-status-import"></div>
         </div>
       </section>
     </div>
@@ -1022,6 +1072,7 @@
       },
     };
     const dataStore = { diary: null, pain: null };
+    const logFilters = { diary: {}, pain: {} };
     const authUI = {
       email: document.getElementById("auth-email"),
       pass: document.getElementById("auth-pass"),
@@ -1029,6 +1080,14 @@
       loginBtn: document.getElementById("auth-login"),
       logoutBtn: document.getElementById("auth-logout"),
       hubBtn: document.getElementById("go-hub"),
+    };
+    const backupUI = {
+      importInput: document.getElementById("import-backup-input"),
+      exportBtn: document.getElementById("export-backup-button"),
+      purgeBtn: document.getElementById("full-purge-button"),
+      importXlsx: document.getElementById("import-xlsx-input"),
+      exportXlsx: document.getElementById("export-xlsx-button"),
+      status: document.getElementById("backup-status"),
     };
     const appMain = document.getElementById("app-main");
     let isAuthed = false;
@@ -1144,6 +1203,134 @@
       habits: [],
       other: [],
     };
+    const cardEmojiMap = {
+      "Journal entries": "📒",
+      "Pain entries": "📓",
+      "Mood avg": "🙂",
+      "Depression avg": "😔",
+      "Anxiety avg": "😨",
+      "Pain avg": "🤕",
+      "Fatigue avg": "🥱",
+    };
+    const EMOJI_CHOICES = ["📒","📓","🙂","😔","😨","🤕","🥱","😊","💪","🧠","🩺","🌿","⭐","🔥","✨"];
+    let emojiPickerEl = null;
+    let emojiScriptLoading = null;
+
+    function closeEmojiPicker() {
+      if (emojiPickerEl) {
+        emojiPickerEl.remove();
+        emojiPickerEl = null;
+      }
+    }
+
+    function ensureEmojiPickerLib() {
+      if (window.EmojiMart && window.EmojiMart.Picker) {
+        return Promise.resolve(window.EmojiMart.Picker);
+      }
+      if (emojiScriptLoading) return emojiScriptLoading;
+      emojiScriptLoading = new Promise((resolve, reject) => {
+        const cssId = "emoji-mart-css";
+        if (!document.getElementById(cssId)) {
+          const link = document.createElement("link");
+          link.id = cssId;
+          link.rel = "stylesheet";
+          link.href = "https://cdn.jsdelivr.net/npm/emoji-mart@5.6.0/dist/browser.css";
+          document.head.appendChild(link);
+        }
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/emoji-mart@5.6.0/dist/browser.js";
+        script.async = true;
+        script.onload = () => {
+          if (window.EmojiMart && window.EmojiMart.Picker) {
+            resolve(window.EmojiMart.Picker);
+          } else {
+            reject(new Error("Emoji picker library did not load"));
+          }
+        };
+        script.onerror = () => reject(new Error("Failed to load emoji picker library"));
+        document.head.appendChild(script);
+      });
+      return emojiScriptLoading;
+    }
+
+    function openEmojiPicker(label, anchor) {
+      const fallback = () => {
+        closeEmojiPicker();
+        const picker = document.createElement("div");
+        picker.className = "emoji-picker";
+        EMOJI_CHOICES.forEach((emoji) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "emoji-choice";
+          btn.textContent = emoji;
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            cardEmojiMap[label] = emoji;
+            closeEmojiPicker();
+            renderDashboard();
+          });
+          picker.appendChild(btn);
+        });
+        const custom = document.createElement("input");
+        custom.className = "emoji-input";
+        custom.placeholder = "Custom";
+        custom.maxLength = 3;
+        custom.addEventListener("change", (e) => {
+          const val = (e.target.value || "").trim();
+          if (val) {
+            cardEmojiMap[label] = val;
+            closeEmojiPicker();
+            renderDashboard();
+          }
+        });
+        picker.appendChild(custom);
+        document.body.appendChild(picker);
+        const rect = anchor.getBoundingClientRect();
+        picker.style.left = `${rect.left + window.scrollX}px`;
+        picker.style.top = `${rect.bottom + window.scrollY + 6}px`;
+        emojiPickerEl = picker;
+        setTimeout(() => {
+          const handler = (ev) => {
+            if (!emojiPickerEl) return;
+            if (emojiPickerEl.contains(ev.target)) return;
+            closeEmojiPicker();
+          };
+          document.addEventListener("click", handler, { once: true });
+        }, 0);
+      };
+
+      ensureEmojiPickerLib()
+        .then((Picker) => {
+          closeEmojiPicker();
+          const pickerWrap = document.createElement("div");
+          pickerWrap.style.position = "absolute";
+          const rect = anchor.getBoundingClientRect();
+          pickerWrap.style.left = `${rect.left + window.scrollX}px`;
+          pickerWrap.style.top = `${rect.bottom + window.scrollY + 6}px`;
+          const picker = new Picker({
+            theme: "dark",
+            skinTonePosition: "none",
+            previewPosition: "none",
+            onEmojiSelect: (emoji) => {
+              cardEmojiMap[label] = emoji.native || emoji.name || "😊";
+              closeEmojiPicker();
+              renderDashboard();
+            },
+          });
+          pickerWrap.appendChild(picker);
+          document.body.appendChild(pickerWrap);
+          emojiPickerEl = pickerWrap;
+          setTimeout(() => {
+            const handler = (ev) => {
+              if (!emojiPickerEl) return;
+              if (emojiPickerEl.contains(ev.target)) return;
+              closeEmojiPicker();
+            };
+            document.addEventListener("click", handler, { once: true });
+          }, 0);
+        })
+        .catch(() => fallback());
+    }
 
     function loadSavedOptionCache() {
       try {
@@ -1325,10 +1512,77 @@
       return false;
     }
 
+    async function ensureLoaded(kind) {
+      if (dataStore[kind] && dataStore[kind].headers && dataStore[kind].rows) {
+        return true;
+      }
+      return fetchExisting(kind);
+    }
+
+    function parseXlsx(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+            resolve(workbook);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = (err) => reject(err);
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function sheetToDataset(sheet) {
+      if (!sheet) return null;
+      const rows = XLSX.utils.sheet_to_json(sheet);
+      if (!rows || !rows.length) return null;
+      const headers = Object.keys(rows[0]);
+      const normalizedRows = rows.map((row) => {
+        const clean = {};
+        headers.forEach((h) => { clean[h] = row[h] ?? ""; });
+        return clean;
+      });
+      return { headers, rows: normalizedRows };
+    }
+
+    function datasetToSheet(dataset) {
+      if (!dataset?.headers || !dataset.rows) return XLSX.utils.json_to_sheet([]);
+      const objs = dataset.rows.map((row) => {
+        const obj = {};
+        dataset.headers.forEach((h) => { obj[h] = row[h] ?? ""; });
+        return obj;
+      });
+      return XLSX.utils.json_to_sheet(objs);
+    }
+
     function setStatus(kind, message, ok = false, target = "logs") {
       const el = target === "import" ? datasets[kind].statusImport : datasets[kind].statusLog;
       if (!el) return;
       el.innerHTML = message ? `<span class="${ok ? "ok" : "err"}">${ok ? "OK" : "Error"}:</span> ${message}` : "";
+    }
+
+    function setBackupStatus(message, ok = false) {
+      if (!backupUI.status) return;
+      backupUI.status.innerHTML = message
+        ? `<span class="${ok ? "ok" : "err"}">${ok ? "OK" : "Error"}:</span> ${escapeHtml(message)}`
+        : "";
+    }
+
+    function wireLogFilters(kind) {
+      const cfg = datasets[kind];
+      if (!cfg?.logsTable) return;
+      cfg.logsTable.querySelectorAll(".filter-input").forEach((input) => {
+        const field = input.dataset.filterField;
+        input.value = logFilters[kind]?.[field] || "";
+        input.addEventListener("input", (e) => {
+          logFilters[kind][field] = e.target.value || "";
+          renderLog(kind);
+        });
+      });
     }
 
     function showPopup(message, ok = true) {
@@ -1380,8 +1634,19 @@
       const isLongField = (h) =>
         LONG_TEXT_FIELDS.some((f) => normalizeHeaderName(f) === normalizeHeaderName(h));
       const sortedRows = sortRowsWithIndex(rows, headers);
-      const displayRows = limit ? sortedRows.slice(0, limit) : sortedRows;
-      const thead = `<thead><tr>${headers.map((h) => `<th>${escapeHtml(h)}</th>`).join("")}${withActions ? "<th>Actions</th>" : ""}</tr></thead>`;
+      const filters = logFilters[kind] || {};
+      const filteredRows = sortedRows.filter(({ row }) =>
+        headers.every((h) => {
+          const val = (filters[h] || "").trim().toLowerCase();
+          if (!val) return true;
+          return String(row[h] || "").toLowerCase().includes(val);
+        })
+      );
+      const displayRows = limit ? filteredRows.slice(0, limit) : filteredRows;
+      const filterRow = `<tr class="filter-row">${headers
+        .map((h) => `<th><input type="text" class="filter-input" data-filter-kind="${kind}" data-filter-field="${escapeHtml(h)}" placeholder="filtra"/></th>`)
+        .join("")}${withActions ? "<th></th>" : ""}</tr>`;
+      const thead = `<thead><tr>${headers.map((h) => `<th>${escapeHtml(h)}</th>`).join("")}${withActions ? "<th>Actions</th>" : ""}</tr>${filterRow}</thead>`;
       const tbody = `<tbody>${displayRows
         .map(({ row, idx: originalIdx }) => {
           const isEditing = editingState.kind === kind && editingState.idx === originalIdx;
@@ -1415,7 +1680,8 @@
           return `<tr data-row="${originalIdx}">${cells}${actions}</tr>`;
         })
         .join("")}</tbody>`;
-      cfg.logsTable.innerHTML = `<div class="table-scroll"><table>${thead}${tbody}</table></div><div class="rowcount">${rows.length} rows</div>`;
+      cfg.logsTable.innerHTML = `<div class="table-scroll"><table>${thead}${tbody}</table></div><div class="rowcount">${displayRows.length} rows</div>`;
+      wireLogFilters(kind);
       if (withActions) wireRowActions(kind);
     }
 
@@ -1726,32 +1992,14 @@
       return Array.from(options);
     }
 
-    const logCollapsed = { diary: true, pain: true };
+    const logCollapsed = { diary: false, pain: false };
     let editingState = { kind: null, idx: null, draft: null };
 
     function renderLog(kind) {
       const data = dataStore[kind];
       if (!data?.headers || !data.rows) return;
-      const btn = document.querySelector(`[data-toggle-log="${kind}"]`);
       const wrap = datasets[kind]?.logsTable;
-      if (logCollapsed[kind]) {
-        if (wrap) wrap.innerHTML = "";
-        if (btn) btn.textContent = "Expand ◀";
-        return;
-      }
       renderTable(kind, data.headers, data.rows, true, null);
-      if (btn) btn.textContent = "Collapse ▼";
-    }
-
-    function wireLogToggles() {
-      document.querySelectorAll("[data-toggle-log]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const kind = btn.dataset.toggleLog;
-          if (!kind) return;
-          logCollapsed[kind] = !logCollapsed[kind];
-          renderLog(kind);
-        });
-      });
     }
 
     function renderOptionButtons(field, containerId, preselectAll = false) {
@@ -1839,6 +2087,12 @@
       if (!row) return;
       editingState = { kind, idx, draft: sanitizeRowForHeaders(row, headers) };
       renderLog(kind);
+      const formSection = document.getElementById("newlog-section");
+      if (formSection) {
+        formSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
 
     function cancelInline(kind) {
@@ -2044,6 +2298,21 @@
       }
     }
 
+    async function saveDataset(kind, payload) {
+      const normalized = normalizeRows(payload.headers || [], payload.rows || [], kind);
+      const sorted = sortRowsByDateTime(normalized.rows, normalized.headers);
+      const final = { headers: normalized.headers, rows: sorted, source: payload.source || "import", imported_at: new Date().toISOString() };
+      dataStore[kind] = final;
+      renderLog(kind);
+      setStatus(kind, `Saved ${sorted.length} rows`, true, "logs");
+      await persistNormalized(kind, final);
+      if (kind === "pain") {
+        buildOptionCacheFromStore();
+        renderPainOptionButtons();
+      }
+      renderDashboard();
+    }
+
     async function persist(kind, parsed, sourceName) {
       const cfg = datasets[kind];
       try {
@@ -2223,12 +2492,108 @@
       });
     }
 
+    function wireBackup() {
+      backupUI.importInput?.addEventListener("change", async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const parsed = JSON.parse(text);
+          const toImport = ["diary", "pain"];
+          for (const kind of toImport) {
+            if (parsed[kind]?.headers && Array.isArray(parsed[kind].rows)) {
+              await saveDataset(kind, parsed[kind]);
+            }
+          }
+          setBackupStatus("Import completato", true);
+        } catch (err) {
+          setBackupStatus(err.message || "Import failed", false);
+        } finally {
+          e.target.value = "";
+        }
+      });
+
+      backupUI.exportBtn?.addEventListener("click", async () => {
+        try {
+          await ensureLoaded("diary");
+          await ensureLoaded("pain");
+          const payload = {
+            diary: dataStore.diary || { headers: REQUIRED.diary, rows: [] },
+            pain: dataStore.pain || { headers: REQUIRED.pain, rows: [] },
+          };
+          const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "myhealth-backup.json";
+          a.click();
+          URL.revokeObjectURL(url);
+          setBackupStatus("Backup esportato", true);
+        } catch (err) {
+          setBackupStatus(err.message || "Export failed", false);
+        }
+      });
+
+      backupUI.purgeBtn?.addEventListener("click", async () => {
+        const ok = confirm("Are you sure you want to delete all diary and pain data?");
+        if (!ok) return;
+        try {
+          const emptyDiary = { headers: REQUIRED.diary, rows: [], source: "purge" };
+          const emptyPain = { headers: REQUIRED.pain, rows: [], source: "purge" };
+          await saveDataset("diary", emptyDiary);
+          await saveDataset("pain", emptyPain);
+          setBackupStatus("Dati azzerati", true);
+        } catch (err) {
+          setBackupStatus(err.message || "Purge failed", false);
+        }
+      });
+
+      backupUI.importXlsx?.addEventListener("change", async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+          const wb = await parseXlsx(file);
+          const diarySheet = sheetToDataset(wb.Sheets["diary"]);
+          const painSheet = sheetToDataset(wb.Sheets["pain"]);
+          if (diarySheet) await saveDataset("diary", diarySheet);
+          if (painSheet) await saveDataset("pain", painSheet);
+          setBackupStatus("Import XLSX completato", true);
+        } catch (err) {
+          setBackupStatus(err.message || "Import XLSX failed", false);
+        } finally {
+          e.target.value = "";
+        }
+      });
+
+      backupUI.exportXlsx?.addEventListener("click", async () => {
+        try {
+          await ensureLoaded("diary");
+          await ensureLoaded("pain");
+          const wb = XLSX.utils.book_new();
+          const diarySheet = datasetToSheet(dataStore.diary || { headers: REQUIRED.diary, rows: [] });
+          const painSheet = datasetToSheet(dataStore.pain || { headers: REQUIRED.pain, rows: [] });
+          XLSX.utils.book_append_sheet(wb, diarySheet, "diary");
+          XLSX.utils.book_append_sheet(wb, painSheet, "pain");
+          const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+          const blob = new Blob([wbout], { type: "application/octet-stream" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "myhealth-data.xlsx";
+          a.click();
+          URL.revokeObjectURL(url);
+          setBackupStatus("Export XLSX completato", true);
+        } catch (err) {
+          setBackupStatus(err.message || "Export XLSX failed", false);
+        }
+      });
+    }
+
     function wireNav() {
       const buttons = document.querySelectorAll(".nav-btn[data-target]");
       const sections = {
         dashboard: document.getElementById("dashboard-section"),
         newlog: document.getElementById("newlog-section"),
-        logs: document.getElementById("logs-section"),
         import: document.getElementById("import-section"),
       };
       buttons.forEach(btn => {
@@ -2269,6 +2634,7 @@
     }
 
     function renderDashboard() {
+      closeEmojiPicker();
       const container = document.getElementById("dash-cards");
       const graphs = document.getElementById("dash-graphs");
       if (!container || !graphs) return;
@@ -2294,16 +2660,6 @@
       const painPrevLevelAvg = avgField(painPrev, "pain level");
       const fatiguePrevAvg = avgField(painPrev, "fatigue level");
 
-      const emojiMap = {
-        "Journal entries": "📒",
-        "Pain entries": "📓",
-        "Mood avg": "🙂",
-        "Depression avg": "😔",
-        "Anxiety avg": "😨",
-        "Pain avg": "🤕",
-        "Fatigue avg": "🥱",
-      };
-
       const cards = [
         { label: "Journal entries", value: diaryCount, prev: diaryPrevCount },
         { label: "Pain entries", value: painCount, prev: painPrevCount },
@@ -2312,7 +2668,7 @@
         { label: "Anxiety avg", value: diaryAnxAvg ?? "–", prev: diaryPrevAnxAvg },
         { label: "Pain avg", value: painLevelAvg ?? "–", prev: painPrevLevelAvg },
         { label: "Fatigue avg", value: fatigueAvg ?? "–", prev: fatiguePrevAvg },
-      ].map((c) => ({ ...c, emoji: emojiMap[c.label] || "📊" }));
+      ].map((c) => ({ ...c, emoji: cardEmojiMap[c.label] || "📊" }));
 
       container.innerHTML = cards
         .map((c) => {
@@ -2320,7 +2676,7 @@
           const deltaHtml = delta ? `<span class="delta ${delta.cls}">${escapeHtml(delta.text)}</span>` : "";
           return `
             <div class="dash-card">
-              <div class="dash-emoji">${escapeHtml(c.emoji)}</div>
+              <div class="dash-emoji" data-label="${escapeHtml(c.label)}">${escapeHtml(c.emoji)}</div>
               <div class="dash-divider"></div>
               <div class="dash-meta">
                 <div class="dash-label">${escapeHtml(c.label)}</div>
@@ -2346,6 +2702,14 @@
           `
         )
         .join("");
+
+      container.querySelectorAll(".dash-emoji").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const label = el.getAttribute("data-label");
+          if (label) openEmojiPicker(label, el);
+        });
+      });
 
       graphDefs.forEach((g, idx) => {
         const canvas = document.getElementById(g.id);
@@ -2572,11 +2936,12 @@
 
     function setQuickActive(btn) {
       document.querySelectorAll(".quick-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
+      if (btn) btn.classList.add("active");
     }
 
     function clearQuickActive() {
       document.querySelectorAll(".quick-btn").forEach(b => b.classList.remove("active"));
+      localStorage.removeItem("myhealth:lastRange");
     }
 
     function toCSV(headers, rows) {
@@ -2688,11 +3053,8 @@
     wirePainForm();
     wireJournalForm();
     wireOptionEditors();
-    wireDropZones();
     wireNav();
-    wireExport();
-    wirePurge();
-    wireLogToggles();
+    wireBackup();
     ["filter-from", "filter-to"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) {
@@ -2702,7 +3064,7 @@
         });
       }
     });
-    function applyQuickRange(range) {
+    function applyQuickRange(range, skipPersist = false) {
       const fromInput = document.getElementById("filter-from");
       const toInput = document.getElementById("filter-to");
       const today = new Date();
@@ -2719,6 +3081,9 @@
       }
       const btn = document.querySelector(`.quick-btn[data-range="${range}"]`);
       if (btn) setQuickActive(btn);
+      if (!skipPersist) {
+        localStorage.setItem("myhealth:lastRange", range);
+      }
       renderDashboard();
     }
 
@@ -2732,7 +3097,8 @@
     setAppVisible(false);
     resetAppState();
     restoreSessionIfPossible();
-    applyQuickRange("365");
+    const lastRange = localStorage.getItem("myhealth:lastRange") || "all";
+    applyQuickRange(lastRange, true);
   </script>
 </body>
 </html>
