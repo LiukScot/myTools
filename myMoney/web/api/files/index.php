@@ -1,7 +1,5 @@
 <?php
 // Tiny JSON file API for Hetzner Webhosting (PHP + MySQL) with simple login.
-error_reporting(E_ALL);
-ini_set('display_errors', '0');
 // Drop this file (and the .htaccess in the same folder) into public_html/myhealth/api/files/
 // Then point your frontend requests to /api/files/...
 
@@ -39,23 +37,7 @@ $FILES_TABLE = 'files';
 
 // ---- No edits needed below unless you want to customize behavior ----
 
-// Broader cookie scope so auth persists across API calls
-$isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') === '443';
-session_save_path(sys_get_temp_dir());
-session_name('MYTOOLSS');
-set_session_cookie_params($isSecure);
-if (empty($_COOKIE[session_name()])) {
-    try {
-        session_id(bin2hex(random_bytes(16)));
-    } catch (Throwable $e) {
-        session_id(uniqid('sess', true));
-    }
-}
 session_start();
-if (session_id() === '') {
-    session_regenerate_id(true);
-    send_session_cookie($isSecure);
-}
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 header('Content-Type: application/json');
@@ -120,33 +102,7 @@ function env_or_fail($key) {
 }
 
 function set_session_cookie_params($isSecure) {
-    if (PHP_VERSION_ID >= 70300) {
-        session_set_cookie_params([
-            'lifetime' => 0,
-            'path' => '/',
-            'domain' => '',
-            'secure' => $isSecure,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
-    } else {
-        session_set_cookie_params(0, '/', '', $isSecure, true);
-    }
-}
-
-function send_session_cookie($isSecure) {
-    if (PHP_VERSION_ID >= 70300) {
-        setcookie(session_name(), session_id(), [
-            'expires' => 0,
-            'path' => '/',
-            'domain' => '',
-            'secure' => $isSecure,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
-    } else {
-        setcookie(session_name(), session_id(), 0, '/', '', $isSecure, true);
-    }
+    // legacy no-op kept for compatibility; using default session behavior
 }
 $DB_HOST = env_or_fail('DB_HOST');
 $DB_USER = env_or_fail('DB_USER');
@@ -195,12 +151,7 @@ function require_auth() {
         return;
     }
     if (!is_authed()) {
-        respond(401, [
-            'error' => 'unauthorized',
-            'session_name' => session_name(),
-            'session_id' => session_id(),
-            'has_user' => isset($_SESSION['user_id']),
-        ]);
+        respond(401, ['error' => 'unauthorized']);
     }
 }
 
