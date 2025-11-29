@@ -111,7 +111,9 @@ function send_session_cookie($isSecure)
         $parts[] = "Secure";
     $parts[] = "SameSite=Lax";
 
-    header("Set-Cookie: " . implode('; ', $parts), false);
+    // Use true to REPLACE any previous Set-Cookie headers (e.g. from session_start or regenerate_id)
+    // This ensures our fully-configured cookie is the one that sticks.
+    header("Set-Cookie: " . implode('; ', $parts), true);
 }
 function env_or_fail($key)
 {

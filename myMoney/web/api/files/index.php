@@ -135,7 +135,8 @@ function send_session_cookie($isSecure)
         $parts[] = "Secure";
     $parts[] = "SameSite=Lax";
 
-    header("Set-Cookie: " . implode('; ', $parts), false);
+    // Use true to REPLACE any previous Set-Cookie headers
+    header("Set-Cookie: " . implode('; ', $parts), true);
 }
 $DB_HOST = env_or_fail('DB_HOST');
 $DB_USER = env_or_fail('DB_USER');
