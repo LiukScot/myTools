@@ -43,14 +43,9 @@ $FILES_TABLE = 'files';
 // ---- No edits needed below unless you want to customize behavior ----
 
 $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path' => '/',
-    'domain' => '',
-    'secure' => $isSecure,
-    'httponly' => true,
-    'samesite' => 'Lax'
-]);
+// Use 5-arg compatible signature for broader PHP support
+session_set_cookie_params(0, '/', '', $isSecure, true);
+session_name('MYMONEY_SESSID');
 session_start();
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -120,15 +115,27 @@ function env_or_fail($key)
 
 function send_session_cookie($isSecure)
 {
+    $name = session_name();
+    $value = session_id();
     $params = session_get_cookie_params();
-    setcookie(session_name(), session_id(), [
-        'expires' => time() + 60 * 60 * 24 * 30, // 30 days, or use 0 for session
-        'path' => $params['path'],
-        'domain' => $params['domain'],
-        'secure' => $isSecure,
-        'httponly' => $params['httponly'],
-        'samesite' => 'Lax' // or Strict
-    ]);
+    // 30 days persistence
+    $expires = time() + 60 * 60 * 24 * 30;
+    $date = gmdate('D, d M Y H:i:s T', $expires);
+
+    $parts = [
+        "$name=$value",
+        "expires=$date",
+        "Max-Age=" . (60 * 60 * 24 * 30),
+        "path={$params['path']}",
+        "HttpOnly"
+    ];
+    if ($params['domain'])
+        $parts[] = "domain={$params['domain']}";
+    if ($isSecure)
+        $parts[] = "Secure";
+    $parts[] = "SameSite=Lax";
+
+    header("Set-Cookie: " . implode('; ', $parts), false);
 }
 $DB_HOST = env_or_fail('DB_HOST');
 $DB_USER = env_or_fail('DB_USER');
