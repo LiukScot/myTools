@@ -43,6 +43,14 @@ $FILES_TABLE = 'files';
 // ---- No edits needed below unless you want to customize behavior ----
 
 $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+
+// Fix for unwritable default session path on some hosts
+$sessDir = __DIR__ . '/../sessions';
+if (!is_dir($sessDir)) {
+    @mkdir($sessDir, 0700, true);
+}
+session_save_path($sessDir);
+
 // Use 5-arg compatible signature for broader PHP support
 session_set_cookie_params(0, '/', '', $isSecure, true);
 session_name('MYMONEY_SESSID');

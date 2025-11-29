@@ -43,6 +43,14 @@ $FILES_TABLE = 'files';
 // ---- No edits needed below unless you want to customize behavior ----
 
 $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+
+// Fix for unwritable default session path on some hosts
+$sessDir = __DIR__ . '/../sessions';
+if (!is_dir($sessDir)) {
+    @mkdir($sessDir, 0700, true);
+}
+session_save_path($sessDir);
+
 // Use 5-arg compatible signature for broader PHP support
 session_set_cookie_params(0, '/', '', $isSecure, true);
 session_name('MYHEALTH_SESSID');
@@ -256,14 +264,6 @@ if (preg_match('#/api(?:/files)?/login/?$#', $rawUri)) {
             'role' => $user['role'],
             'session_name' => session_name(),
             'session_id' => session_id(),
-            'debug' => [
-                'https' => $_SERVER['HTTPS'] ?? 'unset',
-                'forwarded' => $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? 'unset',
-                'cookie_params' => session_get_cookie_params(),
-                'session_status' => session_status(),
-                'save_path' => session_save_path(),
-                'writable' => is_writable(session_save_path() ?: sys_get_temp_dir())
-            ]
         ]);
     } catch (Throwable $e) {
         respond(500, ['error' => 'login failed', 'detail' => $e->getMessage()]);
