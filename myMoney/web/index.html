@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -19,27 +20,36 @@
       --muted: #a1a1ad;
       --border: #35353b;
       --danger: #f97373;
-      --shadow: 0 20px 55px rgba(0,0,0,0.5);
+      --shadow: 0 20px 55px rgba(0, 0, 0, 0.5);
     }
-    * { box-sizing: border-box; }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background:
-        radial-gradient(140% 120% at 20% 10%, rgba(123,230,166,0.10), rgba(0,0,0,0)),
-        radial-gradient(120% 100% at 80% 5%, rgba(111,143,194,0.08), rgba(0,0,0,0)),
+        radial-gradient(140% 120% at 20% 10%, rgba(123, 230, 166, 0.10), rgba(0, 0, 0, 0)),
+        radial-gradient(120% 100% at 80% 5%, rgba(111, 143, 194, 0.08), rgba(0, 0, 0, 0)),
         var(--bg);
       background-repeat: no-repeat;
       background-size: cover;
       background-attachment: fixed;
       color: var(--text);
     }
+
     .shell {
       max-width: 1280px;
       margin: 0 auto;
       padding: 32px 20px 48px;
     }
-    header { margin-bottom: 16px; }
+
+    header {
+      margin-bottom: 16px;
+    }
+
     .title {
       display: flex;
       align-items: center;
@@ -47,6 +57,7 @@
       font-weight: 700;
       letter-spacing: -0.02em;
     }
+
     .logo {
       width: 40px;
       height: 40px;
@@ -56,15 +67,26 @@
       place-items: center;
       color: #081019;
       font-size: 20px;
-      box-shadow: 0 6px 14px rgba(75,191,135,0.28);
+      box-shadow: 0 6px 14px rgba(75, 191, 135, 0.28);
     }
-    .title-main { font-size: 26px; }
-    .title-sub { color: var(--muted); font-size: 13px; }
 
-    h1, h2, h3, h4 {
+    .title-main {
+      font-size: 26px;
+    }
+
+    .title-sub {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
       margin: 0 0 10px 0;
       letter-spacing: -0.01em;
     }
+
     .card {
       border: 1px solid var(--border);
       border-radius: 16px;
@@ -73,28 +95,76 @@
       background: var(--card);
       box-shadow: var(--shadow);
     }
-    .card h2 strong, .card h3 strong { color: var(--accent); }
+
+    .card h2 strong,
+    .card h3 strong {
+      color: var(--accent);
+    }
+
     .divider {
       border-top: 1px solid var(--border);
       margin: 16px 0;
     }
-    .hint, .small-text {
+
+    .hint,
+    .small-text {
       color: var(--muted);
       font-size: 13px;
     }
-    .row, .two-columns, .dash-top-row, .charts-row, .asset-blocks, .top-bar, .heading-row {
+
+    .row,
+    .two-columns,
+    .dash-top-row,
+    .charts-row,
+    .asset-blocks,
+    .top-bar,
+    .heading-row {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
     }
-    .row > .card, .two-columns > .column { flex: 1; min-width: 260px; }
-    .form-column { flex: 1 1 320px; max-width: 460px; }
-    .table-column { flex: 3 1 520px; }
-    .two-columns > .column + .column { border-left: 1px solid var(--border); padding-left: 12px; }
-    .heading-row { align-items: center; }
-    .dash-top-row { align-items: flex-start; gap: 20px; }
-    .dash-metrics { min-width: 220px; flex: 0 0 260px; }
-    .dash-charts { flex: 1; min-width: 340px; border-left: 1px solid var(--border); padding-left: 16px; }
+
+    .row>.card,
+    .two-columns>.column {
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .form-column {
+      flex: 1 1 320px;
+      max-width: 460px;
+    }
+
+    .table-column {
+      flex: 3 1 520px;
+    }
+
+    .two-columns>.column+.column {
+      border-left: 1px solid var(--border);
+      padding-left: 12px;
+    }
+
+    .heading-row {
+      align-items: center;
+    }
+
+    .dash-top-row {
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .dash-metrics {
+      min-width: 220px;
+      flex: 0 0 260px;
+    }
+
+    .dash-charts {
+      flex: 1;
+      min-width: 340px;
+      border-left: 1px solid var(--border);
+      padding-left: 16px;
+    }
+
     .charts-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -102,17 +172,36 @@
       margin-top: 8px;
       align-items: stretch;
     }
-    .chart-card, .asset-block {
+
+    .chart-card,
+    .asset-block {
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 12px;
       background: var(--card-strong);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
     }
-    .chart-card h4 { margin: 0 0 8px 0; text-align: center; color: var(--muted); }
-    .chart-card canvas { width: 100%; max-width: 320px; max-height: 260px; }
-    .asset-blocks { margin-top: 10px; }
-    .asset-block { min-width: 200px; }
+
+    .chart-card h4 {
+      margin: 0 0 8px 0;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .chart-card canvas {
+      width: 100%;
+      max-width: 320px;
+      max-height: 260px;
+    }
+
+    .asset-blocks {
+      margin-top: 10px;
+    }
+
+    .asset-block {
+      min-width: 200px;
+    }
+
     .asset-block-header {
       display: flex;
       align-items: center;
@@ -120,8 +209,18 @@
       gap: 8px;
       margin-bottom: 6px;
     }
-    .asset-block-title { font-weight: 700; margin-bottom: 4px; }
-    .asset-color-controls { display: flex; align-items: center; gap: 6px; }
+
+    .asset-block-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .asset-color-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .asset-color-input {
       width: 32px;
       height: 28px;
@@ -131,13 +230,35 @@
       background: var(--card);
       cursor: pointer;
     }
-    .color-btn { padding: 6px 10px; font-size: 12px; }
-    .asset-block-line { font-size: 13px; color: var(--muted); }
-    .monthly-chart-box { height: 260px; margin-top: 10px; }
 
-    .page { display: none; }
-    .page.active { display: block; }
-    .hidden { display: none !important; }
+    .color-btn {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    .asset-block-line {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .monthly-chart-box {
+      height: 260px;
+      margin-top: 10px;
+      width: 100%;
+      position: relative;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .hidden {
+      display: none !important;
+    }
 
     .top-bar {
       align-items: center;
@@ -146,12 +267,14 @@
       gap: 12px;
       flex-wrap: wrap;
     }
+
     .top-nav {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
       flex: 1 1 auto;
     }
+
     .top-actions {
       display: flex;
       gap: 10px;
@@ -159,6 +282,7 @@
       align-items: center;
       justify-content: flex-end;
     }
+
     .nav-button {
       border-radius: 12px;
       padding: 10px 14px;
@@ -170,13 +294,22 @@
       transition: all 0.2s ease;
       letter-spacing: 0.01em;
     }
+
     .nav-button.active {
       border-color: var(--accent);
       color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(123,230,166,0.35), var(--shadow);
+      box-shadow: 0 0 0 1px rgba(123, 230, 166, 0.35), var(--shadow);
     }
-    .nav-button:hover { border-color: var(--accent); }
-    .nav-button.danger { color: var(--danger); border-color: rgba(249,115,115,0.5); }
+
+    .nav-button:hover {
+      border-color: var(--accent);
+    }
+
+    .nav-button.danger {
+      color: var(--danger);
+      border-color: rgba(249, 115, 115, 0.5);
+    }
+
     .hub-link {
       text-decoration: none;
       display: inline-flex;
@@ -186,13 +319,29 @@
       font-weight: 700;
       line-height: 1.2;
     }
-    .hub-link svg { stroke: currentColor; width: 14px; height: 14px; }
 
-    .actions-cell { white-space: nowrap; }
-    .field-group { margin-bottom: 10px; }
-    label { font-size: 13px; color: var(--muted); }
+    .hub-link svg {
+      stroke: currentColor;
+      width: 14px;
+      height: 14px;
+    }
 
-    input, select, textarea {
+    .actions-cell {
+      white-space: nowrap;
+    }
+
+    .field-group {
+      margin-bottom: 10px;
+    }
+
+    label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    input,
+    select,
+    textarea {
       padding: 10px 12px;
       margin: 4px 0;
       background: var(--card-strong);
@@ -205,25 +354,38 @@
       outline: none;
       transition: border-color 0.2s ease, background 0.2s ease;
     }
-    input:focus, select:focus, textarea:focus {
+
+    input:focus,
+    select:focus,
+    textarea:focus {
       border-color: var(--accent);
-      background: rgba(123,230,166,0.06);
+      background: rgba(123, 230, 166, 0.06);
     }
-    textarea { resize: vertical; min-height: 72px; }
+
+    textarea {
+      resize: vertical;
+      min-height: 72px;
+    }
+
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 12px;
       align-items: flex-start;
     }
+
     .form-card {
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 12px;
       background: var(--card);
-      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
     }
-    .form-card .field-group { margin-bottom: 0; }
+
+    .form-card .field-group {
+      margin-bottom: 0;
+    }
+
     .section-divider {
       width: 100%;
       height: 1px;
@@ -231,11 +393,13 @@
       margin: 14px 0;
       opacity: 0.7;
     }
+
     .stacked-fields {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
+
     .stacked-card {
       margin-top: 12px;
     }
@@ -252,23 +416,30 @@
       transition: all 0.2s ease;
       letter-spacing: 0.01em;
     }
-    button:hover { border-color: var(--accent); }
+
+    button:hover {
+      border-color: var(--accent);
+    }
+
     .btn-primary {
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
       color: #0c1510;
       border: none;
-      box-shadow: 0 6px 12px rgba(123,230,166,0.25);
+      box-shadow: 0 6px 12px rgba(123, 230, 166, 0.25);
     }
+
     .btn-accent {
-      background: rgba(123,230,166,0.14);
-      border-color: rgba(123,230,166,0.45);
+      background: rgba(123, 230, 166, 0.14);
+      border-color: rgba(123, 230, 166, 0.45);
       color: var(--text);
     }
+
     .btn-danger {
-      background: rgba(249,115,115,0.16);
-      border-color: rgba(249,115,115,0.45);
+      background: rgba(249, 115, 115, 0.16);
+      border-color: rgba(249, 115, 115, 0.45);
       color: #ffdfe1;
     }
+
     .btn-small {
       padding: 6px 10px;
       font-size: 12px;
@@ -283,13 +454,16 @@
       border-radius: 10px;
       overflow: hidden;
     }
-    th, td {
+
+    th,
+    td {
       border-bottom: 1px solid var(--border);
       padding: 10px;
       font-size: 13px;
       text-align: left;
       color: var(--text);
     }
+
     th {
       position: sticky;
       top: 0;
@@ -298,18 +472,41 @@
       user-select: none;
       z-index: 1;
     }
+
     th .sort-indicator {
       margin-left: 6px;
       opacity: 0.6;
       font-size: 11px;
     }
-    tr:nth-child(odd) { background: rgba(255,255,255,0.02); }
-    tr:hover { background: rgba(255,255,255,0.04); }
-    .filter-row input { width: 100%; font-size: 12px; padding: 6px 8px; }
 
-    .value-positive { color: #7be6a6; font-weight: 700; }
-    .value-negative { color: #f29ea0; font-weight: 700; }
-    .value-zero { color: var(--muted); font-weight: 600; }
+    tr:nth-child(odd) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    tr:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .filter-row input {
+      width: 100%;
+      font-size: 12px;
+      padding: 6px 8px;
+    }
+
+    .value-positive {
+      color: #7be6a6;
+      font-weight: 700;
+    }
+
+    .value-negative {
+      color: #f29ea0;
+      font-weight: 700;
+    }
+
+    .value-zero {
+      color: var(--muted);
+      font-weight: 600;
+    }
 
     .table-wrap {
       margin-top: 10px;
@@ -320,6 +517,7 @@
       padding-right: 10px;
       box-sizing: border-box;
     }
+
     .table-scroll {
       width: 100%;
       max-width: 100%;
@@ -333,27 +531,54 @@
       color: var(--muted);
       min-height: 18px;
     }
-    .status .ok { color: var(--accent); font-weight: 700; }
-    .status .err { color: var(--danger); font-weight: 700; }
-    .auth-card { margin-bottom: 18px; }
+
+    .status .ok {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .status .err {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .auth-card {
+      margin-bottom: 18px;
+    }
+
     .auth-row {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
       align-items: center;
     }
-    .auth-row input { flex: 1 1 220px; }
+
+    .auth-row input {
+      flex: 1 1 220px;
+    }
 
     @media (max-width: 720px) {
-      .shell { padding: 22px 14px 36px; }
-      .two-columns > .column + .column,
-      .dash-charts { border-left: none; padding-left: 0; margin-left: 0; }
-      th, td { padding: 8px; }
+      .shell {
+        padding: 22px 14px 36px;
+      }
+
+      .two-columns>.column+.column,
+      .dash-charts {
+        border-left: none;
+        padding-left: 0;
+        margin-left: 0;
+      }
+
+      th,
+      td {
+        padding: 8px;
+      }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
   <div class="shell">
     <header>
@@ -387,7 +612,7 @@
         <div class="top-actions">
           <a class="nav-button hub-link hidden" id="go-hub" href="/" aria-label="Back to hub">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M15 5l-7 7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15 5l-7 7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             <span>Back to hub</span>
           </a>
@@ -424,7 +649,8 @@
           <div class="divider"></div>
 
           <h3>📦 dettaglio per asset</h3>
-          <button id="toggleZeroAssetsButton" style="margin-bottom:0.4rem;" class="btn-accent">nascondi investimenti chiusi (valore = 0)</button>
+          <button id="toggleZeroAssetsButton" style="margin-bottom:0.4rem;" class="btn-accent">nascondi investimenti
+            chiusi (valore = 0)</button>
           <div id="assetBlocks" class="asset-blocks"></div>
         </div>
       </section>
@@ -504,11 +730,14 @@
                 </div>
               </div>
             </div>
-            <button type="submit" id="monthlySubmitButton" class="btn-primary">💾 salva</button>
-            <button type="button" id="monthlyCancelEditButton" style="display:none; margin-left:0.5rem;" class="btn-accent">↩️ annulla</button>
+            <button type="submit" id="monthlySubmitButton" class="btn-primary" style="margin-top: 1.5rem;">💾
+              salva</button>
+            <button type="button" id="monthlyCancelEditButton" style="display:none; margin-left:0.5rem;"
+              class="btn-accent">↩️ annulla</button>
           </form>
           <p class="small-text" style="margin-top:0.6rem;">
-            i monthly movements <strong>non influiscono</strong> sul totale investito: servono solo come riepilogo di entrate/uscite mensili 💡
+            i monthly movements <strong>non influiscono</strong> sul totale investito: servono solo come riepilogo di
+            entrate/uscite mensili 💡
           </p>
         </div>
 
@@ -595,8 +824,9 @@
               </div>
             </div>
 
-            <button type="submit" id="txSubmitButton" class="btn-primary">💾 salva</button>
-            <button type="button" id="txCancelEditButton" style="display:none; margin-left:0.5rem;" class="btn-accent">↩️ annulla</button>
+            <button type="submit" id="txSubmitButton" class="btn-primary" style="margin-top: 1.5rem;">💾 salva</button>
+            <button type="button" id="txCancelEditButton" style="display:none; margin-left:0.5rem;"
+              class="btn-accent">↩️ annulla</button>
           </form>
         </div>
 
@@ -642,11 +872,20 @@
           <div class="stacked-fields">
             <!-- JSON area -->
             <div class="field-group">
-              <label><strong>importa dati da backup (.json)</strong></label><br>
               <input type="file" id="importBackupInput" accept=".json" />
             </div>
             <div class="field-group">
-              <button id="exportBackupButton" class="btn-primary">🗃️ salva dati (.json)</button>
+              <button id="exportBackupButton" class="btn-primary">🗃️ export data (.json)</button>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- XLSX area -->
+            <div class="field-group">
+              <input type="file" id="fileInput" accept=".xlsx,.xls" />
+            </div>
+            <div class="field-group">
+              <button id="exportXlsxButton" class="btn-primary">📤 export data (.xlsx)</button>
             </div>
 
             <div class="section-divider"></div>
@@ -654,17 +893,6 @@
             <!-- Purge -->
             <div class="field-group">
               <button id="fullPurgeButton" class="btn-danger">🧨 delete all data</button>
-            </div>
-
-            <div class="section-divider"></div>
-
-            <!-- XLSX area -->
-            <div class="field-group">
-              <label><strong>importa xlsx</strong> (fogli: <code>rawTransactions</code>, <code>movements</code>, <code>monthlySnapshots</code>)</label><br>
-              <input type="file" id="fileInput" accept=".xlsx,.xls" />
-            </div>
-            <div class="field-group">
-              <button id="exportXlsxButton" class="btn-accent">📤 esporta dati (.xlsx)</button>
             </div>
           </div>
         </div>
@@ -1403,20 +1631,26 @@
       const liquidData = filtered.map(s => s.liquid || 0);
 
       monthlyRiskChart = new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
           labels,
           datasets: [
-            { label: 'low', data: lowData, borderColor: '#8bc34a', tension: 0.2 },
-            { label: 'medium', data: mediumData, borderColor: '#4caf50', tension: 0.2 },
-            { label: 'high', data: highData, borderColor: '#2e7d32', tension: 0.2 },
-            { label: 'liquid', data: liquidData, borderColor: '#7be6a6', tension: 0.2 }
+            { label: 'low', data: lowData, backgroundColor: '#8bc34a' },
+            { label: 'medium', data: mediumData, backgroundColor: '#4caf50' },
+            { label: 'high', data: highData, backgroundColor: '#2e7d32' },
+            { label: 'liquid', data: liquidData, backgroundColor: '#7be6a6' }
           ]
         },
         options: {
+          responsive: true,
+          maintainAspectRatio: false,
           plugins: { legend: { position: 'bottom' } },
           scales: {
-            y: { ticks: { callback: value => formatCurrency(value) } }
+            x: { stacked: true },
+            y: {
+              stacked: true,
+              ticks: { callback: value => formatCurrency(value) }
+            }
           }
         }
       });
@@ -1597,7 +1831,7 @@
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(mmRows), 'movements');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(snapRows), 'monthlySnapshots');
 
-      XLSX.writeFile(wb, `investments-export-${new Date().toISOString().slice(0,10)}.xlsx`);
+      XLSX.writeFile(wb, `investments-export-${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
 
     function updateTxSort(column) {
@@ -2040,4 +2274,5 @@
     });
   </script>
 </body>
+
 </html>
