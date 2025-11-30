@@ -428,6 +428,19 @@
       box-shadow: 0 6px 12px rgba(123, 230, 166, 0.25);
     }
 
+    .btn-primary.btn-plain {
+      box-shadow: none;
+      background: rgba(123, 230, 166, 0.18);
+      color: var(--text);
+      border: 1px solid rgba(123, 230, 166, 0.35);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
     .btn-accent {
       background: rgba(123, 230, 166, 0.14);
       border-color: rgba(123, 230, 166, 0.45);
@@ -867,25 +880,28 @@
       <!-- IMPORT / BACKUP -->
       <section id="page-import-backup" class="page">
         <div class="card">
-          <h2>📥 <strong>Import / backup</strong></h2>
+          <h2>Import / backup</h2>
+          <div class="hint">easily import or export your data</div>
 
-          <div class="stacked-fields">
+          <div class="stacked-fields" style="gap: 15px;">
             <!-- JSON area -->
             <div class="field-group">
+              <label><strong>Import from JSON</strong></label><br>
               <input type="file" id="importBackupInput" accept=".json" />
             </div>
             <div class="field-group">
-              <button id="exportBackupButton" class="btn-primary">🗃️ export data (.json)</button>
+              <button id="exportBackupButton" class="btn-primary btn-plain">Export JSON</button>
             </div>
 
             <div class="section-divider"></div>
 
             <!-- XLSX area -->
             <div class="field-group">
+              <label><strong>Import from XLSX</strong></label><br>
               <input type="file" id="fileInput" accept=".xlsx,.xls" />
             </div>
             <div class="field-group">
-              <button id="exportXlsxButton" class="btn-primary">📤 export data (.xlsx)</button>
+              <button id="exportXlsxButton" class="btn-primary btn-plain">Export XLSX</button>
             </div>
 
             <div class="section-divider"></div>

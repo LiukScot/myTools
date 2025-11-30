@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,27 +21,36 @@
       --muted: #a1a1ad;
       --border: #35353b;
       --danger: #ff5a7f;
-      --shadow: 0 20px 55px rgba(0,0,0,0.5);
+      --shadow: 0 20px 55px rgba(0, 0, 0, 0.5);
     }
-    * { box-sizing: border-box; }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background:
-        radial-gradient(140% 120% at 20% 10%, rgba(255,94,138,0.14), rgba(0,0,0,0)),
-        radial-gradient(120% 100% at 80% 5%, rgba(255,143,177,0.08), rgba(0,0,0,0)),
+        radial-gradient(140% 120% at 20% 10%, rgba(255, 94, 138, 0.14), rgba(0, 0, 0, 0)),
+        radial-gradient(120% 100% at 80% 5%, rgba(255, 143, 177, 0.08), rgba(0, 0, 0, 0)),
         var(--bg);
       background-repeat: no-repeat;
       background-size: cover;
       background-attachment: fixed;
       color: var(--text);
     }
+
     .shell {
       max-width: 1280px;
       margin: 0 auto;
       padding: 32px 22px 48px;
     }
-    header { margin-bottom: 18px; }
+
+    header {
+      margin-bottom: 18px;
+    }
+
     .title {
       display: inline-flex;
       align-items: center;
@@ -49,6 +59,7 @@
       font-weight: 700;
       letter-spacing: -0.02em;
     }
+
     .heart {
       width: 24px;
       height: 24px;
@@ -58,14 +69,16 @@
       place-items: center;
       color: #fff;
       font-size: 14px;
-      box-shadow: 0 4px 10px rgba(228,77,117,0.14);
+      box-shadow: 0 4px 10px rgba(228, 77, 117, 0.14);
     }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 18px;
       margin-bottom: 28px;
     }
+
     .card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -73,16 +86,19 @@
       padding: 18px;
       box-shadow: var(--shadow);
     }
+
     .card h2 {
       margin: 0 0 6px;
       font-size: 18px;
       letter-spacing: -0.01em;
     }
+
     .hint {
       color: var(--muted);
       font-size: 13px;
       margin-bottom: 12px;
     }
+
     .drop {
       border: 1px dashed var(--border);
       border-radius: 12px;
@@ -94,24 +110,33 @@
       background: var(--card);
       cursor: pointer;
       transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
     }
+
     .drop:hover {
       border-color: var(--accent);
-      background: rgba(255,94,138,0.08);
+      background: rgba(255, 94, 138, 0.08);
     }
-    .drop strong { display: block; }
-    .drop input { display: none; }
+
+    .drop strong {
+      display: block;
+    }
+
+    .drop input {
+      display: none;
+    }
+
     .status {
       font-size: 13px;
       color: var(--muted);
       margin-top: 10px;
       min-height: 18px;
     }
+
     .debug-log {
       font-size: 12px;
       color: #f59e0b;
-      background: rgba(255,255,255,0.04);
+      background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 8px;
@@ -119,19 +144,29 @@
       white-space: pre-wrap;
       word-break: break-word;
     }
+
     .error-box {
       font-size: 12px;
       color: #f87171;
-      background: rgba(248,113,113,0.08);
-      border: 1px solid rgba(248,113,113,0.35);
+      background: rgba(248, 113, 113, 0.08);
+      border: 1px solid rgba(248, 113, 113, 0.35);
       border-radius: 8px;
       padding: 8px;
       margin-top: 6px;
       white-space: pre-wrap;
       word-break: break-word;
     }
-    .status .ok { color: var(--accent-2); font-weight: 700; }
-    .status .err { color: var(--danger); font-weight: 700; }
+
+    .status .ok {
+      color: var(--accent-2);
+      font-weight: 700;
+    }
+
+    .status .err {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
     .table-wrap {
       margin-top: 12px;
       border: 1px solid var(--border);
@@ -142,6 +177,7 @@
       padding-right: 10px;
       box-sizing: border-box;
     }
+
     .table-scroll {
       width: 100%;
       max-width: 100%;
@@ -150,15 +186,18 @@
       padding-bottom: 6px;
       -webkit-overflow-scrolling: touch;
     }
+
     .table-wrap table {
       width: max-content;
       min-width: 1100px;
       table-layout: auto;
     }
+
     .table-wrap th,
     .table-wrap td {
       white-space: nowrap;
     }
+
     .table-wrap .actions-cell {
       position: sticky;
       right: 0;
@@ -167,37 +206,45 @@
       box-shadow: -1px 0 0 var(--border);
       min-width: 120px;
     }
+
     .table-wrap th.actions-cell {
-      background: rgba(17,24,39,0.9);
+      background: rgba(17, 24, 39, 0.9);
       z-index: 3;
       box-shadow: -1px 0 0 var(--border), 0 1px 0 var(--border);
     }
+
     .table-wrap.limited {
       max-height: 440px;
     }
+
     @media (max-width: 640px) {
       .table-wrap {
         margin-left: -12px;
         margin-right: -12px;
         border-radius: 10px;
       }
+
       .table-wrap table {
         width: max-content;
         min-width: 760px;
       }
+
       .clip-cell {
         max-width: 180px;
         width: min(180px, 100%);
       }
     }
+
     /* Allow longer text columns to wrap */
     .table-wrap th:nth-child(n+6),
     .table-wrap td:nth-child(n+6) {
       white-space: normal;
     }
+
     .table-wrap.expanded {
       max-height: none;
     }
+
     .clip-cell {
       max-width: clamp(200px, 24vw, 260px);
       width: min(260px, 100%);
@@ -209,6 +256,7 @@
       text-overflow: ellipsis;
       word-break: break-word;
     }
+
     .log-header {
       display: flex;
       align-items: center;
@@ -216,6 +264,7 @@
       gap: 10px;
       flex-wrap: wrap;
     }
+
     .inline-input {
       width: 100%;
       padding: 10px 12px;
@@ -227,10 +276,12 @@
       height: 40px;
       line-height: 1.4;
     }
+
     .inline-input.long {
       min-width: 320px;
       max-width: 520px;
     }
+
     .inline-input.multiline {
       min-height: 64px;
       height: auto;
@@ -239,6 +290,7 @@
       padding-bottom: 12px;
       resize: vertical;
     }
+
     .sub-divider {
       display: flex;
       align-items: center;
@@ -247,10 +299,12 @@
       padding-bottom: 10px;
       margin: 12px 0 8px;
     }
+
     .sub-divider .sub-label {
       color: var(--muted);
       font-size: 12px;
     }
+
     .autotherapy-subnav {
       display: flex;
       gap: 8px;
@@ -261,8 +315,9 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       background: var(--card-strong);
-      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
     }
+
     .autotherapy-subnav {
       display: flex;
       gap: 8px;
@@ -273,51 +328,76 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       background: var(--card-strong);
-      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
     }
+
     .autotherapy-subnav .sub-label {
       font-size: 12px;
       color: var(--muted);
       margin-right: 6px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
       min-width: 500px;
     }
-    th, td {
+
+    th,
+    td {
       padding: 8px 10px;
       border-bottom: 1px solid var(--border);
       text-align: left;
       color: var(--text);
     }
+
     th {
       position: sticky;
       top: 0;
-      background: rgba(17,24,39,0.9);
+      background: rgba(17, 24, 39, 0.9);
       z-index: 1;
       font-weight: 700;
       letter-spacing: 0.01em;
     }
-    tbody tr:nth-child(odd) { background: rgba(255,255,255,0.02); }
-    tbody tr:hover { background: rgba(255,94,138,0.08); }
+
+    tbody tr:nth-child(odd) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 94, 138, 0.08);
+    }
+
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       padding: 6px 10px;
       border-radius: 10px;
-      background: rgba(34,197,94,0.15);
+      background: rgba(34, 197, 94, 0.15);
       color: var(--accent-2);
       font-weight: 600;
       font-size: 12px;
     }
-    .rowcount { color: var(--muted); font-size: 12px; margin-left: 6px; }
-    @media (max-width: 720px) {
-      header { flex-direction: column; align-items: flex-start; }
-      .grid { grid-template-columns: 1fr; }
+
+    .rowcount {
+      color: var(--muted);
+      font-size: 12px;
+      margin-left: 6px;
     }
+
+    @media (max-width: 720px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .top-nav {
       display: flex;
       align-items: center;
@@ -326,6 +406,7 @@
       flex-wrap: wrap;
       margin-bottom: 18px;
     }
+
     .top-nav nav {
       display: flex;
       gap: 10px;
@@ -333,6 +414,7 @@
       flex-wrap: wrap;
       flex: 1 1 auto;
     }
+
     .top-actions {
       display: flex;
       gap: 10px;
@@ -340,15 +422,18 @@
       align-items: center;
       justify-content: flex-end;
     }
+
     .entry-tabs {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
       margin: 12px 0 4px;
     }
+
     .entry-panel {
       margin-top: 8px;
     }
+
     .nav-btn {
       padding: 10px 14px;
       border-radius: 10px;
@@ -360,11 +445,13 @@
       transition: all 0.2s ease;
       letter-spacing: 0.01em;
     }
+
     .nav-btn.danger {
-      border-color: rgba(244,63,94,0.5);
+      border-color: rgba(244, 63, 94, 0.5);
       color: var(--danger);
-      background: rgba(244,63,94,0.08);
+      background: rgba(244, 63, 94, 0.08);
     }
+
     .hub-link {
       text-decoration: none;
       display: inline-flex;
@@ -374,28 +461,33 @@
       font-weight: 700;
       line-height: 1.2;
     }
+
     .hub-link svg {
       stroke: currentColor;
       width: 14px;
       height: 14px;
     }
+
     .nav-btn.active {
       border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(255,94,138,0.3), var(--shadow);
+      box-shadow: 0 0 0 1px rgba(255, 94, 138, 0.3), var(--shadow);
       color: var(--accent);
     }
+
     .auth-card {
       margin: 12px 0 18px;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
+
     .auth-row {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
       align-items: center;
     }
+
     .auth-row input {
       background: var(--card-strong);
       border: 1px solid var(--border);
@@ -407,22 +499,25 @@
       min-width: 220px;
       flex: 1;
     }
+
     .auth-row input:focus {
       border-color: var(--accent);
-      background: rgba(255,94,138,0.08);
+      background: rgba(255, 94, 138, 0.08);
     }
+
     .pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       padding: 10px 12px;
       border-radius: 12px;
-      background: rgba(255,94,138,0.08);
-      border: 1px solid rgba(255,94,138,0.24);
+      background: rgba(255, 94, 138, 0.08);
+      border: 1px solid rgba(255, 94, 138, 0.24);
       color: var(--text);
       font-weight: 700;
       letter-spacing: 0.01em;
     }
+
     .form-grid {
       display: block;
       column-width: 220px;
@@ -430,6 +525,7 @@
       column-fill: balance;
       margin-top: 10px;
     }
+
     .form-group {
       display: flex;
       flex-direction: column;
@@ -438,18 +534,20 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       background: var(--card);
-      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
       height: auto;
       break-inside: avoid;
       width: 100%;
       box-sizing: border-box;
       margin: 0 0 10px 0;
     }
+
     .form-group label {
       font-size: 12px;
       color: var(--muted);
       letter-spacing: 0.01em;
     }
+
     .form-group input,
     .form-group select,
     .form-group textarea {
@@ -462,20 +560,24 @@
       outline: none;
       transition: border-color 0.2s ease, background 0.2s ease;
     }
+
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
       border-color: var(--accent);
-      background: rgba(255,94,138,0.08);
+      background: rgba(255, 94, 138, 0.08);
     }
+
     .form-group small {
       color: var(--muted);
       font-size: 12px;
     }
+
     .form-group textarea {
       resize: vertical;
       min-height: 72px;
     }
+
     .form-actions {
       margin-top: 14px;
       display: flex;
@@ -483,6 +585,7 @@
       align-items: center;
       flex-wrap: wrap;
     }
+
     .form-divider {
       width: 100%;
       height: 1px;
@@ -490,6 +593,7 @@
       margin: 16px 0 12px;
       opacity: 0.6;
     }
+
     .section-divider {
       width: 100%;
       height: 1px;
@@ -497,11 +601,13 @@
       margin: 14px 0;
       opacity: 0.7;
     }
+
     .stacked-fields {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
+
     .btn-primary {
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
       color: #0b0b0d;
@@ -510,15 +616,17 @@
       border-radius: 12px;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 6px 12px rgba(255,94,138,0.16);
+      box-shadow: 0 6px 12px rgba(255, 94, 138, 0.16);
       letter-spacing: 0.01em;
     }
+
     .btn-primary.btn-plain {
       box-shadow: none;
-      background: rgba(255,94,138,0.18);
+      background: rgba(255, 94, 138, 0.18);
       color: #fff;
-      border: 1px solid rgba(255,94,138,0.35);
+      border: 1px solid rgba(255, 94, 138, 0.35);
     }
+
     .btn-muted {
       background: var(--card-strong);
       border: 1px solid var(--border);
@@ -528,17 +636,20 @@
       font-weight: 700;
       cursor: pointer;
     }
+
     .tile-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 12px;
       margin-top: 10px;
     }
+
     .chip-row {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
     }
+
     .chip-btn {
       padding: 8px 12px;
       border-radius: 10px;
@@ -551,29 +662,34 @@
       font-size: 13px;
       box-shadow: none;
     }
+
     .chip-btn.active {
-      background: rgba(255,94,138,0.06);
-      border-color: rgba(255,94,138,0.25);
+      background: rgba(255, 94, 138, 0.06);
+      border-color: rgba(255, 94, 138, 0.25);
       color: #f1c8d7;
       box-shadow: none;
     }
+
     .tile {
       padding: 12px;
       border-radius: 12px;
       background: var(--card-strong);
       border: 1px solid var(--border);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
     }
+
     .tile strong {
       display: block;
       margin-bottom: 4px;
     }
+
     .tile p {
       margin: 0;
       color: var(--muted);
       font-size: 13px;
       line-height: 1.4;
     }
+
     .chip-edit {
       margin-left: 8px;
       padding: 4px 8px;
@@ -584,26 +700,33 @@
       font-size: 12px;
       cursor: pointer;
     }
+
     .chip-editor {
       margin-top: 8px;
       border: 1px dashed var(--border);
       padding: 10px;
       border-radius: 10px;
-      background: rgba(255,255,255,0.02);
+      background: rgba(255, 255, 255, 0.02);
     }
+
     .chip-editor-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 10px;
       padding: 6px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
-    .chip-editor-row:last-child { border-bottom: none; }
+
+    .chip-editor-row:last-child {
+      border-bottom: none;
+    }
+
     .chip-editor-actions {
       display: flex;
       gap: 6px;
     }
+
     .chip-editor-actions button,
     .chip-editor-add button {
       padding: 6px 10px;
@@ -614,6 +737,7 @@
       cursor: pointer;
       font-size: 12px;
     }
+
     .chip-editor-add {
       display: flex;
       gap: 8px;
@@ -621,6 +745,7 @@
       align-items: center;
       width: 100%;
     }
+
     .chip-editor-add input {
       flex: 1;
       min-width: 0;
@@ -631,8 +756,15 @@
       color: var(--text);
       box-sizing: border-box;
     }
-    .chip-editor-add button { flex-shrink: 0; }
-    .hidden { display: none; }
+
+    .chip-editor-add button {
+      flex-shrink: 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
     .toast {
       position: fixed;
       right: 18px;
@@ -650,34 +782,67 @@
       transition: opacity 0.2s ease, transform 0.2s ease;
       z-index: 999;
     }
+
     .toast.show {
       opacity: 1;
       transform: translateY(0);
     }
-    .toast.success { border-color: rgba(34,197,94,0.5); }
-    .toast.error { border-color: rgba(244,63,94,0.5); }
+
+    .toast.success {
+      border-color: rgba(34, 197, 94, 0.5);
+    }
+
+    .toast.error {
+      border-color: rgba(244, 63, 94, 0.5);
+    }
+
     .dash-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px;
       margin-top: 12px;
     }
+
     .dash-card {
       padding: 12px 14px;
       border: 1px solid var(--border);
       border-radius: 12px;
       background: var(--card-strong);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
       display: flex;
       align-items: center;
       gap: 12px;
     }
-    .dash-label { color: var(--muted); font-size: 12px; }
-    .dash-value { font-size: 18px; font-weight: 700; display: flex; align-items: baseline; gap: 6px; }
-    .delta { font-size: 12px; }
-    .delta.positive { color: #4ade80; }
-    .delta.negative { color: #f87171; }
-    .delta.neutral { color: var(--muted); }
+
+    .dash-label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .dash-value {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .delta {
+      font-size: 12px;
+    }
+
+    .delta.positive {
+      color: #4ade80;
+    }
+
+    .delta.negative {
+      color: #f87171;
+    }
+
+    .delta.neutral {
+      color: var(--muted);
+    }
+
     .dash-emoji {
       font-size: 22px;
       line-height: 1;
@@ -687,18 +852,21 @@
       height: 34px;
       cursor: pointer;
     }
+
     .dash-divider {
       width: 2px;
       height: 44px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1));
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1));
       border-radius: 2px;
       opacity: 0.7;
     }
+
     .dash-meta {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
+
     .emoji-picker {
       position: absolute;
       z-index: 2000;
@@ -712,6 +880,7 @@
       flex-wrap: wrap;
       min-width: 220px;
     }
+
     .emoji-picker button.emoji-choice {
       border: 1px solid var(--border);
       background: var(--card-strong);
@@ -720,6 +889,7 @@
       cursor: pointer;
       font-size: 16px;
     }
+
     .emoji-picker input.emoji-input {
       border: 1px solid var(--border);
       background: var(--card-strong);
@@ -728,26 +898,30 @@
       padding: 6px 8px;
       min-width: 90px;
     }
+
     .emoji-mart {
       background: var(--card) !important;
       color: var(--text) !important;
       border: 1px solid var(--border) !important;
       box-shadow: var(--shadow) !important;
     }
+
     .graph-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 14px;
       margin-top: 16px;
     }
+
     .graph-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 12px;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.4);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
       width: 100%;
     }
+
     .graph-title {
       margin: 0 0 8px;
       font-size: 14px;
@@ -756,12 +930,18 @@
       align-items: center;
       gap: 8px;
     }
-    canvas { width: 100%; height: 160px; }
+
+    canvas {
+      width: 100%;
+      height: 160px;
+    }
+
     @media (max-width: 640px) {
       .graph-grid {
         grid-template-columns: 1fr;
       }
     }
+
     .filters {
       display: flex;
       gap: 10px;
@@ -769,6 +949,7 @@
       margin: 10px 0;
       align-items: center;
     }
+
     .filters label {
       color: var(--muted);
       font-size: 12px;
@@ -778,6 +959,7 @@
       gap: 6px;
       margin: 0;
     }
+
     .filters input {
       background: var(--card);
       border: 1px solid var(--border);
@@ -785,6 +967,7 @@
       padding: 8px 10px;
       border-radius: 8px;
     }
+
     .filters .divider {
       align-self: center;
       width: 1px;
@@ -792,12 +975,14 @@
       background: var(--border);
       margin: 0 6px;
     }
+
     .quick-filters {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
       align-items: center;
     }
+
     .quick-btn {
       padding: 8px 10px;
       border-radius: 8px;
@@ -808,15 +993,18 @@
       cursor: pointer;
       transition: border-color 0.2s ease, background 0.2s ease;
     }
+
     .quick-btn:hover {
       border-color: var(--accent);
-      background: rgba(255,94,138,0.1);
+      background: rgba(255, 94, 138, 0.1);
     }
+
     .quick-btn.active {
       border-color: var(--accent);
-      background: rgba(255,94,138,0.2);
+      background: rgba(255, 94, 138, 0.2);
       color: var(--text);
     }
+
     .tooltip {
       position: fixed;
       pointer-events: none;
@@ -833,6 +1021,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="shell">
     <header>
@@ -862,7 +1051,7 @@
         <div class="top-actions">
           <a class="nav-btn hub-link hidden" id="go-hub" href="/" aria-label="Back to hub">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M15 5l-7 7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15 5l-7 7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             <span>Back to hub</span>
           </a>
@@ -903,7 +1092,8 @@
           <div class="hint">Capture a quick log without waiting for a CSV import.</div>
           <div class="entry-tabs" role="tablist" aria-label="New entry categories">
             <button class="nav-btn entry-btn active" data-entry="pain" type="button">Physical pain</button>
-          <button class="nav-btn entry-btn" id="autotherapy-tab" data-entry="autotherapy" type="button">Autotherapy ◀</button>
+            <button class="nav-btn entry-btn" id="autotherapy-tab" data-entry="autotherapy" type="button">Autotherapy
+              ◀</button>
           </div>
 
           <div class="entry-panel" data-entry-panel="pain">
@@ -916,11 +1106,13 @@
                 </div>
                 <div class="form-group">
                   <label for="pain-level">Pain level (1-9)</label>
-                  <input id="pain-level" name="pain-level" type="number" min="1" max="9" step="1" placeholder="e.g. 6" />
+                  <input id="pain-level" name="pain-level" type="number" min="1" max="9" step="1"
+                    placeholder="e.g. 6" />
                 </div>
                 <div class="form-group">
                   <label for="fatigue-level">Fatigue level (1-9)</label>
-                  <input id="fatigue-level" name="fatigue-level" type="number" min="1" max="9" step="1" placeholder="e.g. 4" />
+                  <input id="fatigue-level" name="fatigue-level" type="number" min="1" max="9" step="1"
+                    placeholder="e.g. 4" />
                 </div>
                 <div class="form-group">
                   <label>Area <button type="button" class="chip-edit" data-edit="area">Edit</button></label>
@@ -953,7 +1145,8 @@
                 </div>
                 <div class="form-group">
                   <label for="coffee-count">Coffee (cups)</label>
-                  <input id="coffee-count" name="coffee-count" type="number" min="0" max="9" step="1" placeholder="e.g. 1" />
+                  <input id="coffee-count" name="coffee-count" type="number" min="0" max="9" step="1"
+                    placeholder="e.g. 1" />
                 </div>
                 <div class="form-group">
                   <label>Other <button type="button" class="chip-edit" data-edit="other">Edit</button></label>
@@ -961,26 +1154,28 @@
                   <div id="other-editor" class="chip-editor hidden" data-field="other"></div>
                 </div>
               </div>
-            <div class="form-actions">
-              <button class="btn-primary btn-plain" type="submit">Save new entry</button>
-              <div id="pain-form-status" class="status"></div>
+              <div class="form-actions">
+                <button class="btn-primary btn-plain" type="submit">Save new entry</button>
+                <div id="pain-form-status" class="status"></div>
+              </div>
+            </form>
+            <div class="form-divider"></div>
+            <div class="card">
+              <div class="log-header">
+                <h2>Pain log</h2>
+              </div>
+              <div class="table-wrap" id="pain-table"></div>
             </div>
-          </form>
-          <div class="form-divider"></div>
-          <div class="card">
-            <div class="log-header">
-              <h2>Pain log</h2>
-            </div>
-            <div class="table-wrap" id="pain-table"></div>
           </div>
-        </div>
 
-        <div class="entry-panel hidden" data-entry-panel="autotherapy">
-          <div id="autotherapy-stack">
-            <div class="entry-tabs autotherapy-subnav" role="tablist" aria-label="Autotherapy entries">
+          <div class="entry-panel hidden" data-entry-panel="autotherapy">
+            <div id="autotherapy-stack">
+              <div class="entry-tabs autotherapy-subnav" role="tablist" aria-label="Autotherapy entries">
                 <button class="nav-btn entry-btn secondary" data-autotherapy="journal" type="button">Journal</button>
-                <button class="nav-btn entry-btn secondary" data-autotherapy="cbt" type="button">CBT thought response</button>
-                <button class="nav-btn entry-btn secondary" data-autotherapy="dbt" type="button">DBT distress tolerance</button>
+                <button class="nav-btn entry-btn secondary" data-autotherapy="cbt" type="button">CBT thought
+                  response</button>
+                <button class="nav-btn entry-btn secondary" data-autotherapy="dbt" type="button">DBT distress
+                  tolerance</button>
               </div>
               <div class="entry-panel hidden" data-autotherapy-panel="journal">
                 <form id="journal-form">
@@ -992,27 +1187,33 @@
                     </div>
                     <div class="form-group">
                       <label for="journal-mood">Mood level (1-9)</label>
-                      <input id="journal-mood" name="journal-mood" type="number" min="1" max="9" step="1" placeholder="e.g. 6" />
+                      <input id="journal-mood" name="journal-mood" type="number" min="1" max="9" step="1"
+                        placeholder="e.g. 6" />
                     </div>
                     <div class="form-group">
                       <label for="journal-depression">Depression (1-9)</label>
-                      <input id="journal-depression" name="journal-depression" type="number" min="1" max="9" step="1" placeholder="e.g. 4" />
+                      <input id="journal-depression" name="journal-depression" type="number" min="1" max="9" step="1"
+                        placeholder="e.g. 4" />
                     </div>
                     <div class="form-group">
                       <label for="journal-anxiety">Anxiety (1-9)</label>
-                      <input id="journal-anxiety" name="journal-anxiety" type="number" min="1" max="9" step="1" placeholder="e.g. 5" />
+                      <input id="journal-anxiety" name="journal-anxiety" type="number" min="1" max="9" step="1"
+                        placeholder="e.g. 5" />
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                       <label for="journal-description">description</label>
-                      <textarea id="journal-description" name="journal-description" placeholder="cosa hai fatto oggi?"></textarea>
+                      <textarea id="journal-description" name="journal-description"
+                        placeholder="cosa hai fatto oggi?"></textarea>
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                       <label for="journal-gratitude">gratitude</label>
-                      <textarea id="journal-gratitude" name="journal-gratitude" placeholder="per cosa sei grato?"></textarea>
+                      <textarea id="journal-gratitude" name="journal-gratitude"
+                        placeholder="per cosa sei grato?"></textarea>
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                       <label for="journal-reflection">reflection</label>
-                      <textarea id="journal-reflection" name="journal-reflection" placeholder="vuoi riflettere su qualcosa?"></textarea>
+                      <textarea id="journal-reflection" name="journal-reflection"
+                        placeholder="vuoi riflettere su qualcosa?"></textarea>
                     </div>
                   </div>
                   <div class="form-actions">
@@ -1041,15 +1242,26 @@
 
       <section id="import-section" class="hidden">
         <div class="card">
-          <h2>📥 <strong>Import / backup</strong></h2>
+          <h2>Import / backup</h2>
+          <div class="hint">easily import or export your data</div>
 
-          <div class="stacked-fields">
+          <div class="stacked-fields" style="gap: 15px;">
             <div class="field-group">
-              <label><strong>Importa dati da backup (.json)</strong></label><br>
+              <label><strong>Import from JSON</strong></label><br>
               <input type="file" id="import-backup-input" accept=".json" />
             </div>
             <div class="field-group">
-              <button class="nav-btn" id="export-backup-button">📤 esporta dati (.json)</button>
+              <button class="btn-primary btn-plain" id="export-backup-button">Export JSON</button>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="field-group">
+              <label><strong>Import from XLSX</strong> (sheets: <code>diary</code>, <code>pain</code>)</label><br>
+              <input type="file" id="import-xlsx-input" accept=".xlsx,.xls" />
+            </div>
+            <div class="field-group">
+              <button class="btn-primary btn-plain" id="export-xlsx-button">Export XLSX</button>
             </div>
 
             <div class="section-divider"></div>
@@ -1057,27 +1269,18 @@
             <div class="field-group">
               <button class="nav-btn danger" id="full-purge-button">🧨 delete all data</button>
             </div>
-
-            <div class="section-divider"></div>
-
-            <div class="field-group">
-              <label><strong>Importa da XLSX</strong> (fogli: <code>diary</code>, <code>pain</code>)</label><br>
-              <input type="file" id="import-xlsx-input" accept=".xlsx,.xls" />
-            </div>
-            <div class="field-group">
-              <button class="nav-btn" id="export-xlsx-button">📤 esporta dati (.xlsx)</button>
-            </div>
           </div>
-
-          <div class="status" id="backup-status"></div>
-          <pre class="error-box hidden" id="backup-error"></pre>
-
-          <!-- hidden status nodes to satisfy existing refs -->
-          <div class="status hidden" id="diary-status-import"></div>
-          <div class="status hidden" id="pain-status-import"></div>
         </div>
-      </section>
+
+        <div class="status" id="backup-status"></div>
+        <pre class="error-box hidden" id="backup-error"></pre>
+
+        <!-- hidden status nodes to satisfy existing refs -->
+        <div class="status hidden" id="diary-status-import"></div>
+        <div class="status hidden" id="pain-status-import"></div>
     </div>
+    </section>
+  </div>
   </div>
 
   <script>
@@ -1252,7 +1455,7 @@
       "Pain avg": "🤕",
       "Fatigue avg": "🥱",
     };
-    const EMOJI_CHOICES = ["📒","📓","🙂","😔","😨","🤕","🥱","😊","💪","🧠","🩺","🌿","⭐","🔥","✨"];
+    const EMOJI_CHOICES = ["📒", "📓", "🙂", "😔", "😨", "🤕", "🥱", "😊", "💪", "🧠", "🩺", "🌿", "⭐", "🔥", "✨"];
     let emojiPickerEl = null;
     let emojiScriptLoading = null;
 
@@ -1541,7 +1744,7 @@
         }
         const data = await res.json();
         if (data && data.rows && data.headers) {
-        const normalized = normalizeDataset(data, kind);
+          const normalized = normalizeDataset(data, kind);
           const sortedRows = sortRowsByDateTime(normalized.data.rows, normalized.data.headers);
           const updated = { ...normalized.data, rows: sortedRows };
           dataStore[kind] = updated;
@@ -1958,14 +2161,14 @@
           });
           if (otherKey && otherKey in next) delete next[otherKey];
 
-        const habitTokens = new Set();
-        const addTokens = (val) => {
-          String(val || "")
-            .split(",")
-            .map((s) => s.trim().toLowerCase())
-            .filter((s) => s && !["false", "true", "yes", "1", "no", "0"].includes(s))
-            .forEach((s) => habitTokens.add(s));
-        };
+          const habitTokens = new Set();
+          const addTokens = (val) => {
+            String(val || "")
+              .split(",")
+              .map((s) => s.trim().toLowerCase())
+              .filter((s) => s && !["false", "true", "yes", "1", "no", "0"].includes(s))
+              .forEach((s) => habitTokens.add(s));
+          };
           addTokens(rawHabits);
           addTokens(rawGood);
           addTokens(rawHealthy);
@@ -1981,18 +2184,18 @@
           if (extraHabits.length) habitList.push(...extraHabits);
           next["habits"] = habitList.join(", ");
 
-        const otherTokens = new Set();
-        const addOther = (label, val) => {
-          const v = String(val || "").trim();
-          if (!v) return;
-          const lower = v.toLowerCase();
-          if (["yes", "true", "1"].includes(lower)) {
-            otherTokens.add(label);
-          } else if (!["false", "no", "0"].includes(lower)) {
-            otherTokens.add(v);
-          }
-        };
-        flagDefs.forEach((f) => addOther(f.label, f.key ? row[f.key] : ""));
+          const otherTokens = new Set();
+          const addOther = (label, val) => {
+            const v = String(val || "").trim();
+            if (!v) return;
+            const lower = v.toLowerCase();
+            if (["yes", "true", "1"].includes(lower)) {
+              otherTokens.add(label);
+            } else if (!["false", "no", "0"].includes(lower)) {
+              otherTokens.add(v);
+            }
+          };
+          flagDefs.forEach((f) => addOther(f.label, f.key ? row[f.key] : ""));
           if (otherKey) {
             String(row[otherKey] || "")
               .split(",")
@@ -2224,8 +2427,8 @@
       const opts = optionsCache[field] || [];
       const listHtml = opts.length
         ? opts
-            .map(
-              (v) => `
+          .map(
+            (v) => `
             <div class="chip-editor-row">
               <span>${escapeHtml(v)}</span>
               <div class="chip-editor-actions">
@@ -2233,8 +2436,8 @@
                 <button type="button" data-action="delete" data-value="${escapeHtml(v)}" data-field="${field}">Delete</button>
               </div>
             </div>`
-            )
-            .join("")
+          )
+          .join("")
         : `<div style="color:var(--muted); font-size:13px;">No ${escapeHtml(field)} options yet</div>`;
       container.innerHTML = `
         <div class="chip-editor-list">${listHtml}</div>
@@ -2389,14 +2592,14 @@
         const dateKey = findHeader(mergedHeaders, "date") || "date";
         const timeKey = findHeader(mergedHeaders, "hour") || "hour";
         const seen = new Set(
-          existingNormalized.rows.map(r => `${r[dateKey] || ""}T${(r[timeKey] || "21:00").slice(0,5)}`)
+          existingNormalized.rows.map(r => `${r[dateKey] || ""}T${(r[timeKey] || "21:00").slice(0, 5)}`)
         );
         let added = 0;
         let skipped = 0;
         const mergedRows = [...existingNormalized.rows];
 
         normalizedIncoming.rows.forEach(r => {
-          const stamp = `${(r[dateKey] || "").trim()}T${(r[timeKey] || "21:00").slice(0,5)}`;
+          const stamp = `${(r[dateKey] || "").trim()}T${(r[timeKey] || "21:00").slice(0, 5)}`;
           if (!stamp.trim()) return;
           if (seen.has(stamp)) {
             skipped += 1;
@@ -2836,7 +3039,7 @@
       const width = (canvas.width = canvas.offsetWidth || 320);
       const height = (canvas.height = canvas.offsetHeight || 180);
       ctx.clearRect(0, 0, width, height);
-      ctx.strokeStyle = [ "#ff5e8a", "#ff8fb1", "#ffb3c9" ][idx % 3];
+      ctx.strokeStyle = ["#ff5e8a", "#ff8fb1", "#ffb3c9"][idx % 3];
       ctx.lineWidth = 2;
       ctx.fillStyle = "rgba(255,255,255,0.04)";
       ctx.fillRect(0, 0, width, height);
@@ -3164,4 +3367,5 @@
     applyQuickRange(lastRange, true);
   </script>
 </body>
+
 </html>
