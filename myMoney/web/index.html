@@ -41,9 +41,10 @@
     }
 
     .shell {
-      max-width: 1280px;
+      max-width: 1800px;
+      width: 98vw;
       margin: 0 auto;
-      padding: 32px 20px 48px;
+      padding: 18px 8px 30px;
     }
 
     header {
@@ -96,6 +97,10 @@
       box-shadow: var(--shadow);
     }
 
+    .card h1,
+    .card h2,
+    .card h3,
+    .card h4,
     .card h2 strong,
     .card h3 strong {
       color: var(--accent);
@@ -180,6 +185,15 @@
       padding: 12px;
       background: var(--card-strong);
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .asset-block {
+      align-items: flex-start;
+      text-align: left;
     }
 
     .chart-card h4 {
@@ -189,9 +203,19 @@
     }
 
     .chart-card canvas {
+      display: block;
+      margin: 0 auto;
+    }
+
+    #assetAllocationChart {
+      width: 220px;
+      height: 220px !important;
+    }
+
+    #assetPnlChart {
       width: 100%;
-      max-width: 320px;
-      max-height: 260px;
+      max-width: 520px;
+      height: 220px !important;
     }
 
     .asset-blocks {
@@ -200,6 +224,8 @@
 
     .asset-block {
       min-width: 200px;
+      text-align: left;
+      align-items: flex-start;
     }
 
     .asset-block-header {
@@ -208,24 +234,29 @@
       justify-content: space-between;
       gap: 8px;
       margin-bottom: 6px;
+      width: 100%;
     }
 
     .asset-block-title {
       font-weight: 700;
-      margin-bottom: 4px;
+      margin-bottom: 0;
+      font-size: 16px;
+      line-height: 28px;
     }
 
     .asset-color-controls {
       display: flex;
       align-items: center;
       gap: 6px;
+      margin-left: auto;
+      align-self: flex-start;
     }
 
     .asset-color-input {
-      width: 32px;
-      height: 28px;
+      width: 21px;
+      height: 18px;
       padding: 0;
-      border-radius: 8px;
+      border-radius: 5px;
       border: 1px solid var(--border);
       background: var(--card);
       cursor: pointer;
@@ -239,6 +270,7 @@
     .asset-block-line {
       font-size: 13px;
       color: var(--muted);
+      width: 100%;
     }
 
     .monthly-chart-box {
@@ -293,6 +325,19 @@
       cursor: pointer;
       transition: all 0.2s ease;
       letter-spacing: 0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-button .icon,
+    .nav-button .icon * {
+      display: block;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
     }
 
     .nav-button.active {
@@ -475,6 +520,58 @@
       color: #ffdfe1;
     }
 
+    .toggle-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      margin: 0 0 0.4rem 0;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card-strong);
+      color: var(--muted);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .toggle-switch .indicator {
+      width: 28px;
+      height: 16px;
+      border-radius: 999px;
+      background: var(--border);
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .toggle-switch .indicator::after {
+      content: '';
+      position: absolute;
+      top: 1px;
+      left: 2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: all 0.2s ease;
+    }
+
+    .toggle-switch.active {
+      border-color: rgba(123, 230, 166, 0.6);
+      background: rgba(123, 230, 166, 0.12);
+      color: var(--text);
+      box-shadow: 0 0 0 1px rgba(123, 230, 166, 0.28);
+    }
+
+    .toggle-switch.active .indicator {
+      background: rgba(123, 230, 166, 0.35);
+    }
+
+    .toggle-switch.active .indicator::after {
+      background: var(--accent);
+      transform: translateX(10px);
+    }
+
     .btn-small {
       padding: 6px 10px;
       font-size: 12px;
@@ -594,7 +691,7 @@
 
     @media (max-width: 720px) {
       .shell {
-        padding: 22px 14px 36px;
+        padding: 20px 12px 32px;
       }
 
       .two-columns>.column+.column,
@@ -636,15 +733,43 @@
     </div>
 
     <div id="app-main" class="hidden">
-      <div class="top-bar">
-        <nav class="top-nav">
-          <button class="nav-button active" data-page="dashboard">dashboard</button>
-          <button class="nav-button" data-page="monthly-review">monthly review</button>
-          <button class="nav-button" data-page="monthly-movements">monthly movements</button>
-          <button class="nav-button" data-page="transactions">transactions</button>
-          <button class="nav-button" data-page="import-backup">import / backup</button>
-        </nav>
-        <div class="top-actions">
+          <div class="top-bar">
+            <nav class="top-nav">
+          <button class="nav-button active" data-page="dashboard">
+            <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 13h6V4H4v9zm10 7h6V4h-6v16z" />
+            </svg>
+            dashboard
+          </button>
+          <button class="nav-button" data-page="monthly-review">
+            <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 5h14v14H5V5zm0 4h14" />
+              <path d="M9 3v4M15 3v4" />
+            </svg>
+            monthly review
+          </button>
+          <button class="nav-button" data-page="monthly-movements">
+            <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 9h9l-2-2m2 8H7l2 2" />
+              <path d="M5 5h14v14H5z" />
+            </svg>
+            monthly movements
+          </button>
+          <button class="nav-button" data-page="transactions">
+            <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 7h16M4 12h10M4 17h7" />
+            </svg>
+            transactions
+          </button>
+          <button class="nav-button" data-page="import-backup">
+            <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 16V4m0 0l-3 3m3-3l3 3" />
+              <path d="M6 13v5h12v-5" />
+            </svg>
+            import / backup
+          </button>
+            </nav>
+            <div class="top-actions">
           <a class="nav-button hub-link hidden" id="go-hub" href="/" aria-label="Back to hub">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M15 5l-7 7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -660,22 +785,22 @@
         <div class="card">
           <div class="dash-top-row">
             <div class="dash-metrics">
-              <h2>📊 <strong>Dashboard</strong></h2>
-              <div><strong>💰 totale investito:</strong> <span id="totalInvested">-</span></div>
-              <div><strong>📈 pnl totale:</strong> <span id="totalPnl">-</span></div>
-              <div><strong>📦 asset diversi:</strong> <span id="assetCount">-</span></div>
-              <div><strong>🧾 numero transazioni:</strong> <span id="txCount">-</span></div>
-              <div><strong>🕒 ultima transazione:</strong> <span id="lastTxDate">-</span></div>
+              <h2><strong>Dashboard</strong></h2>
+              <div><strong>💰 total invested:</strong> <span id="totalInvested">-</span></div>
+              <div><strong>📈 total PnL:</strong> <span id="totalPnl">-</span></div>
+              <div><strong>📦 different assets:</strong> <span id="assetCount">-</span></div>
+              <div><strong>🧾 transactions count:</strong> <span id="txCount">-</span></div>
+              <div><strong>🕒 last transaction:</strong> <span id="lastTxDate">-</span></div>
             </div>
             <div class="dash-charts">
               <div class="charts-row">
-                <div class="chart-card">
-                  <h4>🥧 allocazione per asset</h4>
-                  <canvas id="assetAllocationChart" height="150"></canvas>
+                <div class="chart-card canvas-small">
+                  <h4>allocazione per asset</h4>
+                  <canvas id="assetAllocationChart" height="220"></canvas>
                 </div>
-                <div class="chart-card">
-                  <h4>📉 PnL per asset</h4>
-                  <canvas id="assetPnlChart" height="150"></canvas>
+                <div class="chart-card canvas-large">
+                  <h4>PnL per asset</h4>
+                  <canvas id="assetPnlChart" height="280"></canvas>
                 </div>
               </div>
             </div>
@@ -683,9 +808,11 @@
 
           <div class="divider"></div>
 
-          <h3>📦 dettaglio per asset</h3>
-          <button id="toggleZeroAssetsButton" style="margin-bottom:0.4rem;" class="btn-accent">nascondi investimenti
-            chiusi (valore = 0)</button>
+          <h3>asset details</h3>
+          <button id="toggleZeroAssetsButton" type="button" class="toggle-switch">
+            <span class="indicator" aria-hidden="true"></span>
+            <span class="label">closed investments · hidden</span>
+          </button>
           <div id="assetBlocks" class="asset-blocks"></div>
         </div>
       </section>
@@ -694,17 +821,17 @@
       <section id="page-monthly-review" class="page">
         <div class="card">
           <div class="heading-row">
-            <h2>📅 <strong>Monthly review</strong></h2>
+            <h2><strong>Monthly review</strong></h2>
           </div>
 
           <div class="field-group">
-            <label><strong>liquidità attuale (snapshot rapido)</strong></label><br>
+            <label><strong>current liquidity (quick snapshot)</strong></label><br>
             <input type="number" step="0.01" id="quickLiquidityInput" />
-            <button type="button" id="addTodaySnapshotButton" class="btn-primary">➕ aggiungi snapshot di oggi</button>
+            <button type="button" id="addTodaySnapshotButton" class="btn-primary btn-plain">➕ add today’s snapshot</button>
           </div>
           <div class="field-group">
             <span class="small-text" style="opacity:0.85;">filter by date:</span><br>
-            <select id="monthlyRangeSelect" aria-label="Filtro intervallo mensile">
+            <select id="monthlyRangeSelect" aria-label="Monthly range filter">
               <option value="all">since beginning</option>
               <option value="3m">last 3 months</option>
               <option value="6m">last 6 months</option>
@@ -714,12 +841,11 @@
             </select>
           </div>
           <p class="small-text">
-            crea una nuova colonna nel grafico con data di oggi usando low/medium/high dell’ultimo snapshot
-            e la liquidità inserita qui.
+            add a new chart column dated today using the last snapshot’s low/medium/high and the liquidity you enter here.
           </p>
 
           <div id="monthlySummary" class="small-text">
-            caricata da <code>monthlySnapshots</code> (xlsx) – nessun dato ancora.
+            loaded from <code>monthlySnapshots</code> (xlsx) – no data yet.
           </div>
           <div class="monthly-chart-box">
             <canvas id="monthlyRiskChart" height="200"></canvas>
@@ -730,31 +856,31 @@
       <!-- MONTHLY MOVEMENTS -->
       <section id="page-monthly-movements" class="page">
         <div class="card">
-          <h2>📆 <strong>Monthly movements</strong></h2>
-          <div>📥 entrate mensili: <span id="mmIncome">-</span></div>
-          <div>📤 uscite mensili: <span id="mmExpense">-</span></div>
-          <div>⚖️ netto mensile: <span id="mmNet">-</span></div>
+          <h2><strong>Monthly movements</strong></h2>
+          <div>📥 monthly income: <span id="mmIncome">-</span></div>
+          <div>📤 monthly expenses: <span id="mmExpense">-</span></div>
+          <div>⚖️ monthly net: <span id="mmNet">-</span></div>
 
           <form id="monthlyForm" style="margin-top:0.8rem;">
             <div class="form-grid">
               <div class="form-card">
                 <div class="field-group">
-                  <label><strong>nome</strong></label><br>
+                  <label><strong>name</strong></label><br>
                   <input type="text" name="name" required />
                 </div>
               </div>
               <div class="form-card">
                 <div class="field-group">
-                  <label><strong>tipo</strong></label><br>
+                  <label><strong>type</strong></label><br>
                   <select name="direction" id="monthlyDirection">
-                    <option value="income">entrata</option>
-                    <option value="expense">uscita</option>
+                    <option value="income">income</option>
+                    <option value="expense">expense</option>
                   </select>
                 </div>
               </div>
               <div class="form-card">
                 <div class="field-group">
-                  <label><strong>importo mensile</strong></label><br>
+                  <label><strong>monthly amount</strong></label><br>
                   <input type="number" step="0.01" name="amount" required />
                 </div>
               </div>
@@ -765,35 +891,34 @@
                 </div>
               </div>
             </div>
-            <button type="submit" id="monthlySubmitButton" class="btn-primary" style="margin-top: 1.5rem;">💾
-              salva</button>
+            <button type="submit" id="monthlySubmitButton" class="btn-primary btn-plain" style="margin-top: 1.5rem;">💾
+              save</button>
             <button type="button" id="monthlyCancelEditButton" style="display:none; margin-left:0.5rem;"
-              class="btn-accent">↩️ annulla</button>
+              class="btn-accent">↩️ cancel</button>
           </form>
           <p class="small-text" style="margin-top:0.6rem;">
-            i monthly movements <strong>non influiscono</strong> sul totale investito: servono solo come riepilogo di
-            entrate/uscite mensili 💡
+            monthly movements <strong>do not affect</strong> the total invested: they are only a monthly income/expense recap 💡
           </p>
         </div>
 
         <div class="card stacked-card">
-          <h3>📋 elenco movimenti</h3>
+          <h3>movements list</h3>
           <div class="table-wrap">
             <div class="table-scroll">
               <table>
                 <thead>
                   <tr>
-                    <th data-mm-column="name">nome <span class="sort-indicator"></span></th>
-                    <th data-mm-column="direction">tipo <span class="sort-indicator"></span></th>
-                    <th data-mm-column="amount">importo <span class="sort-indicator"></span></th>
+                    <th data-mm-column="name">name <span class="sort-indicator"></span></th>
+                    <th data-mm-column="direction">type <span class="sort-indicator"></span></th>
+                    <th data-mm-column="amount">amount <span class="sort-indicator"></span></th>
                     <th data-mm-column="note">note <span class="sort-indicator"></span></th>
-                    <th>azioni</th>
+                    <th>actions</th>
                   </tr>
                   <tr class="filter-row">
-                    <th><input type="text" data-mm-filter="name" placeholder="filtra" /></th>
-                    <th><input type="text" data-mm-filter="direction" placeholder="filtra" /></th>
-                    <th><input type="text" data-mm-filter="amount" placeholder="filtra" /></th>
-                    <th><input type="text" data-mm-filter="note" placeholder="filtra" /></th>
+                    <th><input type="text" data-mm-filter="name" placeholder="filter" /></th>
+                    <th><input type="text" data-mm-filter="direction" placeholder="filter" /></th>
+                    <th><input type="text" data-mm-filter="amount" placeholder="filter" /></th>
+                    <th><input type="text" data-mm-filter="note" placeholder="filter" /></th>
                     <th></th>
                   </tr>
                 </thead>
@@ -807,12 +932,12 @@
       <!-- TRANSACTIONS -->
       <section id="page-transactions" class="page">
         <div class="card">
-          <h2>➕ <strong>Nuova transazione</strong></h2>
+          <h2><strong>New transaction</strong></h2>
           <form id="addForm">
             <div class="form-grid">
               <div class="form-card">
                 <div class="field-group">
-                  <label><strong>data</strong></label><br>
+                  <label><strong>date</strong></label><br>
                   <input type="date" name="date" required />
                 </div>
               </div>
@@ -826,20 +951,20 @@
 
               <div class="form-card">
                 <div class="field-group">
-                  <label><strong>tipo (descrizione)</strong></label><br>
+                  <label><strong>type (description)</strong></label><br>
                   <select name="tipo" id="tipoSelect">
-                    <option value="nuovo vincolo">nuovo vincolo</option>
-                    <option value="cedola">cedola</option>
-                    <option value="interessi">interessi</option>
+                    <option value="nuovo vincolo">new deposit</option>
+                    <option value="cedola">coupon</option>
+                    <option value="interessi">interest</option>
                     <option value="cashback">cashback</option>
-                    <option value="Variazione Valore">Variazione Valore</option>
+                    <option value="Variazione Valore">value change</option>
                   </select>
                 </div>
               </div>
 
               <div class="form-card" id="groupBuy">
                 <div class="field-group">
-                  <label><strong>valore d'acquisto</strong></label><br>
+                  <label><strong>purchase value</strong></label><br>
                   <input type="number" step="1" name="buyValue" />
                 </div>
               </div>
@@ -859,36 +984,36 @@
               </div>
             </div>
 
-            <button type="submit" id="txSubmitButton" class="btn-primary" style="margin-top: 1.5rem;">💾 salva</button>
+            <button type="submit" id="txSubmitButton" class="btn-primary btn-plain" style="margin-top: 1.5rem;">💾 save</button>
             <button type="button" id="txCancelEditButton" style="display:none; margin-left:0.5rem;"
-              class="btn-accent">↩️ annulla</button>
+              class="btn-accent">↩️ cancel</button>
           </form>
         </div>
 
         <div class="card stacked-card">
-          <h2>📋 <strong>Transazioni</strong></h2>
+          <h2><strong>Transactions</strong></h2>
           <div class="table-wrap">
             <div class="table-scroll">
               <table id="transactionsTable">
                 <thead>
                   <tr>
-                    <th data-column="date">data <span class="sort-indicator"></span></th>
+                    <th data-column="date">date <span class="sort-indicator"></span></th>
                     <th data-column="asset">asset <span class="sort-indicator"></span></th>
-                    <th data-column="tipo">tipo <span class="sort-indicator"></span></th>
+                    <th data-column="tipo">type (raw) <span class="sort-indicator"></span></th>
                     <th data-column="type">type <span class="sort-indicator"></span></th>
                     <th data-column="buyValue">buy/sell <span class="sort-indicator"></span></th>
                     <th data-column="pnl">pnl <span class="sort-indicator"></span></th>
                     <th data-column="note">note <span class="sort-indicator"></span></th>
-                    <th>azioni</th>
+                    <th>actions</th>
                   </tr>
                   <tr class="filter-row">
-                    <th><input type="text" data-tx-filter="date" placeholder="filtra" /></th>
-                    <th><input type="text" data-tx-filter="asset" placeholder="filtra" /></th>
-                    <th><input type="text" data-tx-filter="tipo" placeholder="filtra" /></th>
-                    <th><input type="text" data-tx-filter="type" placeholder="filtra" /></th>
-                    <th><input type="text" data-tx-filter="buyValue" placeholder="filtra" /></th>
-                    <th><input type="text" data-tx-filter="pnl" placeholder="filtra" /></th>
-                    <th><input type="text" data-tx-filter="note" placeholder="filtra" /></th>
+                    <th><input type="text" data-tx-filter="date" placeholder="filter" /></th>
+                    <th><input type="text" data-tx-filter="asset" placeholder="filter" /></th>
+                    <th><input type="text" data-tx-filter="tipo" placeholder="filter" /></th>
+                    <th><input type="text" data-tx-filter="type" placeholder="filter" /></th>
+                    <th><input type="text" data-tx-filter="buyValue" placeholder="filter" /></th>
+                    <th><input type="text" data-tx-filter="pnl" placeholder="filter" /></th>
+                    <th><input type="text" data-tx-filter="note" placeholder="filter" /></th>
                     <th></th>
                   </tr>
                 </thead>
@@ -972,8 +1097,9 @@
     let assetPnlChart = null;
     let monthlyRiskChart = null;
     let assetColorMap = {};
-    let showZeroAssets = true;
-    const defaultPreferences = { showZeroAssets: true };
+    // Hide zero-value assets by default; toggle via switch.
+    let showZeroAssets = false;
+    const defaultPreferences = { showZeroAssets: false };
 
     const authUI = {
       email: document.getElementById('auth-email'),
@@ -1345,7 +1471,7 @@
       if (addForm.date) addForm.date.value = today;
       editingTransactionId = null;
       const submitBtn = document.getElementById('txSubmitButton');
-      if (submitBtn) submitBtn.textContent = '💾 salva';
+      if (submitBtn) submitBtn.textContent = '💾 save';
       const cancelBtn = document.getElementById('txCancelEditButton');
       if (cancelBtn) cancelBtn.style.display = 'none';
     }
@@ -1480,6 +1606,12 @@
 
       if (!filteredLabels.length) return;
 
+      filteredLabels.sort((a, b) => {
+        const curDiff = (byAsset[b].current || 0) - (byAsset[a].current || 0);
+        if (curDiff !== 0) return curDiff;
+        return a.localeCompare(b);
+      });
+
       filteredLabels.forEach(asset => {
         const agg = byAsset[asset];
         const ratio = agg.current / totalCurrent;
@@ -1520,11 +1652,11 @@
         block.appendChild(header);
 
         const lines = [
-          `valore attuale: ${formatCurrencyWithColor(agg.current)}`,
-          `investito: ${formatCurrency(agg.buy)}`,
+          `current value: ${formatCurrencyWithColor(agg.current)}`,
+          `invested: ${formatCurrency(agg.buy)}`,
           `pnl: ${formatCurrencyWithColor(agg.pnl)}`,
-          `peso: ${(ratio * 100).toFixed(1)}%`,
-          `profitto %: ${formatPercentWithColor(profitPerc)}`
+          `weight: ${(ratio * 100).toFixed(1)}%`,
+          `profit %: ${formatPercentWithColor(profitPerc)}`
         ];
         lines.forEach(text => {
           const line = document.createElement('div');
@@ -1543,22 +1675,28 @@
       const { labels, data, totalCurrent } = getAssetAggregation();
       if (assetChart) assetChart.destroy();
 
-      if (!labels.length || totalCurrent === 0) {
+      const filteredLabels = showZeroAssets
+        ? labels
+        : labels.filter(label => (data[labels.indexOf(label)] || 0) !== 0);
+      const filteredData = filteredLabels.map(label => data[labels.indexOf(label)] || 0);
+      const filteredTotal = filteredData.reduce((sum, val) => sum + (val || 0), 0);
+
+      if (!filteredLabels.length || filteredTotal === 0) {
         ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
         return;
       }
 
-      const colors = labels.map(label => assetColorMap[label] || normalizeColor(randomColor(label)));
-      labels.forEach((label, idx) => { assetColorMap[label] = colors[idx]; });
+      const colors = filteredLabels.map(label => assetColorMap[label] || normalizeColor(randomColor(label)));
+      filteredLabels.forEach((label, idx) => { assetColorMap[label] = colors[idx]; });
 
       assetChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels,
-          datasets: [{ data, backgroundColor: colors }]
+          labels: filteredLabels,
+          datasets: [{ data: filteredData, backgroundColor: colors }]
         },
         options: {
-          plugins: { legend: { position: 'bottom' } }
+          plugins: { legend: { display: false } }
         }
       });
     }
@@ -1569,24 +1707,39 @@
       const { byAsset, labels } = getAssetAggregation();
       if (assetPnlChart) assetPnlChart.destroy();
 
-      if (!labels.length) {
+      const filteredLabels = showZeroAssets
+        ? labels
+        : labels.filter(label => (byAsset[label].current || 0) !== 0);
+
+      if (!filteredLabels.length) {
         ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
         return;
       }
 
-      const data = labels.map(l => byAsset[l].pnl || 0);
-      const colors = labels.map(label => assetColorMap[label] || normalizeColor(randomColor(label)));
-      labels.forEach((label, idx) => { assetColorMap[label] = colors[idx]; });
+      filteredLabels.sort((a, b) => {
+        const diff = (byAsset[b].pnl || 0) - (byAsset[a].pnl || 0);
+        if (diff !== 0) return diff;
+        return a.localeCompare(b);
+      });
+
+      const data = filteredLabels.map(l => byAsset[l].pnl || 0);
+      const colors = filteredLabels.map(label => assetColorMap[label] || normalizeColor(randomColor(label)));
+      filteredLabels.forEach((label, idx) => { assetColorMap[label] = colors[idx]; });
 
       assetPnlChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels,
+          labels: filteredLabels,
           datasets: [{ data, backgroundColor: colors }]
         },
         options: {
+          maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: {
+            x: {
+              ticks: { display: false },
+              grid: { display: false }
+            },
             y: {
               ticks: {
                 callback: value => formatCurrency(value)
@@ -1622,9 +1775,14 @@
     function updateZeroAssetsToggleLabel() {
       const btn = document.getElementById('toggleZeroAssetsButton');
       if (!btn) return;
-      btn.textContent = showZeroAssets
-        ? 'nascondi investimenti chiusi (valore = 0)'
-        : 'mostra investimenti chiusi (valore = 0)';
+      const label = btn.querySelector('.label');
+      if (label) {
+        label.textContent = showZeroAssets
+          ? 'closed investments · visible'
+          : 'closed investments · hidden';
+      }
+      btn.classList.toggle('active', showZeroAssets);
+      btn.setAttribute('aria-pressed', showZeroAssets ? 'true' : 'false');
     }
 
     // ---------- MONTHLY REVIEW ----------
@@ -1654,8 +1812,8 @@
         const count = filtered.length;
         const last = count ? filtered[filtered.length - 1] : null;
         summary.innerHTML = count
-          ? `Snapshot totali: <strong>${count}</strong> • ultimo: <strong>${last?.date || ''}</strong>`
-          : 'caricata da <code>monthlySnapshots</code> (xlsx) – nessun dato ancora.';
+          ? `Total snapshots: <strong>${count}</strong> • last: <strong>${last?.date || ''}</strong>`
+          : 'loaded from <code>monthlySnapshots</code> (xlsx) – no data yet.';
       }
 
       const ctx = document.getElementById('monthlyRiskChart');
@@ -1981,12 +2139,12 @@
             addForm.note.value = tx.note || '';
             editingTransactionId = id;
             const submitBtn = document.getElementById('txSubmitButton');
-            if (submitBtn) submitBtn.textContent = '✅ salva modifica';
+            if (submitBtn) submitBtn.textContent = '✅ save changes';
             const cancelBtn = document.getElementById('txCancelEditButton');
             if (cancelBtn) cancelBtn.style.display = 'inline-block';
           } else if (target.classList.contains('delete-tx')) {
             const id = target.dataset.id;
-            const ok = confirm('Eliminare questa transazione?');
+            const ok = confirm('Delete this transaction?');
             if (!ok) return;
             transactions = transactions.filter(x => x.id !== id);
             saveState();
@@ -2012,11 +2170,11 @@
           const amount = parseFloat(monthlyForm.amount.value || '0');
           const note = monthlyForm.note.value || '';
           if (!name) {
-            alert('Inserisci un nome per il movimento mensile');
+            alert('Enter a name for the monthly movement');
             return;
           }
           if (Number.isNaN(amount)) {
-            alert('Importo non valido');
+            alert('Invalid amount');
             return;
           }
 
@@ -2049,6 +2207,8 @@
           saveState();
           updateZeroAssetsToggleLabel();
           renderAssetBlocks();
+          renderAssetChart();
+          renderAssetPnlChart();
         });
         updateZeroAssetsToggleLabel();
       }
@@ -2060,12 +2220,12 @@
         addTodaySnapshotButton.addEventListener('click', () => {
           const raw = quickLiquidityInput.value;
           if (!raw) {
-            alert('Inserisci un valore di liquidità');
+            alert('Enter a liquidity value');
             return;
           }
           const liquid = parseFloat(raw);
           if (Number.isNaN(liquid)) {
-            alert('Valore di liquidità non valido');
+            alert('Invalid liquidity value');
             return;
           }
           const today = new Date().toISOString().slice(0, 10);
@@ -2170,7 +2330,7 @@
       monthlyForm.direction.value = 'income';
       editingMonthlyId = null;
       const submitBtn = document.getElementById('monthlySubmitButton');
-      if (submitBtn) submitBtn.textContent = '💾 salva';
+      if (submitBtn) submitBtn.textContent = '💾 save';
       const cancelBtn = document.getElementById('monthlyCancelEditButton');
       if (cancelBtn) cancelBtn.style.display = 'none';
     }
@@ -2211,7 +2371,7 @@
             saveState();
             renderEverything();
           } catch (err) {
-            alert('Import fallita: ' + err.message);
+            alert('Import failed: ' + err.message);
           } finally {
             fileInput.value = '';
           }
@@ -2230,11 +2390,11 @@
               transactions = state.transactions;
               monthlyMovements = state.monthlyMovements;
               monthlySnapshots = state.monthlySnapshots;
-              showZeroAssets = !!(state.preferences?.showZeroAssets ?? true);
+              showZeroAssets = !!(state.preferences?.showZeroAssets ?? false);
               saveState();
               renderEverything();
             } catch (err) {
-              alert('JSON non valido');
+              alert('Invalid JSON');
             }
           };
           reader.readAsText(file);
@@ -2250,7 +2410,7 @@
         transactions = [];
         monthlyMovements = [];
         monthlySnapshots = [];
-        showZeroAssets = true;
+        showZeroAssets = false;
         saveState();
         renderEverything();
       });
@@ -2270,7 +2430,7 @@
       if (state.preferences && typeof state.preferences === 'object') {
         showZeroAssets = Boolean(state.preferences.showZeroAssets);
       } else {
-        showZeroAssets = true;
+        showZeroAssets = false;
       }
       renderEverything();
     }
