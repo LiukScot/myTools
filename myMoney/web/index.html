@@ -8,705 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #000000;
-      --panel: #0b0b0d;
-      --card: #1f1f23;
-      --card-strong: #26262b;
-      --accent: #7be6a6;
-      --accent-2: #b9f6d2;
-      --text: #f5f5f7;
-      --muted: #a1a1ad;
-      --border: #35353b;
-      --danger: #f97373;
-      --shadow: 0 20px 55px rgba(0, 0, 0, 0.5);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(140% 120% at 20% 10%, rgba(123, 230, 166, 0.10), rgba(0, 0, 0, 0)),
-        radial-gradient(120% 100% at 80% 5%, rgba(111, 143, 194, 0.08), rgba(0, 0, 0, 0)),
-        var(--bg);
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-attachment: fixed;
-      color: var(--text);
-    }
-
-    .shell {
-      max-width: 1700px;
-      width: 98vw;
-      margin: 0 auto;
-      padding: 18px 8px 30px;
-    }
-
-    header {
-      margin-bottom: 16px;
-    }
-
-    .title {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 14px;
-      background: radial-gradient(circle at 30% 30%, #7be6a6, #4bbf87);
-      display: grid;
-      place-items: center;
-      color: #081019;
-      font-size: 20px;
-      box-shadow: 0 6px 14px rgba(75, 191, 135, 0.28);
-    }
-
-    .title-main {
-      font-size: 26px;
-    }
-
-    .title-sub {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    h1,
-    h2,
-    h3,
-    h4 {
-      margin: 0 0 10px 0;
-      letter-spacing: -0.01em;
-    }
-
-    .card {
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 16px;
-      background: var(--card);
-      box-shadow: var(--shadow);
-    }
-
-    .card h1,
-    .card h2,
-    .card h3,
-    .card h4,
-    .card h2 strong,
-    .card h3 strong {
-      color: var(--accent);
-    }
-
-    .divider {
-      border-top: 1px solid var(--border);
-      margin: 16px 0;
-    }
-
-    .hint,
-    .small-text {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .row,
-    .two-columns,
-    .dash-top-row,
-    .charts-row,
-    .asset-blocks,
-    .top-bar,
-    .heading-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .row>.card,
-    .two-columns>.column {
-      flex: 1;
-      min-width: 260px;
-    }
-
-    .form-column {
-      flex: 1 1 320px;
-      max-width: 460px;
-    }
-
-    .table-column {
-      flex: 3 1 520px;
-    }
-
-    .two-columns>.column+.column {
-      border-left: 1px solid var(--border);
-      padding-left: 12px;
-    }
-
-    .heading-row {
-      align-items: center;
-    }
-
-    .dash-top-row {
-      align-items: flex-start;
-      gap: 20px;
-    }
-
-    .dash-metrics {
-      min-width: 220px;
-      flex: 0 0 260px;
-    }
-
-    .dash-charts {
-      flex: 1;
-      min-width: 340px;
-      border-left: 1px solid var(--border);
-      padding-left: 16px;
-    }
-
-    .charts-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 12px;
-      margin-top: 8px;
-      align-items: stretch;
-    }
-
-    .chart-card,
-    .asset-block {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      background: var(--card-strong);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-    }
-
-    .asset-block {
-      align-items: flex-start;
-      text-align: left;
-    }
-
-    .chart-card h4 {
-      margin: 0 0 8px 0;
-      text-align: center;
-      color: var(--muted);
-    }
-
-    .chart-card canvas {
-      display: block;
-      margin: 0 auto;
-    }
-
-    #assetAllocationChart {
-      width: 220px;
-      height: 220px !important;
-    }
-
-    #assetPnlChart {
-      width: 100%;
-      max-width: 520px;
-      height: 220px !important;
-    }
-
-    .asset-blocks {
-      margin-top: 10px;
-    }
-
-    .asset-block {
-      min-width: 200px;
-      text-align: left;
-      align-items: flex-start;
-    }
-
-    .asset-block-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 6px;
-      width: 100%;
-    }
-
-    .asset-block-title {
-      font-weight: 700;
-      margin-bottom: 0;
-      font-size: 16px;
-      line-height: 28px;
-    }
-
-    .asset-color-controls {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-left: auto;
-      align-self: flex-start;
-    }
-
-    .asset-color-input {
-      width: 21px;
-      height: 18px;
-      padding: 0;
-      border-radius: 5px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      cursor: pointer;
-    }
-
-    .color-btn {
-      padding: 6px 10px;
-      font-size: 12px;
-    }
-
-    .asset-block-line {
-      font-size: 13px;
-      color: var(--muted);
-      width: 100%;
-    }
-
-    .monthly-chart-box {
-      height: 260px;
-      margin-top: 10px;
-      width: 100%;
-      position: relative;
-    }
-
-    .page {
-      display: none;
-    }
-
-    .page.active {
-      display: block;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .top-bar {
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .top-nav {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      flex: 1 1 auto;
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: flex-end;
-    }
-
-    .nav-button {
-      border-radius: 12px;
-      padding: 10px 14px;
-      border: 1px solid var(--border);
-      background: var(--card-strong);
-      color: var(--text);
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      letter-spacing: 0.01em;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .nav-button .icon,
-    .nav-button .icon * {
-      display: block;
-      stroke: currentColor;
-      stroke-width: 1.6;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      fill: none;
-    }
-
-    .nav-button.active {
-      border-color: var(--accent);
-      color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(123, 230, 166, 0.35), var(--shadow);
-    }
-
-    .nav-button:hover {
-      border-color: var(--accent);
-    }
-
-    .nav-button.danger {
-      color: var(--danger);
-      border-color: rgba(249, 115, 115, 0.5);
-    }
-
-    .hub-link {
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-
-    .hub-link svg {
-      stroke: currentColor;
-      width: 14px;
-      height: 14px;
-    }
-
-    .actions-cell {
-      white-space: nowrap;
-    }
-
-    .field-group {
-      margin-bottom: 10px;
-    }
-
-    label {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    input,
-    select,
-    textarea {
-      padding: 10px 12px;
-      margin: 4px 0;
-      background: var(--card-strong);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 14px;
-      width: 100%;
-      box-sizing: border-box;
-      outline: none;
-      transition: border-color 0.2s ease, background 0.2s ease;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: var(--accent);
-      background: rgba(123, 230, 166, 0.06);
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 72px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-      align-items: flex-start;
-    }
-
-    .form-card {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      background: var(--card);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
-    }
-
-    .form-card .field-group {
-      margin-bottom: 0;
-    }
-
-    .section-divider {
-      width: 100%;
-      height: 1px;
-      background: var(--border);
-      margin: 14px 0;
-      opacity: 0.7;
-    }
-
-    .stacked-fields {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    #page-import-backup .stacked-fields .field-group {
-      margin: 0;
-    }
-
-    #page-import-backup .stacked-fields .field-group input,
-    #page-import-backup .stacked-fields .field-group button {
-      margin: 0;
-    }
-
-    #page-import-backup .field-group label {
-      color: var(--text);
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      display: inline-block;
-    }
-
-    #page-import-backup .field-group label code {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .stacked-card {
-      margin-top: 12px;
-    }
-
-    button {
-      padding: 10px 14px;
-      margin-top: 4px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--card-strong);
-      color: var(--text);
-      cursor: pointer;
-      font-weight: 700;
-      transition: all 0.2s ease;
-      letter-spacing: 0.01em;
-    }
-
-    button:hover {
-      border-color: var(--accent);
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #0c1510;
-      border: none;
-      box-shadow: 0 6px 12px rgba(123, 230, 166, 0.25);
-    }
-
-    .btn-primary.btn-plain {
-      box-shadow: none;
-      background: rgba(123, 230, 166, 0.18);
-      color: var(--text);
-      border: 1px solid rgba(123, 230, 166, 0.35);
-    }
-
-    .hint {
-      color: var(--muted);
-      font-size: 13px;
-      margin-bottom: 12px;
-    }
-
-    .btn-accent {
-      background: rgba(123, 230, 166, 0.18);
-      border-color: rgba(123, 230, 166, 0.35);
-      color: var(--text);
-    }
-
-    .btn-danger {
-      background: rgba(249, 115, 115, 0.16);
-      border-color: rgba(249, 115, 115, 0.45);
-      color: #ffdfe1;
-    }
-
-    .toggle-switch {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
-      margin: 0 0 0.4rem 0;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--card-strong);
-      color: var(--muted);
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .toggle-switch .indicator {
-      width: 28px;
-      height: 16px;
-      border-radius: 999px;
-      background: var(--border);
-      position: relative;
-      transition: all 0.2s ease;
-    }
-
-    .toggle-switch .indicator::after {
-      content: '';
-      position: absolute;
-      top: 1px;
-      left: 2px;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--muted);
-      transition: all 0.2s ease;
-    }
-
-    .toggle-switch.active {
-      border-color: rgba(123, 230, 166, 0.6);
-      background: rgba(123, 230, 166, 0.12);
-      color: var(--text);
-      box-shadow: 0 0 0 1px rgba(123, 230, 166, 0.28);
-    }
-
-    .toggle-switch.active .indicator {
-      background: rgba(123, 230, 166, 0.35);
-    }
-
-    .toggle-switch.active .indicator::after {
-      background: var(--accent);
-      transform: translateX(10px);
-    }
-
-    .btn-small {
-      padding: 6px 10px;
-      font-size: 12px;
-      margin-right: 4px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 8px;
-      background: var(--card-strong);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    th,
-    td {
-      border-bottom: 1px solid var(--border);
-      padding: 10px;
-      font-size: 13px;
-      text-align: left;
-      color: var(--text);
-    }
-
-    th {
-      position: sticky;
-      top: 0;
-      background: rgba(19, 27, 42, 0.95);
-      cursor: pointer;
-      user-select: none;
-      z-index: 1;
-    }
-
-    th .sort-indicator {
-      margin-left: 6px;
-      opacity: 0.6;
-      font-size: 11px;
-    }
-
-    tr:nth-child(odd) {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    tr:hover {
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .filter-row input {
-      width: 100%;
-      font-size: 12px;
-      padding: 6px 8px;
-    }
-
-    .value-positive {
-      color: #7be6a6;
-      font-weight: 700;
-    }
-
-    .value-negative {
-      color: #f29ea0;
-      font-weight: 700;
-    }
-
-    .value-zero {
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    .table-wrap {
-      margin-top: 10px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      width: 100%;
-      padding-right: 10px;
-      box-sizing: border-box;
-    }
-
-    .table-scroll {
-      width: 100%;
-      max-width: 100%;
-      overflow: auto;
-      padding-bottom: 6px;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .status {
-      font-size: 13px;
-      color: var(--muted);
-      min-height: 18px;
-    }
-
-    .status .ok {
-      color: var(--accent);
-      font-weight: 700;
-    }
-
-    .status .err {
-      color: var(--danger);
-      font-weight: 700;
-    }
-
-    .auth-card {
-      margin-bottom: 18px;
-    }
-
-    .auth-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .auth-row input {
-      flex: 1 1 220px;
-    }
-
-    @media (max-width: 720px) {
-      .shell {
-        padding: 20px 12px 32px;
-      }
-
-      .two-columns>.column+.column,
-      .dash-charts {
-        border-left: none;
-        padding-left: 0;
-        margin-left: 0;
-      }
-
-      th,
-      td {
-        padding: 8px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/mymoney/style.css">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -733,50 +35,50 @@
     </div>
 
     <div id="app-main" class="hidden">
-          <div class="top-bar">
-            <nav class="top-nav">
-          <button class="nav-button active" data-page="dashboard">
+      <div class="top-bar">
+        <nav class="top-nav">
+          <button class="nav-btn active" data-page="dashboard">
             <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M4 13h6V4H4v9zm10 7h6V4h-6v16z" />
             </svg>
             dashboard
           </button>
-          <button class="nav-button" data-page="monthly-review">
+          <button class="nav-btn" data-page="monthly-review">
             <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M5 5h14v14H5V5zm0 4h14" />
               <path d="M9 3v4M15 3v4" />
             </svg>
             monthly review
           </button>
-          <button class="nav-button" data-page="monthly-movements">
+          <button class="nav-btn" data-page="monthly-movements">
             <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M5 9h9l-2-2m2 8H7l2 2" />
               <path d="M5 5h14v14H5z" />
             </svg>
             monthly movements
           </button>
-          <button class="nav-button" data-page="transactions">
+          <button class="nav-btn" data-page="transactions">
             <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M4 7h16M4 12h10M4 17h7" />
             </svg>
             transactions
           </button>
-          <button class="nav-button" data-page="import-backup">
+          <button class="nav-btn" data-page="import-backup">
             <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 16V4m0 0l-3 3m3-3l3 3" />
               <path d="M6 13v5h12v-5" />
             </svg>
             import / backup
           </button>
-            </nav>
-            <div class="top-actions">
-          <a class="nav-button hub-link hidden" id="go-hub" href="/" aria-label="Back to hub">
+        </nav>
+        <div class="top-actions">
+          <a class="nav-btn hub-link hidden" id="go-hub" href="/" aria-label="Back to hub">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M15 5l-7 7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             <span>Back to hub</span>
           </a>
-          <button class="nav-button danger hidden" id="auth-logout" type="button">Log out</button>
+          <button class="nav-btn danger hidden" id="auth-logout" type="button">Log out</button>
         </div>
       </div>
 
@@ -824,24 +126,36 @@
             <h2><strong>Monthly review</strong></h2>
           </div>
 
-          <div class="field-group">
-            <label><strong>current liquidity (quick snapshot)</strong></label><br>
-            <input type="number" step="0.01" id="quickLiquidityInput" />
-            <button type="button" id="addTodaySnapshotButton" class="btn-primary btn-plain">➕ add today’s snapshot</button>
+          <div class="form-grid" style="margin-bottom: 28px;">
+            <div class="form-card">
+              <div class="field-group">
+                <label><strong>current liquidity (quick snapshot)</strong></label>
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                  <input type="number" step="0.01" id="quickLiquidityInput" style="flex:1;" placeholder="0.00" />
+                  <button type="button" id="addTodaySnapshotButton" class="btn-primary btn-plain"
+                    style="margin-top:0; white-space: nowrap;">➕ add</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-card">
+              <div class="field-group">
+                <label><span class="small-text" style="opacity:0.85;">filter by date</span></label>
+                <div class="quick-filters" style="margin-top: 6px;">
+                  <button class="quick-btn active" data-range="all" type="button">since beginning</button>
+                  <button class="quick-btn" data-range="3m" type="button">3 months</button>
+                  <button class="quick-btn" data-range="6m" type="button">6 months</button>
+                  <button class="quick-btn" data-range="1y" type="button">1 year</button>
+                  <button class="quick-btn" data-range="3y" type="button">3 years</button>
+                  <button class="quick-btn" data-range="10y" type="button">10 years</button>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="field-group">
-            <span class="small-text" style="opacity:0.85;">filter by date:</span><br>
-            <select id="monthlyRangeSelect" aria-label="Monthly range filter">
-              <option value="all">since beginning</option>
-              <option value="3m">last 3 months</option>
-              <option value="6m">last 6 months</option>
-              <option value="1y">last 1 year</option>
-              <option value="3y">last 3 years</option>
-              <option value="10y">last 10 years</option>
-            </select>
-          </div>
-          <p class="small-text">
-            add a new chart column dated today using the last snapshot’s low/medium/high and the liquidity you enter here.
+
+          <p class="small-text" style="margin-bottom: 16px;">
+            add a new chart column dated today using the last snapshot’s low/medium/high and the liquidity you enter
+            here.
           </p>
 
           <div id="monthlySummary" class="small-text">
@@ -856,12 +170,12 @@
       <!-- MONTHLY MOVEMENTS -->
       <section id="page-monthly-movements" class="page">
         <div class="card">
-          <h2><strong>Monthly movements</strong></h2>
+          <h2><strong>Monthly Movements</strong></h2>
           <div>📥 monthly income: <span id="mmIncome">-</span></div>
           <div>📤 monthly expenses: <span id="mmExpense">-</span></div>
           <div>⚖️ monthly net: <span id="mmNet">-</span></div>
 
-          <form id="monthlyForm" style="margin-top:0.8rem;">
+          <form id="monthlyForm" style="margin-top: 14px;">
             <div class="form-grid">
               <div class="form-card">
                 <div class="field-group">
@@ -891,21 +205,23 @@
                 </div>
               </div>
             </div>
-            <button type="submit" id="monthlySubmitButton" class="btn-primary btn-plain" style="margin-top: 1.5rem;">💾
+            <button type="submit" id="monthlySubmitButton" class="btn-primary btn-plain" style="margin-top: 28px;">💾
               save</button>
             <button type="button" id="monthlyCancelEditButton" style="display:none; margin-left:0.5rem;"
               class="btn-accent">↩️ cancel</button>
           </form>
-          <p class="small-text" style="margin-top:0.6rem;">
-            monthly movements <strong>do not affect</strong> the total invested: they are only a monthly income/expense recap 💡
+          <p class="small-text" style="margin-top: 14px;">
+            monthly movements <strong>do not affect</strong> the total invested: they are only a monthly income/expense
+            recap 💡
           </p>
         </div>
 
-        <div class="card stacked-card">
-          <h3>movements list</h3>
-          <div class="table-wrap">
+        <div class="card">
+          <h3>Movements List <span id="mmCount" style="color:var(--muted); font-size:14px; margin-left:8px;"></span>
+          </h3>
+          <div class="list-wrap">
             <div class="table-scroll">
-              <table>
+              <table id="monthlyMovementsTable">
                 <thead>
                   <tr>
                     <th data-mm-column="name">name <span class="sort-indicator"></span></th>
@@ -932,7 +248,7 @@
       <!-- TRANSACTIONS -->
       <section id="page-transactions" class="page">
         <div class="card">
-          <h2><strong>New transaction</strong></h2>
+          <h2><strong>New Transaction</strong></h2>
           <form id="addForm">
             <div class="form-grid">
               <div class="form-card">
@@ -984,15 +300,17 @@
               </div>
             </div>
 
-            <button type="submit" id="txSubmitButton" class="btn-primary btn-plain" style="margin-top: 1.5rem;">💾 save</button>
+            <button type="submit" id="txSubmitButton" class="btn-primary btn-plain" style="margin-top: 28px;">💾
+              save</button>
             <button type="button" id="txCancelEditButton" style="display:none; margin-left:0.5rem;"
               class="btn-accent">↩️ cancel</button>
           </form>
         </div>
 
-        <div class="card stacked-card">
-          <h2><strong>Transactions</strong></h2>
-          <div class="table-wrap">
+        <div class="card">
+          <h2><strong>Transactions</strong> <span id="txCountHeader"
+              style="color:var(--muted); font-size:14px; margin-left:8px;"></span></h2>
+          <div class="list-wrap">
             <div class="table-scroll">
               <table id="transactionsTable">
                 <thead>
@@ -1027,10 +345,10 @@
       <!-- IMPORT / BACKUP -->
       <section id="page-import-backup" class="page">
         <div class="card">
-          <h2>Import / backup</h2>
+          <h2>Import / Backup</h2>
           <div class="hint">easily import or export your data</div>
 
-          <div class="stacked-fields" style="gap: 15px;">
+          <div class="stacked-fields" style="gap: 14px;">
             <!-- JSON area -->
             <div class="field-group">
               <label><strong>Import from JSON</strong></label><br>
@@ -1044,7 +362,8 @@
 
             <!-- XLSX area -->
             <div class="field-group">
-              <label><strong>Import from XLSX</strong> (sheets: <code>rawTransactions</code>, <code>movements</code>, <code>monthlySnapshots</code>)</label><br>
+              <label><strong>Import from XLSX</strong> (sheets: <code>rawTransactions</code>, <code>movements</code>,
+                <code>monthlySnapshots</code>)</label><br>
               <input type="file" id="fileInput" accept=".xlsx,.xls" />
             </div>
             <div class="field-group">
@@ -1097,6 +416,7 @@
     let assetPnlChart = null;
     let monthlyRiskChart = null;
     let assetColorMap = {};
+    let assetRiskMap = {};
     // Hide zero-value assets by default; toggle via switch.
     let showZeroAssets = false;
     const defaultPreferences = { showZeroAssets: false };
@@ -1213,6 +533,7 @@
         monthlyMovements: [],
         monthlySnapshots: [],
         assetColors: {},
+        assetRisks: {},
         preferences: { ...defaultPreferences },
       };
     }
@@ -1228,6 +549,7 @@
         if (Array.isArray(raw.monthlyMovements)) base.monthlyMovements = raw.monthlyMovements;
         if (Array.isArray(raw.monthlySnapshots)) base.monthlySnapshots = raw.monthlySnapshots;
         if (raw.assetColors && typeof raw.assetColors === 'object') base.assetColors = { ...raw.assetColors };
+        if (raw.assetRisks && typeof raw.assetRisks === 'object') base.assetRisks = { ...raw.assetRisks };
         if (raw.preferences && typeof raw.preferences === 'object') {
           base.preferences = { ...base.preferences, ...raw.preferences };
           base.preferences.showZeroAssets = Boolean(base.preferences.showZeroAssets);
@@ -1273,6 +595,7 @@
         monthlyMovements,
         monthlySnapshots,
         assetColors: assetColorMap,
+        assetRisks: assetRiskMap,
         preferences: { showZeroAssets }
       };
     }
@@ -1436,29 +759,132 @@
       });
     }
 
+    function editTransaction(id) {
+      const tx = transactions.find(t => t.id === id);
+      if (!tx) return;
+      const addForm = document.getElementById('addForm');
+      if (!addForm) return;
+      addForm.date.value = tx.date || '';
+      addForm.asset.value = tx.asset || '';
+      addForm.tipo.value = tx.tipo || 'nuovo vincolo';
+      addForm.tipo.dispatchEvent(new Event('change'));
+      addForm.buyValue.value = tx.buyValue ?? '';
+      addForm.pnl.value = tx.pnl ?? '';
+      addForm.note.value = tx.note || '';
+      editingTransactionId = id;
+      const submitBtn = document.getElementById('txSubmitButton');
+      if (submitBtn) submitBtn.textContent = '✅ save changes';
+      const cancelBtn = document.getElementById('txCancelEditButton');
+      if (cancelBtn) cancelBtn.style.display = 'inline-block';
+      addForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function deleteTransaction(id) {
+      if (!confirm('Delete this transaction?')) return;
+      if (!confirm('Are you really sure? This cannot be undone.')) return;
+      transactions = transactions.filter(x => x.id !== id);
+      saveState();
+      renderEverything();
+      resetTransactionForm();
+    }
+
+    function editMonthlyMovement(id) {
+      const m = monthlyMovements.find(x => x.id === id);
+      if (!m) return;
+      const form = document.getElementById('monthlyForm');
+      if (!form) return;
+      form.name.value = m.name || '';
+      form.direction.value = m.direction || 'income';
+      form.amount.value = m.amount || '';
+      form.note.value = m.note || '';
+      editingMonthlyId = id;
+      const submitBtn = document.getElementById('monthlySubmitButton');
+      if (submitBtn) submitBtn.textContent = '✅ save changes';
+      const cancelBtn = document.getElementById('monthlyCancelEditButton');
+      if (cancelBtn) cancelBtn.style.display = 'inline-block';
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function deleteMonthlyMovement(id) {
+      if (!confirm('Delete this monthly movement?')) return;
+      if (!confirm('Are you really sure? This cannot be undone.')) return;
+      monthlyMovements = monthlyMovements.filter(x => x.id !== id);
+      saveState();
+      renderEverything();
+      resetMonthlyForm();
+    }
+
+
     function renderTable() {
-      const tbody = document.getElementById('transactionsTableBody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
+      // Robust selector: target the wrapper directly
+      const wrapper = document.querySelector('#page-transactions .list-wrap');
+      if (!wrapper) return;
 
       const rows = getFilteredSortedTransactions();
-      rows.forEach(t => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${t.date || ''}</td>
-          <td>${t.asset || ''}</td>
-          <td>${t.tipo || ''}</td>
-          <td>${t.type || ''}</td>
-          <td>${formatCurrencyWithColor(t.buyValue)}</td>
-          <td>${formatCurrencyWithColor(t.pnl)}</td>
-          <td>${t.note || ''}</td>
-          <td class="actions-cell">
-            <button class="btn-small edit-tx" data-id="${t.id}">✏️</button>
-            <button class="btn-small delete-tx" data-id="${t.id}">🗑️</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+
+      const gridHtml = `
+        <div class="log-grid">
+          ${rows.map(t => {
+        const dateStr = t.date || '';
+        let niceDate = dateStr;
+        try {
+          const d = new Date(dateStr);
+          if (!isNaN(d)) niceDate = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        } catch (e) { }
+
+        return `
+              <div class="log-card">
+                <div class="log-card-header">
+                  <span>${escapeHtml(niceDate)}</span>
+                  <span>${formatCurrencyWithColor(t.buyValue)}</span>
+                </div>
+                <div class="log-card-body">
+                   <div>${escapeHtml(t.asset || 'No asset')}</div>
+                   <div class="log-card-meta">${escapeHtml(t.tipo || '')}</div>
+                </div>
+                <div class="log-card-actions">
+                  <button class="nav-button small edit-tx" data-id="${t.id}" title="Edit" style="padding:4px 8px;">
+                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="nav-button danger small delete-tx" data-id="${t.id}" title="Delete" style="padding:4px 8px;">
+                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </button>
+                </div>
+              </div>
+            `;
+      }).join('')}
+        </div>
+      `;
+
+      if (wrapper) {
+        wrapper.innerHTML = gridHtml;
+        const countSpan = document.getElementById("txCountHeader");
+        if (countSpan) countSpan.textContent = `${rows.length} transactions`;
+        // Re-attach events (delegation or direct?)
+        // The actions are wired via delegation or similar? 
+        // Previous implementation: just innerHTML. 
+        // Wait, 'edit-tx' and 'delete-tx' need listeners.
+        // Where are listeners attached? 
+        // I see 'wireRowActions' style logic? No, let's check code.
+      }
+
+      // I need to wire events for the new buttons
+      const newContainer = wrapper || document.body; // Fallback
+      newContainer.querySelectorAll('.edit-tx').forEach(btn =>
+        btn.addEventListener('click', () => editTransaction(btn.dataset.id)));
+      newContainer.querySelectorAll('.delete-tx').forEach(btn =>
+        btn.addEventListener('click', () => deleteTransaction(btn.dataset.id)));
+    }
+
+    function escapeHtml(text) { // Helper if not exists in myMoney, wait, myHealth had it. Does myMoney? 
+      // I don't see escapeHtml in myMoney view. I should add it or use basic replacement.
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
     function resetTransactionForm() {
@@ -1538,9 +964,9 @@
     }
 
     function renderMonthlyMovements() {
-      const tbody = document.getElementById('monthlyMovementsTableBody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
+      // Robust selector: target the wrapper directly
+      const wrapper = document.querySelector('#page-monthly-movements .list-wrap');
+      if (!wrapper) return;
 
       const income = monthlyMovements.reduce((sum, m) =>
         m.direction === 'income' ? sum + (m.amount || 0) : sum, 0);
@@ -1553,21 +979,46 @@
       document.getElementById('mmNet').textContent = formatCurrency(net);
 
       const list = getFilteredSortedMonthlyMovements();
-      list.forEach(m => {
-        const tr = document.createElement('tr');
+
+      const gridHtml = `
+        <div class="log-grid">
+          ${list.map(m => {
         const signedAmount = m.direction === 'expense' ? -m.amount : m.amount;
-        tr.innerHTML = `
-          <td>${m.name || ''}</td>
-          <td>${m.direction === 'income' ? 'entrata' : 'uscita'}</td>
-          <td>${formatCurrencyWithColor(signedAmount)}</td>
-          <td>${m.note || ''}</td>
-          <td>
-            <button class="btn-small edit-monthly" data-id="${m.id}">✏️</button>
-            <button class="btn-small delete-monthly" data-id="${m.id}">🗑️</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+        return `
+              <div class="log-card">
+                <div class="log-card-header">
+                  <span>${escapeHtml(m.name || 'Untitled')}</span>
+                  <span>${formatCurrencyWithColor(signedAmount)}</span>
+                </div>
+                <div class="log-card-body">
+                   <div class="log-card-meta">${escapeHtml(m.note || '')}</div>
+                   <div class="log-card-meta">${m.direction === 'income' ? 'Entrata' : 'Uscita'}</div>
+                </div>
+                <div class="log-card-actions">
+                  <button class="nav-button small edit-monthly" data-id="${m.id}" title="Edit" style="padding:4px 8px;">
+                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="nav-button danger small delete-monthly" data-id="${m.id}" title="Delete" style="padding:4px 8px;">
+                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </button>
+                </div>
+              </div>
+            `;
+      }).join('')}
+        </div>
+      `;
+
+      if (wrapper) {
+        wrapper.innerHTML = gridHtml;
+        const countSpan = document.getElementById("mmCount");
+        if (countSpan) countSpan.textContent = `${list.length} movements`;
+      }
+
+      const newContainer = wrapper || document.body;
+      newContainer.querySelectorAll('.edit-monthly').forEach(btn =>
+        btn.addEventListener('click', () => editMonthlyMovement(btn.dataset.id)));
+      newContainer.querySelectorAll('.delete-monthly').forEach(btn =>
+        btn.addEventListener('click', () => deleteMonthlyMovement(btn.dataset.id)));
     }
 
     // ---------- AGGREGAZIONE ASSET ----------
@@ -1592,6 +1043,20 @@
     }
 
     // ---------- BLOCCHETTI + GRAFICI ----------
+    function cycleAssetRisk(asset) {
+      const current = assetRiskMap[asset] || 'low'; // Default to 'low' if not set
+      const cycle = ['low', 'medium', 'high'];
+      let nextRisk = 'low';
+      if (cycle.includes(current)) {
+        const i = cycle.indexOf(current);
+        nextRisk = cycle[(i + 1) % cycle.length];
+      }
+
+      assetRiskMap[asset] = nextRisk;
+      saveState(); // Assuming saveState() exists and saves assetRiskMap
+      renderEverything(); // Assuming renderEverything() exists and re-renders all components
+    }
+
     function renderAssetBlocks() {
       const container = document.getElementById('assetBlocks');
       if (!container) return;
@@ -1604,68 +1069,68 @@
         ? labels
         : labels.filter(asset => (byAsset[asset].current || 0) !== 0);
 
-      if (!filteredLabels.length) return;
+      const html = filteredLabels.map(asset => {
+        const stats = byAsset[asset];
+        const pct = (stats.current / totalCurrent) * 100;
+        const profitPct = stats.buy > 0
+          ? (stats.pnl / stats.buy) * 100
+          : 0;
 
-      filteredLabels.sort((a, b) => {
-        const curDiff = (byAsset[b].current || 0) - (byAsset[a].current || 0);
-        if (curDiff !== 0) return curDiff;
-        return a.localeCompare(b);
+        // Color picker logic (existing)
+        const color = assetColorMap[asset] || 'var(--accent)';
+        const pickerId = `c-${asset.replace(/\s+/g, '-')}`;
+
+        // Risk logic
+        const risk = assetRiskMap[asset] || 'low'; // default to low as entry point
+        const riskClass = risk;
+
+        return `
+          <div class="card asset-card" style="border-left: 4px solid ${color}; position: relative;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+               <h3 style="margin:0; color:${color}">${escapeHtml(asset)}</h3>
+            </div>
+            
+            <div style="display:flex; align-items:center; gap: 8px; margin-top:4px;">
+               <div class="risk-pill ${riskClass}" title="Click to toggle risk" data-risk-asset="${escapeHtml(asset)}">
+                 risk: ${risk}
+               </div>
+
+               <input type="color" id="${pickerId}" value="${color}" 
+                 class="color-picker-input"
+                 title="Change color" />
+            </div>
+
+            <div style="margin-top:8px; font-size:13px; line-height:1.4;">
+              <div style="color:var(--muted)">current value: <span style="color:var(--text); font-weight:bold;">${formatCurrency(stats.current)}</span></div>
+              <div style="color:var(--muted)">invested: ${formatCurrency(stats.buy)}</div>
+              <div style="color:var(--muted)">pnl: ${formatCurrencyWithColor(stats.pnl)}</div>
+              <div style="color:var(--muted)">weight: ${pct.toFixed(1)}%</div>
+              <div style="color:var(--muted)">profit %: ${formatPercentWithColor(profitPct)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+
+      // Re-attach color listeners and risk listeners
+      filteredLabels.forEach(asset => {
+        const pickerId = `c-${asset.replace(/\s+/g, '-')}`;
+        const picker = document.getElementById(pickerId);
+        if (picker) {
+          picker.addEventListener('change', (e) => {
+            assetColorMap[asset] = e.target.value;
+            saveState();
+            renderEverything();
+          });
+        }
       });
 
-      filteredLabels.forEach(asset => {
-        const agg = byAsset[asset];
-        const ratio = agg.current / totalCurrent;
-        const profitPerc = agg.buy > 0 ? (agg.pnl / agg.buy) * 100 : 0;
-        const rawColor = assetColorMap[asset] || '#7be6a6';
-        const color = normalizeColor(rawColor);
-        assetColorMap[asset] = color;
-
-        const block = document.createElement('div');
-        block.className = 'asset-block';
-
-        const header = document.createElement('div');
-        header.className = 'asset-block-header';
-        const title = document.createElement('div');
-        title.className = 'asset-block-title';
-        title.style.color = color;
-        title.textContent = asset;
-
-        const controls = document.createElement('div');
-        controls.className = 'asset-color-controls';
-        const colorInput = document.createElement('input');
-        colorInput.type = 'color';
-        colorInput.value = color;
-        colorInput.className = 'asset-color-input';
-        colorInput.addEventListener('input', () => {
-          const val = normalizeColor(colorInput.value);
-          assetColorMap[asset] = val;
-          const state = getCurrentState();
-          saveToLocalStorage(state);
-          queueServerSave(state);
-          renderAssetBlocks();
-          renderAssetChart();
-          renderAssetPnlChart();
+      container.querySelectorAll('.risk-pill').forEach(pill => {
+        pill.addEventListener('click', (e) => {
+          const asset = pill.dataset.riskAsset;
+          if (asset) cycleAssetRisk(asset);
         });
-        controls.appendChild(colorInput);
-        header.appendChild(title);
-        header.appendChild(controls);
-        block.appendChild(header);
-
-        const lines = [
-          `current value: ${formatCurrencyWithColor(agg.current)}`,
-          `invested: ${formatCurrency(agg.buy)}`,
-          `pnl: ${formatCurrencyWithColor(agg.pnl)}`,
-          `weight: ${(ratio * 100).toFixed(1)}%`,
-          `profit %: ${formatPercentWithColor(profitPerc)}`
-        ];
-        lines.forEach(text => {
-          const line = document.createElement('div');
-          line.className = 'asset-block-line';
-          line.innerHTML = text;
-          block.appendChild(line);
-        });
-
-        container.appendChild(block);
       });
     }
 
@@ -1787,10 +1252,6 @@
 
     // ---------- MONTHLY REVIEW ----------
     function renderMonthlyReview(range = 'all') {
-      const select = document.getElementById('monthlyRangeSelect');
-      if (select && select.value !== range) {
-        range = select.value;
-      }
 
       let filtered = [...monthlySnapshots];
       if (range !== 'all') {
@@ -1831,10 +1292,10 @@
         data: {
           labels,
           datasets: [
-            { label: 'low', data: lowData, backgroundColor: '#8bc34a' },
-            { label: 'medium', data: mediumData, backgroundColor: '#4caf50' },
-            { label: 'high', data: highData, backgroundColor: '#2e7d32' },
-            { label: 'liquid', data: liquidData, backgroundColor: '#7be6a6' }
+            { label: 'low', data: lowData, backgroundColor: '#74c0fc' },
+            { label: 'medium', data: mediumData, backgroundColor: '#faa2c1' },
+            { label: 'high', data: highData, backgroundColor: '#e599f7' },
+            { label: 'liquid', data: liquidData, backgroundColor: '#51cf66' } // green for liquid
           ]
         },
         options: {
@@ -2119,45 +1580,19 @@
         });
       });
 
-      const txTable = document.getElementById('transactionsTable');
-      if (txTable) {
-        txTable.addEventListener('click', event => {
-          const target = event.target;
-          if (!(target instanceof HTMLElement)) return;
-          if (target.classList.contains('edit-tx')) {
-            const id = target.dataset.id;
-            const tx = transactions.find(t => t.id === id);
-            if (!tx) return;
-            const addForm = document.getElementById('addForm');
-            if (!addForm) return;
-            addForm.date.value = tx.date || '';
-            addForm.asset.value = tx.asset || '';
-            addForm.tipo.value = tx.tipo || 'nuovo vincolo';
-            addForm.tipo.dispatchEvent(new Event('change'));
-            addForm.buyValue.value = tx.buyValue ?? '';
-            addForm.pnl.value = tx.pnl ?? '';
-            addForm.note.value = tx.note || '';
-            editingTransactionId = id;
-            const submitBtn = document.getElementById('txSubmitButton');
-            if (submitBtn) submitBtn.textContent = '✅ save changes';
-            const cancelBtn = document.getElementById('txCancelEditButton');
-            if (cancelBtn) cancelBtn.style.display = 'inline-block';
-          } else if (target.classList.contains('delete-tx')) {
-            const id = target.dataset.id;
-            const ok = confirm('Delete this transaction?');
-            if (!ok) return;
-            transactions = transactions.filter(x => x.id !== id);
-            saveState();
-            renderEverything();
-            resetTransactionForm();
-          }
-        });
-      }
+      // Obsolete table listeners removed as we now use direct binding on card actions
 
       const txCancelBtn = document.getElementById('txCancelEditButton');
       if (txCancelBtn) {
         txCancelBtn.addEventListener('click', () => {
           resetTransactionForm();
+        });
+      }
+
+      const mmCancelBtn = document.getElementById('monthlyCancelEditButton');
+      if (mmCancelBtn) {
+        mmCancelBtn.addEventListener('click', () => {
+          resetMonthlyForm();
         });
       }
 
@@ -2415,10 +1850,13 @@
         renderEverything();
       });
 
-      const monthlyRangeSelect = document.getElementById('monthlyRangeSelect');
-      if (monthlyRangeSelect) {
-        monthlyRangeSelect.addEventListener('change', () => renderMonthlyReview(monthlyRangeSelect.value));
-      }
+      document.querySelectorAll('.quick-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderMonthlyReview(btn.dataset.range);
+        });
+      });
     });
 
     // ---------- INIT ----------
@@ -2427,6 +1865,7 @@
       monthlyMovements = state.monthlyMovements || [];
       monthlySnapshots = state.monthlySnapshots || [];
       assetColorMap = state.assetColors && typeof state.assetColors === 'object' ? { ...state.assetColors } : {};
+      assetRiskMap = state.assetRisks && typeof state.assetRisks === 'object' ? { ...state.assetRisks } : {};
       if (state.preferences && typeof state.preferences === 'object') {
         showZeroAssets = Boolean(state.preferences.showZeroAssets);
       } else {
@@ -2463,7 +1902,36 @@
       }
     }
 
+    function wireNav() {
+      const buttons = document.querySelectorAll(".nav-btn[data-page]");
+      const pages = document.querySelectorAll(".page");
+      const titleMain = document.querySelector(".title-main");
+
+      function setActive(pageId) {
+        if (!pageId) return;
+        buttons.forEach(btn => btn.classList.toggle("active", btn.dataset.page === pageId));
+        pages.forEach(page => {
+          if (page.id === `page-${pageId}`) {
+            page.classList.add("active");
+          } else {
+            page.classList.remove("active");
+          }
+        });
+        // Scroll top
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      buttons.forEach(btn => {
+        btn.addEventListener("click", () => setActive(btn.dataset.page));
+      });
+
+      // Default active
+      const current = document.querySelector(".nav-btn.active");
+      if (current) setActive(current.dataset.page);
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
+      wireNav();
       wireAuthForm();
       setAuthVisibility(false);
       setAppVisible(false);

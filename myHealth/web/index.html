@@ -9,1035 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <style>
-    :root {
-      --bg: #000000;
-      --panel: #0b0b0d;
-      --card: #1f1f23;
-      --card-strong: #26262b;
-      --accent: #ff5e8a;
-      --accent-2: #ff8fb1;
-      --text: #f5f5f7;
-      --muted: #a1a1ad;
-      --border: #35353b;
-      --danger: #ff5a7f;
-      --shadow: 0 20px 55px rgba(0, 0, 0, 0.5);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(140% 120% at 20% 10%, rgba(255, 94, 138, 0.14), rgba(0, 0, 0, 0)),
-        radial-gradient(120% 100% at 80% 5%, rgba(255, 143, 177, 0.08), rgba(0, 0, 0, 0)),
-        var(--bg);
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-attachment: fixed;
-      color: var(--text);
-    }
-
-    .shell {
-      max-width: 1700px;
-      width: 98vw;
-      margin: 0 auto;
-      padding: 18px 8px 30px;
-    }
-
-    header {
-      margin-bottom: 18px;
-    }
-
-    .title {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .heart {
-      width: 24px;
-      height: 24px;
-      border-radius: 8px;
-      background: radial-gradient(circle at 30% 30%, #e44d75, #ff7fa6);
-      display: grid;
-      place-items: center;
-      color: #fff;
-      font-size: 14px;
-      box-shadow: 0 4px 10px rgba(228, 77, 117, 0.14);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 18px;
-      margin-bottom: 28px;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: var(--shadow);
-    }
-
-    .card h1,
-    .card h2,
-    .card h3,
-    .card h4 {
-      margin: 0 0 6px;
-      font-size: 18px;
-      letter-spacing: -0.01em;
-      color: var(--accent);
-    }
-
-    .hint {
-      color: var(--muted);
-      font-size: 13px;
-      margin-bottom: 12px;
-    }
-
-    .drop {
-      border: 1px dashed var(--border);
-      border-radius: 12px;
-      padding: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      background: var(--card);
-      cursor: pointer;
-      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
-    }
-
-    .drop:hover {
-      border-color: var(--accent);
-      background: rgba(255, 94, 138, 0.08);
-    }
-
-    .drop strong {
-      display: block;
-    }
-
-    .drop input {
-      display: none;
-    }
-
-    .status {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 10px;
-      min-height: 18px;
-    }
-
-    .debug-log {
-      font-size: 12px;
-      color: #f59e0b;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px;
-      margin-top: 6px;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .error-box {
-      font-size: 12px;
-      color: #f87171;
-      background: rgba(248, 113, 113, 0.08);
-      border: 1px solid rgba(248, 113, 113, 0.35);
-      border-radius: 8px;
-      padding: 8px;
-      margin-top: 6px;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .status .ok {
-      color: var(--accent-2);
-      font-weight: 700;
-    }
-
-    .status .err {
-      color: var(--danger);
-      font-weight: 700;
-    }
-
-    .table-wrap {
-      margin-top: 12px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      width: 100%;
-      max-width: 90vw;
-      padding-right: 10px;
-      box-sizing: border-box;
-    }
-
-    .table-scroll {
-      width: 100%;
-      max-width: 100%;
-      max-height: 70vh;
-      overflow: auto;
-      padding-bottom: 6px;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .table-wrap table {
-      width: max-content;
-      min-width: 1100px;
-      table-layout: auto;
-    }
-
-    .table-wrap th,
-    .table-wrap td {
-      white-space: nowrap;
-    }
-
-    .table-wrap .actions-cell {
-      position: sticky;
-      right: 0;
-      background: var(--card);
-      z-index: 2;
-      box-shadow: -1px 0 0 var(--border);
-      min-width: 120px;
-    }
-
-    .table-wrap th.actions-cell {
-      background: rgba(17, 24, 39, 0.9);
-      z-index: 3;
-      box-shadow: -1px 0 0 var(--border), 0 1px 0 var(--border);
-    }
-
-    .table-wrap.limited {
-      max-height: 440px;
-    }
-
-    @media (max-width: 640px) {
-      .table-wrap {
-        margin-left: -12px;
-        margin-right: -12px;
-        border-radius: 10px;
-      }
-
-      .table-wrap table {
-        width: max-content;
-        min-width: 760px;
-      }
-
-      .clip-cell {
-        max-width: 180px;
-        width: min(180px, 100%);
-      }
-    }
-
-    /* Allow longer text columns to wrap */
-    .table-wrap th:nth-child(n+6),
-    .table-wrap td:nth-child(n+6) {
-      white-space: normal;
-    }
-
-    .table-wrap.expanded {
-      max-height: none;
-    }
-
-    .clip-cell {
-      max-width: clamp(200px, 24vw, 260px);
-      width: min(260px, 100%);
-      white-space: normal;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      word-break: break-word;
-    }
-
-    .log-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .inline-input {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--card-strong);
-      color: var(--text);
-      box-sizing: border-box;
-      height: 40px;
-      line-height: 1.4;
-    }
-
-    .inline-input.long {
-      min-width: 320px;
-      max-width: 520px;
-    }
-
-    .inline-input.multiline {
-      min-height: 64px;
-      height: auto;
-      line-height: 1.5;
-      padding-top: 12px;
-      padding-bottom: 12px;
-      resize: vertical;
-    }
-
-    .sub-divider {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 10px;
-      margin: 12px 0 8px;
-    }
-
-    .sub-divider .sub-label {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .autotherapy-subnav {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-top: 12px;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--card-strong);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
-    }
-
-    .autotherapy-subnav {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-top: 12px;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--card-strong);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
-    }
-
-    .autotherapy-subnav .sub-label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-right: 6px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      min-width: 500px;
-    }
-
-    th,
-    td {
-      padding: 8px 10px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      color: var(--text);
-    }
-
-    th {
-      position: sticky;
-      top: 0;
-      background: rgba(17, 24, 39, 0.9);
-      z-index: 1;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-    }
-
-    tbody tr:nth-child(odd) {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    tbody tr:hover {
-      background: rgba(255, 94, 138, 0.08);
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      border-radius: 10px;
-      background: rgba(34, 197, 94, 0.15);
-      color: var(--accent-2);
-      font-weight: 600;
-      font-size: 12px;
-    }
-
-    .rowcount {
-      color: var(--muted);
-      font-size: 12px;
-      margin-left: 6px;
-    }
-
-    @media (max-width: 720px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .top-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .top-nav nav {
-      display: flex;
-      gap: 10px;
-      margin: 0;
-      flex-wrap: wrap;
-      flex: 1 1 auto;
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: flex-end;
-    }
-
-    .entry-tabs {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 12px 0 4px;
-    }
-
-    .entry-panel {
-      margin-top: 8px;
-    }
-
-    .nav-btn {
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      letter-spacing: 0.01em;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .nav-btn.danger {
-      border-color: rgba(244, 63, 94, 0.5);
-      color: var(--danger);
-      background: rgba(244, 63, 94, 0.08);
-    }
-
-    .hub-link {
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-
-    .hub-link svg {
-      stroke: currentColor;
-      width: 14px;
-      height: 14px;
-    }
-
-    .nav-btn .icon,
-    .nav-btn .icon * {
-      display: block;
-      stroke: currentColor;
-      stroke-width: 1.6;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      fill: none;
-    }
-
-    .nav-btn.active {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(255, 94, 138, 0.3), var(--shadow);
-      color: var(--accent);
-    }
-
-    .auth-card {
-      margin: 12px 0 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .auth-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .auth-row input {
-      background: var(--card-strong);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      padding: 10px;
-      font-size: 14px;
-      outline: none;
-      min-width: 220px;
-      flex: 1;
-    }
-
-    .auth-row input:focus {
-      border-color: var(--accent);
-      background: rgba(255, 94, 138, 0.08);
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: rgba(255, 94, 138, 0.08);
-      border: 1px solid rgba(255, 94, 138, 0.24);
-      color: var(--text);
-      font-weight: 700;
-      letter-spacing: 0.01em;
-    }
-
-    .form-grid {
-      display: block;
-      column-width: 220px;
-      column-gap: 12px;
-      column-fill: balance;
-      margin-top: 10px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--card);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
-      height: auto;
-      break-inside: avoid;
-      width: 100%;
-      box-sizing: border-box;
-      margin: 0 0 10px 0;
-    }
-
-    .form-group label {
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: 0.01em;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      background: var(--card-strong);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      padding: 10px;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s ease, background 0.2s ease;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      border-color: var(--accent);
-      background: rgba(255, 94, 138, 0.08);
-    }
-
-    .form-group small {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .form-group textarea {
-      resize: vertical;
-      min-height: 72px;
-    }
-
-    .form-actions {
-      margin-top: 14px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .form-divider {
-      width: 100%;
-      height: 1px;
-      background: var(--border);
-      margin: 16px 0 12px;
-      opacity: 0.6;
-    }
-
-    .section-divider {
-      width: 100%;
-      height: 1px;
-      background: var(--border);
-      margin: 14px 0;
-      opacity: 0.7;
-    }
-
-    .stacked-fields {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #0b0b0d;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 6px 12px rgba(255, 94, 138, 0.16);
-      letter-spacing: 0.01em;
-    }
-
-    .btn-primary.btn-plain {
-      box-shadow: none;
-      background: rgba(255, 94, 138, 0.18);
-      color: #fff;
-      border: 1px solid rgba(255, 94, 138, 0.35);
-    }
-
-    .btn-muted {
-      background: var(--card-strong);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .tile-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    .chip-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .chip-btn {
-      padding: 8px 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--card-strong);
-      color: var(--text);
-      cursor: pointer;
-      font-weight: 700;
-      transition: all 0.2s ease;
-      font-size: 13px;
-      box-shadow: none;
-    }
-
-    .chip-btn.active {
-      background: rgba(255, 94, 138, 0.06);
-      border-color: rgba(255, 94, 138, 0.25);
-      color: #f1c8d7;
-      box-shadow: none;
-    }
-
-    .tile {
-      padding: 12px;
-      border-radius: 12px;
-      background: var(--card-strong);
-      border: 1px solid var(--border);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-    }
-
-    .tile strong {
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .tile p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.4;
-    }
-
-    .chip-edit {
-      margin-left: 8px;
-      padding: 4px 8px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--card-strong);
-      color: var(--muted);
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .chip-editor {
-      margin-top: 8px;
-      border: 1px dashed var(--border);
-      padding: 10px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .chip-editor-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      padding: 6px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .chip-editor-row:last-child {
-      border-bottom: none;
-    }
-
-    .chip-editor-actions {
-      display: flex;
-      gap: 6px;
-    }
-
-    .chip-editor-actions button,
-    .chip-editor-add button {
-      padding: 6px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    .chip-editor-add {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-      align-items: center;
-      width: 100%;
-    }
-
-    .chip-editor-add input {
-      flex: 1;
-      min-width: 0;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--card-strong);
-      color: var(--text);
-      box-sizing: border-box;
-    }
-
-    .chip-editor-add button {
-      flex-shrink: 0;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .toast {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      min-width: 260px;
-      max-width: 360px;
-      padding: 14px 16px;
-      border-radius: 12px;
-      background: #0b1220;
-      border: 1px solid var(--border);
-      color: var(--text);
-      box-shadow: var(--shadow);
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      z-index: 999;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .toast.success {
-      border-color: rgba(34, 197, 94, 0.5);
-    }
-
-    .toast.error {
-      border-color: rgba(244, 63, 94, 0.5);
-    }
-
-    .dash-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .dash-card {
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--card-strong);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .dash-label {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .dash-value {
-      font-size: 18px;
-      font-weight: 700;
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-    }
-
-    .delta {
-      font-size: 12px;
-    }
-
-    .delta.positive {
-      color: #4ade80;
-    }
-
-    .delta.negative {
-      color: #f87171;
-    }
-
-    .delta.neutral {
-      color: var(--muted);
-    }
-
-    .dash-emoji {
-      font-size: 22px;
-      line-height: 1;
-      display: grid;
-      place-items: center;
-      width: 34px;
-      height: 34px;
-      cursor: pointer;
-    }
-
-    .dash-divider {
-      width: 2px;
-      height: 44px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1));
-      border-radius: 2px;
-      opacity: 0.7;
-    }
-
-    .dash-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .emoji-picker {
-      position: absolute;
-      z-index: 2000;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 8px;
-      box-shadow: var(--shadow);
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      min-width: 220px;
-    }
-
-    .emoji-picker button.emoji-choice {
-      border: 1px solid var(--border);
-      background: var(--card-strong);
-      border-radius: 8px;
-      padding: 6px 8px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .emoji-picker input.emoji-input {
-      border: 1px solid var(--border);
-      background: var(--card-strong);
-      color: var(--text);
-      border-radius: 8px;
-      padding: 6px 8px;
-      min-width: 90px;
-    }
-
-    .emoji-mart {
-      background: var(--card) !important;
-      color: var(--text) !important;
-      border: 1px solid var(--border) !important;
-      box-shadow: var(--shadow) !important;
-    }
-
-    .graph-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 14px;
-      margin-top: 16px;
-    }
-
-    .graph-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
-      width: 100%;
-    }
-
-    .graph-title {
-      margin: 0 0 8px;
-      font-size: 14px;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    canvas {
-      width: 100%;
-      height: 160px;
-    }
-
-    @media (max-width: 640px) {
-      .graph-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 10px 0;
-      align-items: center;
-    }
-
-    .filters label {
-      color: var(--muted);
-      font-size: 12px;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 6px;
-      margin: 0;
-    }
-
-    .filters input {
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 10px;
-      border-radius: 8px;
-    }
-
-    .filters .divider {
-      align-self: center;
-      width: 1px;
-      height: 28px;
-      background: var(--border);
-      margin: 0 6px;
-    }
-
-    .quick-filters {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .quick-btn {
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      font-size: 12px;
-      cursor: pointer;
-      transition: border-color 0.2s ease, background 0.2s ease;
-    }
-
-    .quick-btn:hover {
-      border-color: var(--accent);
-      background: rgba(255, 94, 138, 0.1);
-    }
-
-    .quick-btn.active {
-      border-color: var(--accent);
-      background: rgba(255, 94, 138, 0.2);
-      color: var(--text);
-    }
-
-    .tooltip {
-      position: fixed;
-      pointer-events: none;
-      background: #0b1220;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      box-shadow: var(--shadow);
-      opacity: 0;
-      transition: opacity 0.1s ease;
-      z-index: 1000;
-    }
-  </style>
+  <link rel="stylesheet" href="/myhealth/style.css">
 </head>
 
 <body>
@@ -1135,17 +107,17 @@
             <form id="pain-form">
               <div class="form-grid">
                 <div class="form-group">
-                  <label for="pain-date">Entry date/time</label>
+                  <label for="pain-date">Entry Date/Time</label>
                   <input id="pain-date" name="pain-date" type="datetime-local" />
                   <small>Stored as separate date + time columns; defaults to now if left empty.</small>
                 </div>
                 <div class="form-group">
-                  <label for="pain-level">Pain level (1-9)</label>
+                  <label for="pain-level">Pain Level (1-9)</label>
                   <input id="pain-level" name="pain-level" type="number" min="1" max="9" step="1"
                     placeholder="e.g. 6" />
                 </div>
                 <div class="form-group">
-                  <label for="fatigue-level">Fatigue level (1-9)</label>
+                  <label for="fatigue-level">Fatigue Level (1-9)</label>
                   <input id="fatigue-level" name="fatigue-level" type="number" min="1" max="9" step="1"
                     placeholder="e.g. 4" />
                 </div>
@@ -1190,16 +162,18 @@
                 </div>
               </div>
               <div class="form-actions">
-                <button class="btn-primary btn-plain" type="submit">Save new entry</button>
+                <button class="btn-primary btn-plain" id="pain-submit-btn" type="submit">Save new entry</button>
+                <button class="btn-muted hidden" id="pain-cancel-btn" type="button">Cancel edit</button>
                 <div id="pain-form-status" class="status"></div>
               </div>
             </form>
             <div class="form-divider"></div>
             <div class="card">
               <div class="log-header">
-                <h2>Pain log</h2>
+                <h2>Pain log <span id="pain-count" style="color:var(--muted); font-size:14px; margin-left:8px;"></span>
+                </h2>
               </div>
-              <div class="table-wrap" id="pain-table"></div>
+              <div class="list-wrap" id="pain-table"></div>
             </div>
           </div>
 
@@ -1252,16 +226,19 @@
                     </div>
                   </div>
                   <div class="form-actions">
-                    <button class="btn-primary btn-plain" type="submit">Save journal entry</button>
+                    <button class="btn-primary btn-plain" id="journal-submit-btn" type="submit">Save journal
+                      entry</button>
+                    <button class="btn-muted hidden" id="journal-cancel-btn" type="button">Cancel edit</button>
                     <div id="journal-form-status" class="status"></div>
                   </div>
                 </form>
                 <div class="form-divider"></div>
                 <div class="card">
                   <div class="log-header">
-                    <h2>Journal log</h2>
+                    <h2>Journal log <span id="diary-count"
+                        style="color:var(--muted); font-size:14px; margin-left:8px;"></span></h2>
                   </div>
-                  <div class="table-wrap" id="diary-table"></div>
+                  <div class="list-wrap" id="diary-table"></div>
                 </div>
               </div>
               <div class="entry-panel hidden" data-autotherapy-panel="cbt">
@@ -1728,6 +705,14 @@
         }
       };
       setDefaultDate();
+
+      const cancelBtn = document.getElementById("journal-cancel-btn");
+      if (cancelBtn) {
+        cancelBtn.addEventListener("click", () => {
+          resetEditState();
+        });
+      }
+
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const data = new FormData(form);
@@ -1751,10 +736,20 @@
         };
         const parsed = { headers: REQUIRED.diary, rows: [row] };
         try {
-          await persist("diary", parsed, "journal form");
-          setStatusMsg("Saved journal entry", true);
-          form.reset();
-          setDefaultDate();
+          if (editingEntry.kind === "diary" && editingEntry.idx !== null) {
+            // Update existing
+            const rows = [...dataStore.diary.rows];
+            rows[editingEntry.idx] = row;
+            await saveRows("diary", rows);
+            setStatusMsg("Updated journal entry", true);
+            resetEditState();
+          } else {
+            // Create new
+            await persist("diary", parsed, "journal form");
+            setStatusMsg("Saved journal entry", true);
+            form.reset();
+            setDefaultDate();
+          }
         } catch (err) {
           setStatusMsg(err.message || "Failed to save journal entry", false);
         }
@@ -1926,63 +921,122 @@
 
     function renderTable(kind, headers, rows, withActions = false, limit = null) {
       const cfg = datasets[kind];
+      const isLogView = withActions; // Usually true for the main log view
+
       if (!headers || !rows) {
         cfg.logsTable.innerHTML = "";
         return;
       }
-      const isLongField = (h) =>
-        LONG_TEXT_FIELDS.some((f) => normalizeHeaderName(f) === normalizeHeaderName(h));
+
       const sortedRows = sortRowsWithIndex(rows, headers);
-      const filters = logFilters[kind] || {};
-      const filteredRows = sortedRows.filter(({ row }) =>
-        headers.every((h) => {
-          const val = (filters[h] || "").trim().toLowerCase();
-          if (!val) return true;
-          return String(row[h] || "").toLowerCase().includes(val);
-        })
-      );
+      const globalFilter = (logFilters[kind]?.['global'] || "").toLowerCase();
+      const filteredRows = sortedRows.filter(({ row }) => {
+        if (!globalFilter) return true;
+        return Object.values(row).some(v => String(v).toLowerCase().includes(globalFilter));
+      });
+
       const displayRows = limit ? filteredRows.slice(0, limit) : filteredRows;
-      const filterRow = `<tr class="filter-row">${headers
-        .map((h) => `<th><input type="text" class="filter-input" data-filter-kind="${kind}" data-filter-field="${escapeHtml(h)}" placeholder="filtra"/></th>`)
-        .join("")}${withActions ? "<th></th>" : ""}</tr>`;
-      const thead = `<thead><tr>${headers.map((h) => `<th>${escapeHtml(h)}</th>`).join("")}${withActions ? "<th>Actions</th>" : ""}</tr>${filterRow}</thead>`;
-      const tbody = `<tbody>${displayRows
-        .map(({ row, idx: originalIdx }) => {
-          const isEditing = editingState.kind === kind && editingState.idx === originalIdx;
-          const cells = headers
-            .map((h) => {
-              const longField = isLongField(h);
-              if (isEditing) {
-                const extraClass = longField ? " long" : "";
-                if (longField) {
-                  return `<td><textarea class="inline-input${extraClass} multiline" data-edit-field="${escapeHtml(h)}" data-edit-kind="${kind}" data-edit-idx="${originalIdx}">${escapeHtml(
-                    editingState.draft?.[h] ?? row[h] ?? ""
-                  )}</textarea></td>`;
-                }
-                return `<td><input class="inline-input${extraClass}" data-edit-field="${escapeHtml(h)}" data-edit-kind="${kind}" data-edit-idx="${originalIdx}" value="${escapeHtml(
-                  editingState.draft?.[h] ?? row[h] ?? ""
-                )}"/></td>`;
-              }
-              const content = escapeHtml(row[h] ?? "");
-              const wrapped = longField ? `<div class="clip-cell">${content}</div>` : content;
-              return `<td>${wrapped}</td>`;
-            })
-            .join("");
-          let actions = "";
-          if (withActions) {
-            if (isEditing) {
-              actions = `<td class="row-actions"><button class="nav-btn small" data-save-row="${originalIdx}" data-kind="${kind}">Save</button><button class="nav-btn danger small" data-cancel-row="${originalIdx}" data-kind="${kind}">Cancel</button></td>`;
-            } else {
-              actions = `<td class="row-actions"><button class="nav-btn small" data-edit-row="${originalIdx}" data-kind="${kind}">Edit</button><button class="nav-btn danger small" data-delete-row="${originalIdx}" data-kind="${kind}">Delete</button></td>`;
-            }
-          }
-          return `<tr data-row="${originalIdx}">${cells}${actions}</tr>`;
-        })
-        .join("")}</tbody>`;
-      cfg.logsTable.innerHTML = `<div class="table-scroll"><table>${thead}${tbody}</table></div><div class="rowcount">${displayRows.length} rows</div>`;
-      wireLogFilters(kind);
-      if (withActions) wireRowActions(kind);
+
+      // If it's the dashboard/preview, maybe keep it simple? But user asked for "logs of both apps". 
+      // Assuming this replaces the main log tables.
+
+      // Filter Inputs for main view
+      let filterHtml = "";
+      if (isLogView) {
+        // Simplified filter: just one global search or maybe just date?
+        // For now, let's keep the date range filter in dashboard, 
+        // but here we might want a text filter provided by the existing filter inputs if we keep them.
+        // But the card view makes per-column filtering hard.
+        // Let's add a generic search input if needed, or rely on distinct filters.
+        // The previous filter row had per-column inputs. 
+        // Let's revert to a single "Search" input for simplicity in card view?
+        // Or just skip filters for now as user didn't specify, but removing them might be bad.
+        // I'll add a simple "Filter by content" input above the grid.
+
+        filterHtml = `
+         <div class="filter-bar">
+             <input type="text" id="filter-${kind}" placeholder="Search logs..." style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text);">
+         </div>`;
+      }
+
+      const gridHtml = `
+        <div class="log-grid">
+          ${displayRows.map(({ row, idx: originalIdx }) => {
+        const dateKey = findHeader(headers, "date") || "date";
+        const timeKey = findHeader(headers, "hour") || "hour";
+        const dateStr = row[dateKey] || "No date";
+        const timeStr = row[timeKey] || "";
+
+        // Format nice date if possible
+        let niceDate = dateStr;
+        try {
+          const d = new Date(dateStr);
+          if (!isNaN(d)) niceDate = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        } catch (e) { }
+
+        return `
+              <div class="log-card">
+                <div class="log-card-header">
+                  <span>${escapeHtml(niceDate)}</span>
+                  <span style="color:var(--accent);">${escapeHtml(timeStr)}</span>
+                </div>
+                ${isLogView ? `
+                <div class="log-card-actions">
+                  <button class="nav-btn small" data-edit-row="${originalIdx}" data-kind="${kind}" title="Edit">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="nav-btn danger small" data-delete-row="${originalIdx}" data-kind="${kind}" title="Delete">
+                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </button>
+                </div>
+                ` : ''}
+              </div>
+            `;
+      }).join("")}
+        </div>
+      `;
+
+      cfg.logsTable.innerHTML = (isLogView ? filterHtml : "") + gridHtml;
+
+      // Update count span in header
+      const countSpanId = kind === 'pain' ? 'pain-count' : 'diary-count';
+      const countSpan = document.getElementById(countSpanId);
+      if (countSpan) {
+        countSpan.textContent = `${displayRows.length} entries`;
+      }
+
+      if (isLogView) {
+        // Wire search
+        const searchInput = document.getElementById(`filter-${kind}`);
+        if (searchInput) {
+          // Restore filter value
+          // We need a place to store this new single filter
+          // Re-using logFilters[kind]['global'] for now?
+          searchInput.value = logFilters[kind]?.['global'] || "";
+          searchInput.addEventListener("input", (e) => {
+            if (!logFilters[kind]) logFilters[kind] = {};
+            logFilters[kind]['global'] = e.target.value;
+            // We need to re-run renderTable, but renderTable uses logFilters to filter... 
+            // I need to update the filter logic above to handle 'global'
+            renderLog(kind);
+          });
+        }
+        wireRowActions(kind);
+      }
     }
+
+    // Quick patch for global filter support in the filter block above
+    // I will replace the filter logic block in the next edit or include it here.
+    // Let's rewrite the filter block inside this function:
+    /*
+      const globalFilter = (logFilters[kind]?.['global'] || "").toLowerCase();
+      const filteredRows = sortedRows.filter(({ row }) => {
+        if (!globalFilter) return true;
+        // Search all values
+        return Object.values(row).some(v => String(v).toLowerCase().includes(globalFilter));
+      });
+    */
+
 
     function escapeHtml(str) {
       return String(str)
@@ -2332,12 +1386,12 @@
         btn.onclick = () => deleteRow(kind, parseInt(btn.dataset.deleteRow, 10));
       });
       cfg.logsTable.querySelectorAll("[data-save-row]").forEach((btn) => {
-        btn.onclick = () => saveInline(kind, parseInt(btn.dataset.saveRow, 10));
+        // Obsolete
       });
       cfg.logsTable.querySelectorAll("[data-cancel-row]").forEach((btn) => {
-        btn.onclick = () => cancelInline(kind);
+        // Obsolete
       });
-      attachInlineInputs(kind);
+
     }
 
     function sanitizeRowForHeaders(row, headers) {
@@ -2379,50 +1433,166 @@
       }
     }
 
-    function editRow(kind, idx) {
-      const rows = dataStore[kind]?.rows || [];
-      const headers = dataStore[kind]?.headers || [];
-      const row = rows[idx];
-      if (!row) return;
-      editingState = { kind, idx, draft: sanitizeRowForHeaders(row, headers) };
-      renderLog(kind);
-      const formSection = document.getElementById("newlog-section");
-      if (formSection) {
-        formSection.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    }
 
-    function cancelInline(kind) {
-      editingState = { kind: null, idx: null, draft: null };
-      renderLog(kind);
-    }
 
-    function attachInlineInputs(kind) {
-      const cfg = datasets[kind];
-      if (!cfg?.logsTable) return;
-      cfg.logsTable.querySelectorAll(".inline-input[data-edit-kind]").forEach((input) => {
-        input.addEventListener("input", (e) => {
-          const field = e.target.dataset.editField;
-          const idx = parseInt(e.target.dataset.editIdx, 10);
-          if (editingState.kind !== kind || editingState.idx !== idx) return;
-          if (!editingState.draft) editingState.draft = {};
-          editingState.draft[field] = e.target.value;
-        });
+    // New editing state: tracks entry kind and index
+    let editingEntry = { kind: null, idx: null };
+
+    // Helper: Select options in a container by values string
+    function selectOptions(containerId, valuesString) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      // Deselect all first
+      container.querySelectorAll(".chip-btn").forEach(btn => btn.classList.remove("active"));
+      if (!valuesString) return;
+      const values = String(valuesString).split(",").map(s => s.trim().toLowerCase());
+      container.querySelectorAll(".chip-btn").forEach(btn => {
+        if (values.includes(btn.dataset.value.toLowerCase())) {
+          btn.classList.add("active");
+        }
       });
     }
 
-    function saveInline(kind, idx) {
-      if (editingState.kind !== kind || editingState.idx !== idx) return;
-      const rows = dataStore[kind]?.rows || [];
-      const headers = dataStore[kind]?.headers || [];
-      const draft = sanitizeRowForHeaders(editingState.draft || {}, headers);
-      const newRows = [...rows];
-      newRows[idx] = draft;
-      editingState = { kind: null, idx: null, draft: null };
-      saveRows(kind, newRows);
+    function populatePainForm(row) {
+      const form = document.getElementById("pain-form");
+      if (!form) return;
+
+      const dateKey = findHeader(Object.keys(row), "date") || "date";
+      const timeKey = findHeader(Object.keys(row), "hour") || "hour";
+      const dateVal = row[dateKey];
+      const timeVal = row[timeKey];
+
+      // Combine date + time for datetime-local input
+      if (dateVal) {
+        const time = timeVal || "21:00";
+        const iso = `${dateVal}T${time.slice(0, 5)}`;
+        const input = form.querySelector('input[name="pain-date"]');
+        if (input) input.value = iso;
+      }
+
+      form.querySelector('input[name="pain-level"]').value = row["pain level"] || "";
+      form.querySelector('input[name="fatigue-level"]').value = row["fatigue level"] || "";
+      form.querySelector('textarea[name="pain-note"]').value = row["note"] || "";
+      form.querySelector('input[name="coffee-count"]').value = row["coffee"] || "";
+
+      selectOptions("area-options", row["area"]);
+      selectOptions("symptoms-options", row["symptoms"]);
+      selectOptions("activities-options", row["activities"]);
+      selectOptions("medicines-options", row["medicines"]);
+      selectOptions("habits-options", row["habits"]);
+      selectOptions("other-options", row["other"]);
     }
+
+    function populateJournalForm(row) {
+      const form = document.getElementById("journal-form");
+      if (!form) return;
+
+      const dateKey = findHeader(Object.keys(row), "date") || "date";
+      const timeKey = findHeader(Object.keys(row), "hour") || "hour";
+      const dateVal = row[dateKey];
+      const timeVal = row[timeKey];
+
+      if (dateVal) {
+        const time = timeVal || "21:00";
+        const iso = `${dateVal}T${time.slice(0, 5)}`;
+        const input = form.querySelector('input[name="journal-date"]');
+        if (input) input.value = iso;
+      }
+
+      form.querySelector('input[name="journal-mood"]').value = row["mood level"] || "";
+      form.querySelector('input[name="journal-depression"]').value = row["depression"] || "";
+      form.querySelector('input[name="journal-anxiety"]').value = row["anxiety"] || "";
+      form.querySelector('textarea[name="journal-description"]').value = row["description"] || "";
+      form.querySelector('textarea[name="journal-gratitude"]').value = row["gratitude"] || "";
+      form.querySelector('textarea[name="journal-reflection"]').value = row["reflection"] || "";
+    }
+
+    function editRow(kind, idx) {
+      const rows = dataStore[kind]?.rows || [];
+      const row = rows[idx];
+      if (!row) return;
+
+      editingEntry = { kind, idx };
+
+      if (kind === "pain") {
+        // Switch to Pain tab
+        const btn = document.querySelector('button[data-entry="pain"]');
+        if (btn) btn.click();
+        populatePainForm(row);
+
+        // UI updates
+        const submitBtn = document.getElementById("pain-submit-btn");
+        if (submitBtn) submitBtn.textContent = "Save Changes";
+        const cancelBtn = document.getElementById("pain-cancel-btn");
+        if (cancelBtn) cancelBtn.classList.remove("hidden");
+
+        // Scroll to form
+        const section = document.getElementById("newlog-section");
+        if (section) section.classList.remove("hidden"); // ensure visible
+        document.getElementById("pain-form").scrollIntoView({ behavior: "smooth", block: "center" });
+
+      } else if (kind === "diary") {
+        // Switch to Journal tab (via autotherapy)
+        const autoBtn = document.getElementById("autotherapy-tab");
+        if (autoBtn) autoBtn.click();
+        const journalBtn = document.querySelector('button[data-autotherapy="journal"]');
+        if (journalBtn) journalBtn.click();
+
+        populateJournalForm(row);
+
+        // UI updates
+        const submitBtn = document.getElementById("journal-submit-btn");
+        if (submitBtn) submitBtn.textContent = "Save Changes";
+        const cancelBtn = document.getElementById("journal-cancel-btn");
+        if (cancelBtn) cancelBtn.classList.remove("hidden");
+
+        // Scroll to form
+        const section = document.getElementById("newlog-section");
+        if (section) section.classList.remove("hidden");
+        document.getElementById("journal-form").scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
+    function resetEditState() {
+      editingEntry = { kind: null, idx: null };
+
+      // Reset Pain UI
+      const painSubmit = document.getElementById("pain-submit-btn");
+      if (painSubmit) painSubmit.textContent = "Save new entry";
+      const painCancel = document.getElementById("pain-cancel-btn");
+      if (painCancel) painCancel.classList.add("hidden");
+      document.getElementById("pain-form")?.reset();
+
+      // Reset Journal UI
+      const journalSubmit = document.getElementById("journal-submit-btn");
+      if (journalSubmit) journalSubmit.textContent = "Save journal entry";
+      const journalCancel = document.getElementById("journal-cancel-btn");
+      if (journalCancel) journalCancel.classList.add("hidden");
+      document.getElementById("journal-form")?.reset();
+
+      // Reset chips
+      document.querySelectorAll(".chip-btn.active").forEach(btn => btn.classList.remove("active"));
+      // re-apply default if needed, or just clear
+
+      // Trigger default date fill
+      const painForm = document.getElementById("pain-form");
+      if (painForm) {
+        const now = new Date();
+        const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        const input = painForm.querySelector('input[name="pain-date"]');
+        if (input) input.value = localIso;
+      }
+      const journalForm = document.getElementById("journal-form");
+      if (journalForm) {
+        const now = new Date();
+        const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        const input = journalForm.querySelector('input[name="journal-date"]');
+        if (input) input.value = localIso;
+      }
+    }
+
+    // Obsolete inline functions removed
+
 
     function deleteRow(kind, idx) {
       const rows = dataStore[kind]?.rows || [];
@@ -2723,6 +1893,13 @@
       setDefaultDate();
       renderPainOptionButtons();
 
+      const cancelBtn = document.getElementById("pain-cancel-btn");
+      if (cancelBtn) {
+        cancelBtn.addEventListener("click", () => {
+          resetEditState();
+        });
+      }
+
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const data = new FormData(form);
@@ -2756,16 +1933,26 @@
         };
         const parsed = { headers: REQUIRED.pain, rows: [row] };
         try {
-          await persist("pain", parsed, "manual form");
-          setStatus("Saved new pain entry", true);
-          buildOptionCacheFromStore();
-          renderPainOptionButtons();
-          optionFields.forEach((field) => {
-            const editor = document.getElementById(`${field}-editor`);
-            if (editor && !editor.classList.contains("hidden")) renderOptionEditor(field);
-          });
-          form.reset();
-          setDefaultDate();
+          if (editingEntry.kind === "pain" && editingEntry.idx !== null) {
+            // Update existing
+            const rows = [...dataStore.pain.rows];
+            rows[editingEntry.idx] = row;
+            await saveRows("pain", rows);
+            setStatus("Updated pain entry", true);
+            resetEditState();
+          } else {
+            // Create new
+            await persist("pain", parsed, "manual form");
+            setStatus("Saved new pain entry", true);
+            buildOptionCacheFromStore();
+            renderPainOptionButtons();
+            optionFields.forEach((field) => {
+              const editor = document.getElementById(`${field}-editor`);
+              if (editor && !editor.classList.contains("hidden")) renderOptionEditor(field);
+            });
+            form.reset();
+            setDefaultDate();
+          }
         } catch (err) {
           setStatus(err.message || "Failed to save pain entry", false);
         }
@@ -2779,6 +1966,8 @@
           const file = e.target.files?.[0];
           handleFile(kind, file);
         });
+
+
         const label = input.closest(".drop");
         label.addEventListener("dragover", (e) => { e.preventDefault(); label.classList.add("hover"); });
         label.addEventListener("dragleave", () => label.classList.remove("hover"));
@@ -2902,7 +2091,9 @@
           const target = btn.dataset.target;
           buttons.forEach(b => b.classList.toggle("active", b === btn));
           Object.entries(sections).forEach(([key, el]) => {
-            el.classList.toggle("hidden", key !== target);
+            if (el) {
+              el.classList.toggle("hidden", key !== target);
+            }
           });
           if (target === "newlog" && entryTabSetter) {
             const current = document.querySelector(".entry-btn.active")?.dataset.entry
@@ -3039,7 +2230,15 @@
       const prevNum = toNumber(previous);
       if (curNum === null || prevNum === null || prevNum === 0) return null;
       const pct = ((curNum - prevNum) / prevNum) * 100;
-      const invert = (label || "").toLowerCase().includes("depression") || (label || "").toLowerCase().includes("anxiety");
+      const lowerLabel = (label || "").toLowerCase();
+      // Invert logic for negative things: Depression, Anxiety, Pain avg, Fatigue avg
+      // Note: "Pain entries" is activity (good/neutral), so we specifically target "pain avg"
+      const invert =
+        lowerLabel.includes("depression") ||
+        lowerLabel.includes("anxiety") ||
+        lowerLabel.includes("pain avg") ||
+        lowerLabel.includes("fatigue avg");
+
       const positive = invert ? pct < 0 : pct > 0;
       const negative = invert ? pct > 0 : pct < 0;
       return {

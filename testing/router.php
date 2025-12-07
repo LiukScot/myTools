@@ -21,9 +21,24 @@ if (strpos($uri, '/mymoney/api/files') === 0) {
     return;
 }
 
-function try_serve(string $file): bool {
-    if (!is_file($file)) return false;
-    $mime = function_exists('mime_content_type') ? mime_content_type($file) : null;
+function try_serve(string $file): bool
+{
+    if (!is_file($file))
+        return false;
+
+    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    $mime = match ($ext) {
+        'css' => 'text/css',
+        'js' => 'application/javascript',
+        'json' => 'application/json',
+        'html', 'htm' => 'text/html',
+        'png' => 'image/png',
+        'jpg', 'jpeg' => 'image/jpeg',
+        'gif' => 'image/gif',
+        'svg' => 'image/svg+xml',
+        default => function_exists('mime_content_type') ? mime_content_type($file) : null,
+    };
+
     if ($mime) {
         header('Content-Type: ' . $mime);
     }
@@ -32,10 +47,13 @@ function try_serve(string $file): bool {
 }
 
 // Helper to resolve and serve static assets inside app roots
-function serve_from_app(string $appRoot, string $uri, string $base): bool {
+function serve_from_app(string $appRoot, string $uri, string $base): bool
+{
     $rel = substr($uri, strlen($base));
-    if ($rel === '' || $rel === false || $rel === null) $rel = '/';
-    if ($rel === '/' || $rel === '') $rel = '/index.html';
+    if ($rel === '' || $rel === false || $rel === null)
+        $rel = '/';
+    if ($rel === '/' || $rel === '')
+        $rel = '/index.html';
     $path = realpath($appRoot . $rel);
     if (!$path || strpos($path, realpath($appRoot)) !== 0) {
         return try_serve($appRoot . '/index.html');
@@ -47,10 +65,12 @@ function serve_from_app(string $appRoot, string $uri, string $base): bool {
 }
 
 if (strpos($uri, '/myhealth') === 0) {
-    if (serve_from_app($healthRoot, $uri, '/myhealth')) return;
+    if (serve_from_app($healthRoot, $uri, '/myhealth'))
+        return;
 }
 if (strpos($uri, '/mymoney') === 0) {
-    if (serve_from_app($moneyRoot, $uri, '/mymoney')) return;
+    if (serve_from_app($moneyRoot, $uri, '/mymoney'))
+        return;
 }
 
 // Default to hub
