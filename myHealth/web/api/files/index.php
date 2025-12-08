@@ -40,8 +40,6 @@ function load_env_files(array $paths)
 $ALLOW_SIGNUP = false; // leave false to block self-registration
 $FILES_TABLE = 'files';
 $USER_SETTINGS_TABLE = 'user_settings';
-$AI_KEY_SECRET_ENV = 'GEMINI_KEY_SECRET'; // 32+ chars recommended
-
 // ---- No edits needed below unless you want to customize behavior ----
 
 $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
@@ -52,6 +50,7 @@ if (!is_dir($sessDir)) {
     @mkdir($sessDir, 0700, true);
 }
 session_save_path($sessDir);
+$logFile = $sessDir . '/api-error.log';
 
 // Use 5-arg compatible signature for broader PHP support
 session_set_cookie_params(0, '/', '', $isSecure, true);
@@ -126,6 +125,27 @@ $env_candidates = [
 ];
 load_env_files($env_candidates);
 
+function log_api_error($message)
+{
+    global $logFile;
+    if (!$logFile) {
+        error_log($message);
+        return;
+    }
+    $line = date('c') . ' ' . $message . PHP_EOL;
+    @file_put_contents($logFile, $line, FILE_APPEND);
+}
+
+set_exception_handler(function (Throwable $e) {
+    log_api_error("Uncaught exception: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
+    respond(500, ['error' => 'exception', 'detail' => $e->getMessage()]);
+});
+
+set_error_handler(function ($severity, $message, $file, $line) {
+    log_api_error("PHP error [{$severity}] {$message} in {$file}:{$line}");
+    respond(500, ['error' => 'php_error', 'detail' => $message, 'line' => $line]);
+});
+
 function send_session_cookie($isSecure)
 {
     $name = session_name();
@@ -180,8 +200,6 @@ $DB_HOST = env_or_fail('DB_HOST');
 $DB_USER = env_or_fail('DB_USER');
 $DB_PASS = env_or_fail('DB_PASS');
 $DB_NAME = env_or_fail('DB_NAME');
-$AI_SECRET_RAW = env_or_fail($AI_KEY_SECRET_ENV);
-$AI_SECRET_KEY = hash('sha256', $AI_SECRET_RAW, true); // 32-byte key
 
 if (!extension_loaded('mysqli')) {
     respond(500, ['error' => 'mysqli extension not loaded']);
@@ -217,8 +235,7 @@ $mysqli->query(
         user_id INT NOT NULL,
         gemini_key TEXT DEFAULT NULL,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        PRIMARY KEY (user_id),
-        CONSTRAINT fk_user_settings_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        PRIMARY KEY (user_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
 );
 
@@ -341,6 +358,24 @@ function enforce_rate_limit(string $bucket, int $limit = 5, int $windowSeconds =
     $_SESSION['rate'][$bucket][] = $now;
 }
 
+function enforce_chat_limits(int $maxRequestsPerMinute = 2, int $maxApproxTokens = 450000)
+{
+    $now = time();
+    if (!isset($_SESSION['chat_times'])) {
+        $_SESSION['chat_times'] = [];
+    }
+    $_SESSION['chat_times'] = array_values(array_filter($_SESSION['chat_times'], static fn($t) => ($now - $t) < 60));
+    if (count($_SESSION['chat_times']) >= $maxRequestsPerMinute) {
+        respond(429, ['error' => 'chat_rate_limited', 'detail' => 'Too many chat requests per minute']);
+    }
+    $_SESSION['chat_times'][] = $now;
+    return function (int $approxTokens) use ($maxApproxTokens) {
+        if ($approxTokens > $maxApproxTokens) {
+            respond(400, ['error' => 'chat_token_limit', 'detail' => 'Request too large for token budget']);
+        }
+    };
+}
+
 function secure_bytes(int $len): string
 {
     if (function_exists('random_bytes')) {
@@ -353,30 +388,220 @@ function secure_bytes(int $len): string
     respond(500, ['error' => 'no secure random source available']);
 }
 
-function encrypt_ai_key(string $plain, string $key): string
+function json_from_files_table(mysqli $mysqli, string $name): ?array
 {
-    $iv = secure_bytes(12); // GCM recommended 12-byte IV
-    $tag = '';
-    $cipher = openssl_encrypt($plain, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
-    if ($cipher === false) {
-        respond(500, ['error' => 'encryption failed']);
+    $stmt = $mysqli->prepare("SELECT data FROM files WHERE name=? LIMIT 1");
+    $stmt->bind_param("s", $name);
+    $stmt->execute();
+    $stmt->bind_result($data);
+    if ($stmt->fetch()) {
+        $decoded = json_decode($data, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            $stmt->close();
+            return $decoded;
+        }
     }
-    return base64_encode($iv . $tag . $cipher);
+    $stmt->close();
+    return null;
 }
 
-function decrypt_ai_key(?string $blob, string $key): ?string
+function sort_rows_by_date(array $rows, array $headers): array
 {
-    if ($blob === null || $blob === '')
-        return null;
-    $data = base64_decode($blob, true);
-    if ($data === false || strlen($data) < 28) { // 12 IV + 16 tag
-        return null;
+    $dKey = in_array('date', $headers, true) ? 'date' : (in_array('Date', $headers, true) ? 'Date' : null);
+    $tKey = in_array('hour', $headers, true) ? 'hour' : (in_array('Hour', $headers, true) ? 'Hour' : null);
+    usort($rows, static function ($a, $b) use ($dKey, $tKey) {
+        $aDate = $dKey ? ($a[$dKey] ?? '') : '';
+        $bDate = $dKey ? ($b[$dKey] ?? '') : '';
+        $aHour = $tKey ? ($a[$tKey] ?? '') : '';
+        $bHour = $tKey ? ($b[$tKey] ?? '') : '';
+        $aTs = strtotime($aDate . ' ' . $aHour) ?: 0;
+        $bTs = strtotime($bDate . ' ' . $bHour) ?: 0;
+        return $bTs <=> $aTs;
+    });
+    return $rows;
+}
+
+function filter_dataset_by_days(?array $dataset, ?int $days): ?array
+{
+    if (!$dataset || $days === null) return $dataset;
+    $headers = $dataset['headers'] ?? [];
+    $rows = $dataset['rows'] ?? [];
+    $cutoff = strtotime("-{$days} days");
+    $dKey = in_array('date', $headers, true) ? 'date' : (in_array('Date', $headers, true) ? 'Date' : null);
+    if (!$dKey) return $dataset;
+    $filtered = array_values(array_filter($rows, static function ($row) use ($dKey, $cutoff) {
+        $d = $row[$dKey] ?? '';
+        $ts = strtotime($d);
+        return $ts !== false && $ts >= $cutoff;
+    }));
+    return ['headers' => $headers, 'rows' => $filtered];
+}
+
+function rows_to_text(?array $dataset, string $label, ?int $limit = null): string
+{
+    if (!$dataset || !isset($dataset['rows']) || !is_array($dataset['rows'])) {
+        return "";
     }
-    $iv = substr($data, 0, 12);
-    $tag = substr($data, 12, 16);
-    $cipher = substr($data, 28);
-    $plain = openssl_decrypt($cipher, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
-    return $plain === false ? null : $plain;
+    $headers = $dataset['headers'] ?? [];
+    $rows = sort_rows_by_date($dataset['rows'], $headers);
+    if (is_int($limit) && $limit > 0) {
+        $rows = array_slice($rows, 0, $limit);
+    }
+    $parts = [];
+    foreach ($rows as $row) {
+        $clean = [];
+        foreach ($row as $k => $v) {
+            $clean[] = "{$k}: {$v}";
+        }
+        $parts[] = "- " . implode("; ", $clean);
+    }
+    if (!$parts) return "";
+    return strtoupper($label) . ":\n" . implode("\n", $parts);
+}
+
+function call_gemini_single(string $apiKey, string $prompt, float $temperature, int $maxTokens, string $model): array
+{
+    if (!function_exists('curl_init')) {
+        throw new RuntimeException('curl extension missing');
+    }
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . rawurlencode($apiKey);
+    $payload = [
+        "contents" => [
+            [
+                "role" => "user",
+                "parts" => [
+                    ["text" => $prompt],
+                ],
+            ],
+        ],
+        "generationConfig" => [
+            "temperature" => $temperature,
+            "maxOutputTokens" => $maxTokens,
+        ],
+    ];
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => ["Content-Type: application/json"],
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_TIMEOUT => 20,
+    ]);
+    $response = curl_exec($ch);
+    $errno = curl_errno($ch);
+    $status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    $info = curl_getinfo($ch);
+    curl_close($ch);
+    if ($errno) {
+        throw new RuntimeException("gemini request failed (curl errno {$errno})");
+    }
+    $decoded = json_decode($response, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        log_api_error("Gemini {$model} bad JSON status {$status}; curl info: " . json_encode($info) . "; body: " . substr($response ?? '', 0, 500));
+        throw new RuntimeException("gemini returned non-json (status {$status})");
+    }
+    if ($status >= 400) {
+        $detail = isset($decoded['error']['message']) ? $decoded['error']['message'] : 'gemini error';
+        log_api_error("Gemini {$model} error status {$status}: {$detail}; body: " . substr(json_encode($decoded), 0, 500));
+        throw new RuntimeException("gemini error status {$status}: {$detail}");
+    }
+    // Extract text from the first candidate with parts
+    $text = null;
+    if (isset($decoded['candidates']) && is_array($decoded['candidates'])) {
+        foreach ($decoded['candidates'] as $cand) {
+            $parts = $cand['content']['parts'] ?? [];
+            $texts = [];
+            foreach ($parts as $p) {
+                if (isset($p['text'])) {
+                    $texts[] = $p['text'];
+                }
+            }
+            if ($texts) {
+                $text = implode("\n", $texts);
+                break;
+            }
+            // If safety blocked, surface that
+            if (($cand['finishReason'] ?? '') === 'SAFETY') {
+                $ratings = $cand['safetyRatings'] ?? [];
+                $cat = array_column($ratings, 'category');
+                $msg = $cat ? ('Safety block: ' . implode(', ', $cat)) : 'Safety block';
+                throw new RuntimeException($msg);
+            }
+        }
+    }
+    if (!$text) {
+        log_api_error("Gemini {$model} empty response status {$status}; body: " . substr(json_encode($decoded), 0, 500));
+        throw new RuntimeException("gemini returned empty response (status {$status})");
+    }
+    return ['text' => $text, 'raw' => $decoded, 'model_used' => $model];
+}
+
+function call_gemini(string $apiKey, string $prompt, float $temperature = 0.4, int $maxTokens = 512, string $model = 'gemini-1.5-flash'): array
+{
+    $fallbacks = [
+        'gemini-2.5-flash' => ['gemini-2.5-pro', 'gemini-flash-latest', 'gemini-pro-latest'],
+        'gemini-2.5-pro' => ['gemini-2.5-flash', 'gemini-pro-latest', 'gemini-flash-latest'],
+        'gemini-flash-latest' => ['gemini-pro-latest', 'gemini-2.5-flash'],
+        'gemini-pro-latest' => ['gemini-2.5-pro', 'gemini-2.5-flash'],
+        'gemini-2.0-flash' => ['gemini-2.5-flash', 'gemini-flash-latest'],
+        'gemini-2.0-flash-001' => ['gemini-2.5-flash', 'gemini-flash-latest'],
+        'gemini-2.0-flash-lite' => ['gemini-2.5-flash', 'gemini-flash-latest'],
+    ];
+    $sequence = array_unique(array_merge([$model], $fallbacks[$model] ?? []));
+    $errors = [];
+    foreach ($sequence as $candidate) {
+        try {
+            return call_gemini_single($apiKey, $prompt, $temperature, $maxTokens, $candidate);
+        } catch (RuntimeException $e) {
+            $errors[] = $candidate . ": " . $e->getMessage();
+        }
+    }
+    throw new RuntimeException("All model attempts failed: " . implode(" | ", $errors));
+}
+
+function compose_fallback_reply(?array $diary, ?array $pain, string $reason): string
+{
+    $parts = [];
+    $parts[] = "LLM unavailable. Reason: {$reason}";
+    $diaryRows = $diary['rows'] ?? [];
+    $painRows = $pain['rows'] ?? [];
+    $parts[] = "Diary entries: " . count($diaryRows) . "; Pain entries: " . count($painRows) . ".";
+
+    $latestPain = null;
+    if ($pain && isset($pain['rows']) && isset($pain['headers'])) {
+        $sorted = sort_rows_by_date($pain['rows'], $pain['headers']);
+        $latestPain = $sorted[0] ?? null;
+    }
+    if ($latestPain) {
+        $snippet = [];
+        foreach (['date', 'hour', 'pain level', 'fatigue level', 'symptoms', 'area', 'activities', 'medicines', 'note'] as $k) {
+            if (isset($latestPain[$k]) && $latestPain[$k] !== '') {
+                $snippet[] = "{$k}: {$latestPain[$k]}";
+            }
+        }
+        if ($snippet) {
+            $parts[] = "Latest pain entry -> " . implode("; ", $snippet);
+        }
+    }
+
+    $latestDiary = null;
+    if ($diary && isset($diary['rows']) && isset($diary['headers'])) {
+        $sorted = sort_rows_by_date($diary['rows'], $diary['headers']);
+        $latestDiary = $sorted[0] ?? null;
+    }
+    if ($latestDiary) {
+        $snippet = [];
+        foreach (['date', 'hour', 'mood level', 'depression', 'anxiety', 'description', 'reflection'] as $k) {
+            if (isset($latestDiary[$k]) && $latestDiary[$k] !== '') {
+                $snippet[] = "{$k}: {$latestDiary[$k]}";
+            }
+        }
+        if ($snippet) {
+            $parts[] = "Latest diary entry -> " . implode("; ", $snippet);
+        }
+    }
+
+    return implode("\n", array_filter($parts));
 }
 
 // Gemini API key: GET status, PUT/POST save, DELETE clear
@@ -390,12 +615,11 @@ if (preg_match('#/api(?:/files)?/ai-key/?$#', $rawUri)) {
         $stmt->execute();
         $stmt->bind_result($key, $updated);
         if ($stmt->fetch() && $key !== null && $key !== '') {
-            $plain = decrypt_ai_key($key, $AI_SECRET_KEY);
-            if ($plain !== null && $plain !== '') {
-                $last4 = strlen($plain) >= 4 ? substr($plain, -4) : '';
-                respond(200, ['has_key' => true, 'last4' => $last4, 'updated_at' => $updated]);
-            }
+            $last4 = strlen($key) >= 4 ? substr($key, -4) : '';
+            $stmt->close();
+            respond(200, ['has_key' => true, 'last4' => $last4, 'updated_at' => $updated]);
         }
+        $stmt->close();
         respond(200, ['has_key' => false]);
     }
     if ($method === 'PUT' || $method === 'POST') {
@@ -406,11 +630,11 @@ if (preg_match('#/api(?:/files)?/ai-key/?$#', $rawUri)) {
             respond(400, ['error' => 'key required']);
         if (strlen($key) > 4096)
             respond(400, ['error' => 'key too long']);
-        $enc = encrypt_ai_key($key, $AI_SECRET_KEY);
         $stmt = $mysqli->prepare("INSERT INTO {$USER_SETTINGS_TABLE} (user_id, gemini_key) VALUES (?, ?)
             ON DUPLICATE KEY UPDATE gemini_key=VALUES(gemini_key), updated_at=CURRENT_TIMESTAMP");
-        $stmt->bind_param("is", $userId, $enc);
+        $stmt->bind_param("is", $userId, $key);
         $stmt->execute();
+        $stmt->close();
         respond(200, ['status' => 'saved', 'has_key' => true]);
     }
     if ($method === 'DELETE') {
@@ -418,9 +642,102 @@ if (preg_match('#/api(?:/files)?/ai-key/?$#', $rawUri)) {
         $stmt = $mysqli->prepare("UPDATE {$USER_SETTINGS_TABLE} SET gemini_key=NULL, updated_at=CURRENT_TIMESTAMP WHERE user_id=?");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
+        $stmt->close();
         respond(200, ['status' => 'cleared', 'has_key' => false]);
     }
     respond(405, ['error' => 'method not allowed']);
+}
+
+// Chatbot endpoint: POST /api/files/chat
+if (preg_match('#/api(?:/files)?/chat/?$#', $rawUri)) {
+    require_auth();
+    if ($method !== 'POST') {
+        respond(405, ['error' => 'method not allowed']);
+    }
+    enforce_rate_limit('chat:post', 8, 60);
+    $body = read_json();
+    $message = trim($body['message'] ?? '');
+    if ($message === '') {
+        respond(400, ['error' => 'message required']);
+    }
+    $tokenGuard = enforce_chat_limits(2, 450000);
+    // Load Gemini key
+    $stmt = $mysqli->prepare("SELECT gemini_key FROM {$USER_SETTINGS_TABLE} WHERE user_id=? LIMIT 1");
+    $stmt->bind_param("i", $_SESSION['user_id']);
+    $stmt->execute();
+    $stmt->bind_result($apiKey);
+    if (!$stmt->fetch() || !$apiKey) {
+        $stmt->close();
+        respond(400, ['error' => 'no gemini key saved']);
+    }
+    $stmt->close();
+
+    $model = isset($body['model']) && is_string($body['model']) ? trim($body['model']) : 'gemini-2.5-flash';
+    $allowedModels = [
+        'gemini-2.5-flash',
+        'gemini-2.5-pro',
+        'gemini-flash-latest',
+        'gemini-pro-latest',
+        'gemini-2.0-flash',
+        'gemini-2.0-flash-001',
+        'gemini-2.0-flash-lite',
+        'gemini-pro',
+    ];
+    if (!in_array($model, $allowedModels, true)) {
+        $model = 'gemini-2.5-flash';
+    }
+
+    $range = isset($body['range']) && is_string($body['range']) ? trim($body['range']) : 'all';
+    $days = null;
+    if (in_array($range, ['30', '90', '365'], true)) {
+        $days = (int)$range;
+    }
+
+    // Build context from stored datasets (filtered by range)
+    $diary = filter_dataset_by_days(json_from_files_table($mysqli, 'diary.json'), $days);
+    $pain = filter_dataset_by_days(json_from_files_table($mysqli, 'pain.json'), $days);
+    $ctxParts = [];
+    $ctxDiary = rows_to_text($diary, 'diary'); // filtered rows
+    $ctxPain = rows_to_text($pain, 'pain');   // filtered rows
+    if ($ctxDiary) $ctxParts[] = $ctxDiary;
+    if ($ctxPain) $ctxParts[] = $ctxPain;
+    $context = $ctxParts ? implode("\n\n", $ctxParts) : "No diary or pain logs available.";
+
+    $maxOutputTokens = 8192;
+
+    $prompt = "You are an assistant for the myHealth diary and pain tracker.\n"
+        . "Use only the provided context to answer. If the context is missing information, say you do not know.\n"
+        . "Be concise and actionable.\n\n"
+        . "Context:\n{$context}\n\n"
+        . "User question:\n{$message}\n\n"
+        . "Answer with bullet points or short paragraphs. Cite specifics from the context when possible.";
+    $approxTokens = (int)ceil(strlen($prompt) / 4) + $maxOutputTokens + 2000; // headroom for model "thought" tokens
+    $tokenGuard($approxTokens);
+
+    try {
+        $llm = call_gemini($apiKey, $prompt, 0.4, $maxOutputTokens, $model);
+        $reply = $llm['text'] ?? 'No answer returned.';
+        respond(200, [
+            'reply' => $reply,
+            'model_used' => $llm['model_used'] ?? $model,
+            'used_context' => [
+                'diary_rows' => isset($diary['rows']) ? count($diary['rows']) : 0,
+                'pain_rows' => isset($pain['rows']) ? count($pain['rows']) : 0,
+            ],
+        ]);
+    } catch (Throwable $e) {
+        $fallback = compose_fallback_reply($diary, $pain, $e->getMessage());
+        respond(200, [
+            'reply' => $fallback,
+            'fallback' => true,
+            'detail' => $e->getMessage(),
+            'model_used' => 'fallback',
+            'used_context' => [
+                'diary_rows' => isset($diary['rows']) ? count($diary['rows']) : 0,
+                'pain_rows' => isset($pain['rows']) ? count($pain['rows']) : 0,
+            ],
+        ]);
+    }
 }
 
 // Everything below is file API (requires auth unless APP_KEY matches)

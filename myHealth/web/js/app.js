@@ -588,7 +588,11 @@ const datasets = {
     }
 
     function loadChatRange() {
-      return localStorage.getItem(CHAT_RANGE_KEY) || "90";
+      const val = localStorage.getItem(CHAT_RANGE_KEY);
+      const allowed = ["30", "90", "365", "all"];
+      if (allowed.includes(val)) return val;
+      localStorage.setItem(CHAT_RANGE_KEY, "all");
+      return "all";
     }
 
     function saveChatRange(value) {
@@ -600,11 +604,6 @@ const datasets = {
       document.querySelectorAll(".chat-range-btn").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.range === current);
       });
-      const helper = document.getElementById("chatbot-helper");
-      if (helper) {
-        const label = current === "all" ? "Since start" : `${current} day${current === "1" ? "" : "s"}`;
-        helper.textContent = `Chatbot will use your saved Gemini key. Context: ${label}.`;
-      }
     }
 
     function syncModelSelect() {
