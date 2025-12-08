@@ -4,3 +4,10 @@ __pycache__/
 .env
 **/.env
 .venv
+# PHP session stores (should never be committed)
+myMoney/web/api/sessions/
+myHealth/web/api/sessions/
+myMoney/sessions/
+myHealth/sessions/
+myMoney/web/sessions/
+myHealth/web/sessions/

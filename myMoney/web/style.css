@@ -823,3 +823,62 @@ tr:hover {
   background: rgba(123, 230, 166, 0.2);
   color: var(--text);
 }
+
+/* Utility helpers to replace inline styles */
+.mb-28 {
+  margin-bottom: 28px !important;
+}
+
+.mb-16 {
+  margin-bottom: 16px !important;
+}
+
+.mt-6 {
+  margin-top: 6px !important;
+}
+
+.mt-14 {
+  margin-top: 14px !important;
+}
+
+.mt-28 {
+  margin-top: 28px !important;
+}
+
+.ml-8 {
+  margin-left: 8px !important;
+}
+
+.ml-8-half {
+  margin-left: 0.5rem !important;
+}
+
+.flex-row-gap-8 {
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.flex-1 {
+  flex: 1 1 0% !important;
+}
+
+.no-wrap {
+  white-space: nowrap !important;
+}
+
+.no-top-margin {
+  margin-top: 0 !important;
+}
+
+.faded-85 {
+  opacity: 0.85 !important;
+}
+
+.stacked-gap-14 {
+  gap: 14px !important;
+}
+
+.counter-subtle {
+  color: var(--muted);
+  font-size: 14px;
+}

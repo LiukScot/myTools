@@ -7,6 +7,11 @@ Personal site stack for `liukscot.com`, housing multiple sub-apps.
 - `myHealth/` – health tracker static frontend + PHP file API (`/myhealth`).
 - `myMoney/` – money/investment tracker with login + PHP file API (`/mymoney`).
 
+## Guidelines for developers
+- Keep frontend JS in small modules instead of inline `<script>` tags. Each app now loads a top-level module (`/myhealth/js/app.js`, `/mymoney/js/app.js`) plus helper modules (e.g. `api.js`, `utils.js`). Add new helpers there rather than growing a single file.
+- Prefer separating concerns: API/fetch helpers, state/load/save, and UI wiring/rendering should live in distinct modules to ease debugging and testing.
+- Keep sensitive artifacts (sessions, .env) out of the webroot and under `.gitignore` (already configured).
+
 ## Local dev (one runner)
 - Put DB creds in the repo root `.env` (DB_HOST, DB_USER, DB_PASS, DB_NAME).
 - Start the unified server from repo root: `./testing/run.sh`

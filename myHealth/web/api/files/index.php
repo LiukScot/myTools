@@ -44,8 +44,8 @@ $FILES_TABLE = 'files';
 
 $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
 
-// Fix for unwritable default session path on some hosts
-$sessDir = __DIR__ . '/../sessions';
+// Keep session files outside the webroot (one level above /web)
+$sessDir = dirname(__DIR__, 3) . '/sessions';
 if (!is_dir($sessDir)) {
     @mkdir($sessDir, 0700, true);
 }
@@ -56,17 +56,44 @@ session_set_cookie_params(0, '/', '', $isSecure, true);
 session_name('MYHEALTH_SESSID');
 session_start();
 
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 header('Content-Type: application/json');
-if ($origin) {
+
+// CORS: allow only explicit origins, block everything else when Origin is present
+function load_allowed_origins(): array
+{
+    $env = getenv('ALLOWED_ORIGINS') ?: ($_ENV['ALLOWED_ORIGINS'] ?? '');
+    $raw = array_filter(array_map('trim', explode(',', $env)));
+    if ($raw) {
+        return array_map(static fn($o) => rtrim(strtolower($o), '/'), $raw);
+    }
+    // sensible defaults for local dev and prod domain
+    return [
+        'http://127.0.0.1:8000',
+        'http://localhost:8000',
+        'http://localhost',
+        'https://liukscot.com',
+        'https://www.liukscot.com',
+    ];
+}
+
+function normalize_origin(?string $origin): string
+{
+    return rtrim(strtolower($origin ?? ''), '/');
+}
+
+$allowedOrigins = load_allowed_origins();
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$normalizedOrigin = normalize_origin($origin);
+if ($origin !== '') {
+    if (!in_array($normalizedOrigin, $allowedOrigins, true)) {
+        respond(403, ['error' => 'origin not allowed']);
+    }
     header('Access-Control-Allow-Origin: ' . $origin);
     header('Vary: Origin');
     header('Access-Control-Allow-Credentials: true');
-} else {
-    header('Access-Control-Allow-Origin: *');
 }
 header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, X-App-Key');
+header('Access-Control-Allow-Headers: Content-Type');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
@@ -190,11 +217,6 @@ function is_authed()
 
 function require_auth()
 {
-    $appKey = getenv('APP_KEY') ?: ($_ENV['APP_KEY'] ?? null);
-    $headerKey = $_SERVER['HTTP_X_APP_KEY'] ?? null;
-    if ($appKey && $headerKey && hash_equals($appKey, $headerKey)) {
-        return;
-    }
     if (!is_authed()) {
         respond(401, ['error' => 'unauthorized']);
     }
