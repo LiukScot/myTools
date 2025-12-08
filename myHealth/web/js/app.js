@@ -35,6 +35,22 @@ const datasets = {
       status: document.getElementById("backup-status"),
       errorBox: document.getElementById("backup-error"),
     };
+    const geminiUI = {
+      input: document.getElementById("gemini-api-key"),
+      saveBtn: document.getElementById("save-gemini-key"),
+      clearBtn: document.getElementById("clear-gemini-key"),
+      status: document.getElementById("gemini-key-status"),
+      helper: document.getElementById("gemini-key-helper"),
+      modelSelect: document.getElementById("gemini-model"),
+    };
+    const chatbotUI = {
+      prompt: document.getElementById("chatbot-prompt"),
+      sendBtn: document.getElementById("chatbot-send-btn"),
+      helper: document.getElementById("chatbot-helper"),
+      log: document.getElementById("chatbot-log"),
+      status: document.getElementById("chatbot-status"),
+      loading: document.getElementById("chatbot-loading"),
+    };
     const appMain = document.getElementById("app-main");
     let isAuthed = false;
     function setAuthStatus(message, ok = false) {
@@ -141,6 +157,9 @@ const datasets = {
       habits: [],
       other: [],
     };
+    let geminiState = { hasKey: false, last4: "" };
+    const GEMINI_MODEL_KEY = "myhealth:gemini:model";
+    const CHAT_RANGE_KEY = "myhealth:chatRange";
     const cardEmojiMap = {
       "Journal entries": "📒",
       "Pain entries": "📓",
@@ -334,6 +353,7 @@ const datasets = {
         setAppVisible(true);
         await fetchExisting("diary");
         await fetchExisting("pain");
+        await refreshGeminiKeyState({ silent: true });
         renderDashboard();
       } catch (err) {
         setAuthStatus(err.message || "Login failed");
@@ -350,6 +370,9 @@ const datasets = {
         resetAppState();
         setAppVisible(false);
         setAuthVisibility(false);
+        geminiState = { hasKey: false, last4: "" };
+        updateGeminiUi(geminiState);
+        setGeminiStatus("");
       } catch (err) {
         setAuthStatus(err.message || "Logout failed");
       }
@@ -547,6 +570,150 @@ const datasets = {
       if (!backupUI.errorBox) return;
       backupUI.errorBox.textContent = message || "";
       backupUI.errorBox.classList.toggle("hidden", !message);
+    }
+
+    function setGeminiStatus(message, ok = false) {
+      if (!geminiUI.status) return;
+      geminiUI.status.innerHTML = message
+        ? `<span class="${ok ? "ok" : "err"}">${ok ? "Saved" : "Error"}:</span> ${escapeHtml(message)}`
+        : "";
+    }
+
+    function loadModelChoice() {
+      return localStorage.getItem(GEMINI_MODEL_KEY) || "gemini-2.5-flash";
+    }
+
+    function saveModelChoice(value) {
+      localStorage.setItem(GEMINI_MODEL_KEY, value);
+    }
+
+    function loadChatRange() {
+      return localStorage.getItem(CHAT_RANGE_KEY) || "90";
+    }
+
+    function saveChatRange(value) {
+      localStorage.setItem(CHAT_RANGE_KEY, value);
+    }
+
+    function syncChatRangeButtons() {
+      const current = loadChatRange();
+      document.querySelectorAll(".chat-range-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.range === current);
+      });
+      const helper = document.getElementById("chatbot-helper");
+      if (helper) {
+        const label = current === "all" ? "Since start" : `${current} day${current === "1" ? "" : "s"}`;
+        helper.textContent = `Chatbot will use your saved Gemini key. Context: ${label}.`;
+      }
+    }
+
+    function syncModelSelect() {
+      const val = loadModelChoice();
+      if (geminiUI.modelSelect) {
+        geminiUI.modelSelect.value = val;
+      }
+    }
+
+    function updateGeminiUi(state = { hasKey: false, last4: "" }) {
+      const hasKey = !!state.hasKey && isAuthed;
+      const last4 = state.last4 || "";
+      if (geminiUI.helper) {
+        geminiUI.helper.textContent = hasKey
+          ? `Gemini API key stored on server${last4 ? ` (ending ${last4})` : ""}.`
+          : "No Gemini key saved. Paste one below to enable the chatbot.";
+      }
+      if (chatbotUI.helper) {
+        chatbotUI.helper.textContent = hasKey
+          ? "Chatbot will use your saved Gemini key."
+          : "Save a Gemini key in Settings to enable chatbot calls.";
+      }
+      if (chatbotUI.sendBtn) {
+        chatbotUI.sendBtn.disabled = !hasKey;
+        chatbotUI.sendBtn.title = hasKey ? "" : "Log in and save your Gemini key in Settings first";
+      }
+    }
+
+    async function refreshGeminiKeyState({ silent = false } = {}) {
+      if (!isAuthed) {
+        geminiState = { hasKey: false, last4: "" };
+        updateGeminiUi(geminiState);
+        if (!silent) setGeminiStatus("Log in to manage your Gemini key", false);
+        return;
+      }
+      try {
+        const res = await apiFetch("/api/files/ai-key");
+        const data = await safeParseJson(res);
+        if (!res.ok) {
+          throw new Error((data && data.error) || "Failed to load Gemini key");
+        }
+        geminiState = {
+          hasKey: !!data.has_key,
+          last4: data.last4 || "",
+        };
+        updateGeminiUi(geminiState);
+        if (!silent) {
+          setGeminiStatus(geminiState.hasKey ? "Gemini key on file" : "No Gemini key saved yet", geminiState.hasKey);
+        }
+      } catch (err) {
+        geminiState = { hasKey: false, last4: "" };
+        updateGeminiUi(geminiState);
+        if (!silent) setGeminiStatus(err.message || "Failed to load Gemini key", false);
+      }
+    }
+
+    function wireGeminiSettings() {
+      if (!geminiUI.input) return;
+      updateGeminiUi(geminiState);
+      syncModelSelect();
+      syncChatRangeButtons();
+      document.querySelectorAll(".chat-range-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const range = btn.dataset.range || "all";
+          saveChatRange(range);
+          syncChatRangeButtons();
+        });
+      });
+      if (geminiUI.modelSelect) {
+        geminiUI.modelSelect.addEventListener("change", (e) => {
+          saveModelChoice(e.target.value);
+        });
+      }
+      geminiUI.saveBtn?.addEventListener("click", async () => {
+        const key = geminiUI.input.value.trim();
+        if (!key) {
+          setGeminiStatus("Paste a Gemini API key first", false);
+          return;
+        }
+        try {
+          const res = await apiFetch("/api/files/ai-key", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key }),
+          });
+          const data = await safeParseJson(res);
+          if (!res.ok) {
+            throw new Error((data && data.error) || "Failed to save Gemini key");
+          }
+          geminiUI.input.value = "";
+          setGeminiStatus("Gemini API key saved server-side for your account", true);
+          await refreshGeminiKeyState({ silent: true });
+        } catch (err) {
+          setGeminiStatus(err.message || "Failed to save Gemini key", false);
+        }
+      });
+      geminiUI.clearBtn?.addEventListener("click", async () => {
+        try {
+          const res = await apiFetch("/api/files/ai-key", { method: "DELETE" });
+          const data = await safeParseJson(res);
+          if (!res.ok) {
+            throw new Error((data && data.error) || "Failed to clear Gemini key");
+          }
+          setGeminiStatus("Gemini API key cleared", true);
+          await refreshGeminiKeyState({ silent: true });
+        } catch (err) {
+          setGeminiStatus(err.message || "Failed to clear Gemini key", false);
+        }
+      });
     }
 
     function wireLogFilters(kind) {
@@ -1749,12 +1916,135 @@ const datasets = {
       });
     }
 
+    function appendChatMessage(role, text) {
+      if (!chatbotUI.log) return;
+      if (chatbotUI.log.firstElementChild?.classList.contains("hint")) {
+        chatbotUI.log.innerHTML = "";
+      }
+      const row = document.createElement("div");
+      row.className = "chat-row";
+      const roleEl = document.createElement("div");
+      roleEl.className = "chat-role";
+      roleEl.textContent = role;
+      const bubble = document.createElement("div");
+      bubble.className = "chat-bubble";
+      if (role === "Assistant") {
+        bubble.innerHTML = formatAssistantMessage(text);
+      } else {
+        bubble.textContent = text;
+      }
+      row.appendChild(roleEl);
+      row.appendChild(bubble);
+      chatbotUI.log.appendChild(row);
+      chatbotUI.log.scrollTop = chatbotUI.log.scrollHeight;
+    }
+
+    function formatAssistantMessage(text) {
+      const escaped = escapeHtml(text || "");
+      const withBold = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      const paragraphs = withBold
+        .split(/\n{2,}/)
+        .map((p) => p.replace(/\n/g, "<br>"))
+        .map((p) => `<p>${p}</p>`)
+        .join("");
+      return paragraphs || "<p></p>";
+    }
+
+    function setChatLoading(isLoading) {
+      if (!chatbotUI.loading) return;
+      chatbotUI.loading.classList.toggle("hidden", !isLoading);
+    }
+
+    function wireChatbot() {
+      if (!chatbotUI.sendBtn || !chatbotUI.prompt) return;
+      updateGeminiUi(geminiState);
+      refreshGeminiKeyState({ silent: true });
+      let sending = false;
+      let sendBtnBaseDisabled = chatbotUI.sendBtn.disabled;
+      const setStatus = (msg) => {
+        if (chatbotUI.status) chatbotUI.status.textContent = msg || "";
+      };
+      const toggleSending = (isSending) => {
+        sending = isSending;
+        if (isSending) {
+          sendBtnBaseDisabled = chatbotUI.sendBtn.disabled;
+          chatbotUI.sendBtn.disabled = true;
+        } else {
+          chatbotUI.sendBtn.disabled = sendBtnBaseDisabled;
+        }
+        chatbotUI.sendBtn.textContent = isSending ? "Sending..." : "Send";
+        chatbotUI.prompt.disabled = isSending;
+        setChatLoading(isSending);
+      };
+      const sendMessage = async () => {
+        if (chatbotUI.sendBtn.disabled) {
+          if (chatbotUI.status) chatbotUI.status.textContent = "Save your Gemini API key in Settings first.";
+          return;
+        }
+        const prompt = chatbotUI.prompt.value.trim();
+        if (!prompt) {
+          setStatus("Enter a question first.");
+          return;
+        }
+        if (sending) return;
+        setStatus("");
+        appendChatMessage("You", prompt);
+        chatbotUI.prompt.value = "";
+        try {
+          toggleSending(true);
+          const model = loadModelChoice();
+          const range = loadChatRange();
+          const res = await apiFetch("/api/files/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: prompt, model, range }),
+          });
+          const data = await safeParseJson(res);
+          if (res.status === 401) {
+            setStatus("Please log in to chat.");
+            return;
+          }
+          if (res.status === 400 && data?.error === "no gemini key saved") {
+            setStatus("Save your Gemini key in Settings first.");
+            return;
+          }
+          if (!res.ok) {
+            const detail = typeof data === "object" ? data?.detail || data?.error : "";
+            throw new Error(detail || (data && data.error) || `Server error ${res.status}`);
+          }
+          const reply = data?.reply || "No answer.";
+          if (data?.fallback) {
+            setStatus(`Fallback response (LLM unavailable: ${data?.detail || "unknown error"})`);
+          } else {
+            setStatus("");
+          }
+          appendChatMessage("Assistant", reply);
+        } catch (err) {
+          appendChatMessage("Assistant", "Sorry, I could not complete that request.");
+          setStatus(err.message || "Chat failed");
+          return;
+        }
+        finally {
+          toggleSending(false);
+        }
+      };
+      chatbotUI.sendBtn.addEventListener("click", sendMessage);
+      chatbotUI.prompt.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+        // Ctrl/Cmd+Enter will insert a newline by default
+      });
+    }
+
     function wireNav() {
       const buttons = document.querySelectorAll(".nav-btn[data-target]");
       const sections = {
         dashboard: document.getElementById("dashboard-section"),
         newlog: document.getElementById("newlog-section"),
-        import: document.getElementById("import-section"),
+        chatbot: document.getElementById("chatbot-section"),
+        settings: document.getElementById("settings-section"),
       };
       buttons.forEach(btn => {
         btn.addEventListener("click", () => {
@@ -2196,6 +2486,7 @@ const datasets = {
       setAppVisible(hasData);
       setAuthVisibility(hasData);
       if (hasData) {
+        await refreshGeminiKeyState({ silent: true });
         renderDashboard();
       }
     }
@@ -2224,6 +2515,8 @@ const datasets = {
     wireJournalForm();
     wireOptionEditors();
     wireNav();
+    wireGeminiSettings();
+    wireChatbot();
     wireBackup();
     ["filter-from", "filter-to"].forEach((id) => {
       const el = document.getElementById(id);

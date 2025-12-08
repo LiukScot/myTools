@@ -606,6 +606,149 @@ tbody tr:hover {
     gap: 10px;
 }
 
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field-group label {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.settings-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.settings-inline input {
+    flex: 1 1 280px;
+    min-width: 240px;
+}
+
+.chat-log {
+    min-height: 160px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card-strong);
+    padding: 12px;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25) inset;
+}
+
+.chat-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.chat-loading .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.chat-loading.hidden {
+    display: none;
+}
+
+.chat-bubble p {
+    margin: 0 0 8px 0;
+}
+
+.chat-bubble p:last-child {
+    margin-bottom: 0;
+}
+
+.chat-bubble strong {
+    color: var(--text);
+}
+
+.chat-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.chat-role {
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    font-weight: 800;
+    min-width: 70px;
+    text-transform: uppercase;
+}
+
+.chat-bubble {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    line-height: 1.5;
+}
+
+.chat-input-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.chat-input-row.constrained {
+    max-width: 720px;
+    width: 100%;
+}
+
+.chat-input-row.constrained textarea {
+    min-width: 320px;
+}
+
+.chat-input-row textarea {
+    flex: 1 1 320px;
+    min-height: 80px;
+}
+
+.chat-range {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 8px 0;
+}
+
+.chat-range .sub-label {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.chat-range .quick-btn.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(255, 94, 138, 0.3);
+    color: var(--accent);
+    background: rgba(255, 94, 138, 0.2);
+    font-weight: 800;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .btn-primary {
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
     color: #0b0b0d;

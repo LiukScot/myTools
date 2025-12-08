@@ -39,6 +39,8 @@ function load_env_files(array $paths)
 // Session login only; users are pre-created by you.
 $ALLOW_SIGNUP = false; // leave false to block self-registration
 $FILES_TABLE = 'files';
+$USER_SETTINGS_TABLE = 'user_settings';
+$AI_KEY_SECRET_ENV = 'GEMINI_KEY_SECRET'; // 32+ chars recommended
 
 // ---- No edits needed below unless you want to customize behavior ----
 
@@ -178,6 +180,8 @@ $DB_HOST = env_or_fail('DB_HOST');
 $DB_USER = env_or_fail('DB_USER');
 $DB_PASS = env_or_fail('DB_PASS');
 $DB_NAME = env_or_fail('DB_NAME');
+$AI_SECRET_RAW = env_or_fail($AI_KEY_SECRET_ENV);
+$AI_SECRET_KEY = hash('sha256', $AI_SECRET_RAW, true); // 32-byte key
 
 if (!extension_loaded('mysqli')) {
     respond(500, ['error' => 'mysqli extension not loaded']);
@@ -206,6 +210,15 @@ $mysqli->query(
         name VARCHAR(150) PRIMARY KEY,
         data LONGTEXT NOT NULL,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+);
+$mysqli->query(
+    "CREATE TABLE IF NOT EXISTS {$USER_SETTINGS_TABLE} (
+        user_id INT NOT NULL,
+        gemini_key TEXT DEFAULT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (user_id),
+        CONSTRAINT fk_user_settings_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
 );
 
@@ -311,6 +324,103 @@ if (preg_match('#/api(?:/files)?/logout/?$#', $rawUri)) {
     }
     session_destroy();
     respond(200, ['status' => 'ok']);
+}
+
+function enforce_rate_limit(string $bucket, int $limit = 5, int $windowSeconds = 60)
+{
+    $now = time();
+    if (!isset($_SESSION['rate'][$bucket])) {
+        $_SESSION['rate'][$bucket] = [];
+    }
+    $_SESSION['rate'][$bucket] = array_values(array_filter($_SESSION['rate'][$bucket], static function ($ts) use ($now, $windowSeconds) {
+        return ($now - $ts) < $windowSeconds;
+    }));
+    if (count($_SESSION['rate'][$bucket]) >= $limit) {
+        respond(429, ['error' => 'rate limit exceeded']);
+    }
+    $_SESSION['rate'][$bucket][] = $now;
+}
+
+function secure_bytes(int $len): string
+{
+    if (function_exists('random_bytes')) {
+        return random_bytes($len);
+    }
+    $bytes = openssl_random_pseudo_bytes($len, $strong);
+    if ($bytes !== false && $strong) {
+        return $bytes;
+    }
+    respond(500, ['error' => 'no secure random source available']);
+}
+
+function encrypt_ai_key(string $plain, string $key): string
+{
+    $iv = secure_bytes(12); // GCM recommended 12-byte IV
+    $tag = '';
+    $cipher = openssl_encrypt($plain, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+    if ($cipher === false) {
+        respond(500, ['error' => 'encryption failed']);
+    }
+    return base64_encode($iv . $tag . $cipher);
+}
+
+function decrypt_ai_key(?string $blob, string $key): ?string
+{
+    if ($blob === null || $blob === '')
+        return null;
+    $data = base64_decode($blob, true);
+    if ($data === false || strlen($data) < 28) { // 12 IV + 16 tag
+        return null;
+    }
+    $iv = substr($data, 0, 12);
+    $tag = substr($data, 12, 16);
+    $cipher = substr($data, 28);
+    $plain = openssl_decrypt($cipher, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+    return $plain === false ? null : $plain;
+}
+
+// Gemini API key: GET status, PUT/POST save, DELETE clear
+if (preg_match('#/api(?:/files)?/ai-key/?$#', $rawUri)) {
+    require_auth();
+    $userId = $_SESSION['user_id'];
+    if ($method === 'GET') {
+        enforce_rate_limit('ai-key:get', 8, 60);
+        $stmt = $mysqli->prepare("SELECT gemini_key, updated_at FROM {$USER_SETTINGS_TABLE} WHERE user_id=? LIMIT 1");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $stmt->bind_result($key, $updated);
+        if ($stmt->fetch() && $key !== null && $key !== '') {
+            $plain = decrypt_ai_key($key, $AI_SECRET_KEY);
+            if ($plain !== null && $plain !== '') {
+                $last4 = strlen($plain) >= 4 ? substr($plain, -4) : '';
+                respond(200, ['has_key' => true, 'last4' => $last4, 'updated_at' => $updated]);
+            }
+        }
+        respond(200, ['has_key' => false]);
+    }
+    if ($method === 'PUT' || $method === 'POST') {
+        enforce_rate_limit('ai-key:write', 5, 300);
+        $body = read_json();
+        $key = trim($body['key'] ?? '');
+        if ($key === '')
+            respond(400, ['error' => 'key required']);
+        if (strlen($key) > 4096)
+            respond(400, ['error' => 'key too long']);
+        $enc = encrypt_ai_key($key, $AI_SECRET_KEY);
+        $stmt = $mysqli->prepare("INSERT INTO {$USER_SETTINGS_TABLE} (user_id, gemini_key) VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE gemini_key=VALUES(gemini_key), updated_at=CURRENT_TIMESTAMP");
+        $stmt->bind_param("is", $userId, $enc);
+        $stmt->execute();
+        respond(200, ['status' => 'saved', 'has_key' => true]);
+    }
+    if ($method === 'DELETE') {
+        enforce_rate_limit('ai-key:write', 5, 300);
+        $stmt = $mysqli->prepare("UPDATE {$USER_SETTINGS_TABLE} SET gemini_key=NULL, updated_at=CURRENT_TIMESTAMP WHERE user_id=?");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        respond(200, ['status' => 'cleared', 'has_key' => false]);
+    }
+    respond(405, ['error' => 'method not allowed']);
 }
 
 // Everything below is file API (requires auth unless APP_KEY matches)
