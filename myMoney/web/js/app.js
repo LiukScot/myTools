@@ -110,10 +110,13 @@ const primaryStorageKey = 'investments_state_v2';
       setAuthVisibility(false);
     }
 
-    function wireAuthForm() {
-      authUI.loginBtn?.addEventListener('click', () => doLogin());
-      authUI.logoutBtn?.addEventListener('click', () => doLogout());
-    }
+function wireAuthForm() {
+  authUI.loginBtn?.addEventListener('click', () => doLogin());
+  authUI.logoutBtn?.addEventListener('click', () => doLogout());
+  authUI.hubBtn?.addEventListener('click', () => {
+    window.location.href = '/';
+  });
+}
 
     function defaultState() {
       return {

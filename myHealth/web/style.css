@@ -506,64 +506,90 @@ tbody tr:hover {
     letter-spacing: 0.01em;
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 14px;
-    align-items: flex-start;
-    margin-top: 14px;
+.pain-grid {
+    display: block;
+    column-count: 4;
+    column-gap: 10px;
+    margin-top: 6px;
 }
 
-.form-group {
+.pain-grid .form-group {
+    display: block;
+    width: 100%;
+    margin: 0 0 10px 0;
+    break-inside: avoid;
+}
+
+.pain-grid .notes-group {
+    column-span: none;
+    max-width: 480px;
+}
+
+.pain-grid .small-field {
+    max-width: none;
+}
+
+@media (max-width: 1200px) {
+    .pain-grid {
+        column-count: 3;
+    }
+}
+
+@media (max-width: 900px) {
+    .pain-grid {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 640px) {
+    .pain-grid {
+        column-count: 1;
+    }
+}
+
+.pain-grid .masonry-span-full {
+    column-span: all;
+}
+
+/* Header actions alignment */
+.top-nav {
     display: flex;
-    flex-direction: column;
-    gap: 7px;
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: var(--card);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
-    height: auto;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.top-nav nav {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Settings masonry */
+.settings-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.stacked-fields.settings-grid {
+    display: grid !important;
+}
+
+.settings-grid > * {
     break-inside: avoid;
     width: 100%;
-    box-sizing: border-box;
-    margin: 0 0 14px 0;
+    display: block;
+    margin: 0;
 }
 
-.form-group label {
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: 0.01em;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    background: var(--card-strong);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--text);
-    padding: 7px 14px;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    border-color: var(--accent);
-    background: rgba(255, 94, 138, 0.08);
-}
-
-.form-group small {
-    color: var(--muted);
-    font-size: 12px;
-}
-
-.form-group textarea {
-    resize: vertical;
-    min-height: 72px;
+.pain-grid .masonry-span-full {
+    column-span: all;
 }
 
 .form-actions {
@@ -593,17 +619,17 @@ tbody tr:hover {
 .stacked-fields {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 10px;
 }
 
 .group-box {
-    padding: 12px;
+    padding: 12px 12px 10px;
     border: 1px solid var(--border);
     border-radius: 12px;
     background: var(--card-strong);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-    width: min(100%, 840px);
-    align-self: flex-start;
+    width: 100%;
+    align-self: stretch;
 }
 
 .import-row {
@@ -624,9 +650,9 @@ tbody tr:hover {
 }
 
 .danger-zone {
-    margin-top: 28px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
+    margin-top: 14px;
+    padding-top: 0;
+    border-top: none;
 }
 
 .stacked-fields button {
@@ -814,12 +840,6 @@ tbody tr:hover {
     margin-top: 10px;
 }
 
-.chip-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
 .chip-btn {
     padding: 8px 12px;
     border-radius: 10px;
@@ -869,6 +889,10 @@ tbody tr:hover {
     color: var(--muted);
     font-size: 12px;
     cursor: pointer;
+}
+
+.chip-row {
+    margin-top: 6px;
 }
 
 .chip-editor {

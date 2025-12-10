@@ -62,8 +62,6 @@
             </svg>
             Settings
           </button>
-        </nav>
-        <div class="top-actions">
           <a class="nav-btn hub-link hidden" id="go-hub" href="/" aria-label="Back to hub">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M15 5l-7 7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -71,7 +69,7 @@
             <span>Back to hub</span>
           </a>
           <button class="nav-btn danger logout-btn hidden" id="auth-logout" type="button">Log out</button>
-        </div>
+        </nav>
       </div>
 
       <section id="dashboard-section">
@@ -113,7 +111,7 @@
 
           <div class="entry-panel" data-entry-panel="pain">
             <form id="pain-form">
-              <div class="form-grid">
+              <div class="form-grid pain-grid">
                 <div class="form-group">
                   <label for="pain-date">Entry Date/Time</label>
                   <input id="pain-date" name="pain-date" type="datetime-local" />
@@ -129,44 +127,44 @@
                   <input id="fatigue-level" name="fatigue-level" type="number" min="1" max="9" step="1"
                     placeholder="e.g. 4" />
                 </div>
-                <div class="form-group">
-                  <label>Area <button type="button" class="chip-edit" data-edit="area">Edit</button></label>
-                  <div id="area-options" class="chip-row" data-field="area"></div>
-                  <div id="area-editor" class="chip-editor hidden" data-field="area"></div>
-                </div>
-                <div class="form-group">
-                  <label>Symptoms <button type="button" class="chip-edit" data-edit="symptoms">Edit</button></label>
-                  <div id="symptoms-options" class="chip-row" data-field="symptoms"></div>
-                  <div id="symptoms-editor" class="chip-editor hidden" data-field="symptoms"></div>
-                </div>
-                <div class="form-group">
-                  <label>Activities <button type="button" class="chip-edit" data-edit="activities">Edit</button></label>
-                  <div id="activities-options" class="chip-row" data-field="activities"></div>
-                  <div id="activities-editor" class="chip-editor hidden" data-field="activities"></div>
-                </div>
-                <div class="form-group">
-                  <label>Medicines <button type="button" class="chip-edit" data-edit="medicines">Edit</button></label>
-                  <div id="medicines-options" class="chip-row" data-field="medicines" data-preselect="all"></div>
-                  <div id="medicines-editor" class="chip-editor hidden" data-field="medicines"></div>
-                </div>
-                <div class="form-group">
-                  <label for="pain-note">Notes</label>
-                  <textarea id="pain-note" name="pain-note" placeholder="Anything else worth tracking?"></textarea>
-                </div>
-                <div class="form-group">
-                  <label>Habits <button type="button" class="chip-edit" data-edit="habits">Edit</button></label>
-                  <div id="habits-options" class="chip-row" data-field="habits"></div>
-                  <div id="habits-editor" class="chip-editor hidden" data-field="habits"></div>
-                </div>
-                <div class="form-group">
+                <div class="form-group small-field">
                   <label for="coffee-count">Coffee (cups)</label>
                   <input id="coffee-count" name="coffee-count" type="number" min="0" max="9" step="1"
                     placeholder="e.g. 1" />
                 </div>
-                <div class="form-group">
+                <div class="form-group chip-group">
+                  <label>Area <button type="button" class="chip-edit" data-edit="area">Edit</button></label>
+                  <div id="area-options" class="chip-row" data-field="area"></div>
+                  <div id="area-editor" class="chip-editor hidden" data-field="area"></div>
+                </div>
+                <div class="form-group chip-group">
+                  <label>Symptoms <button type="button" class="chip-edit" data-edit="symptoms">Edit</button></label>
+                  <div id="symptoms-options" class="chip-row" data-field="symptoms"></div>
+                  <div id="symptoms-editor" class="chip-editor hidden" data-field="symptoms"></div>
+                </div>
+                <div class="form-group chip-group">
+                  <label>Activities <button type="button" class="chip-edit" data-edit="activities">Edit</button></label>
+                  <div id="activities-options" class="chip-row" data-field="activities"></div>
+                  <div id="activities-editor" class="chip-editor hidden" data-field="activities"></div>
+                </div>
+                <div class="form-group chip-group">
+                  <label>Medicines <button type="button" class="chip-edit" data-edit="medicines">Edit</button></label>
+                  <div id="medicines-options" class="chip-row" data-field="medicines" data-preselect="all"></div>
+                  <div id="medicines-editor" class="chip-editor hidden" data-field="medicines"></div>
+                </div>
+                <div class="form-group chip-group">
+                  <label>Habits <button type="button" class="chip-edit" data-edit="habits">Edit</button></label>
+                  <div id="habits-options" class="chip-row" data-field="habits"></div>
+                  <div id="habits-editor" class="chip-editor hidden" data-field="habits"></div>
+                </div>
+                <div class="form-group chip-group">
                   <label>Other <button type="button" class="chip-edit" data-edit="other">Edit</button></label>
                   <div id="other-options" class="chip-row" data-field="other"></div>
                   <div id="other-editor" class="chip-editor hidden" data-field="other"></div>
+                </div>
+                <div class="form-group notes-group">
+                  <label for="pain-note">Notes</label>
+                  <textarea id="pain-note" name="pain-note" placeholder="Anything else worth tracking?"></textarea>
                 </div>
               </div>
               <div class="form-actions">
@@ -196,7 +194,7 @@
               </div>
               <div class="entry-panel hidden" data-autotherapy-panel="journal">
                 <form id="journal-form">
-                  <div class="form-grid">
+                  <div class="form-grid pain-grid">
                     <div class="form-group">
                       <label for="journal-date">Entry date/time</label>
                       <input id="journal-date" name="journal-date" type="datetime-local" />
@@ -305,7 +303,7 @@
           <h2>Settings</h2>
           <div class="hint">Import/export your data and manage the chatbot connection.</div>
 
-          <div class="stacked-fields">
+          <div class="stacked-fields settings-grid">
             <!-- JSON import/export -->
             <div class="field-group group-box">
               <label><strong>Import from JSON</strong></label>
@@ -324,8 +322,6 @@
                 <button class="nav-btn" id="export-xlsx-button">Export XLSX</button>
               </div>
             </div>
-
-            <div class="section-divider"></div>
 
             <h3>Chatbot</h3>
 
@@ -356,6 +352,7 @@
               </div>
             </div>
 
+            <h3>Danger zone</h3>
             <div class="danger-zone">
               <button class="nav-btn danger" id="full-purge-button">🧨 delete all data</button>
             </div>

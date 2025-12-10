@@ -230,45 +230,37 @@ h4 {
   display: none !important;
 }
 
-.top-bar {
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-  gap: 14px;
-  flex-wrap: wrap;
+@media (max-width: 720px) {
+  .top-bar .top-nav,
+  .top-nav {
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 8px;
+  }
 }
 
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.top-bar .top-nav,
 .top-nav {
   display: flex;
-  gap: 14px;
+  align-items: center;
   flex-wrap: wrap;
+  gap: 10px;
   flex: 1 1 auto;
+  min-width: 0;
 }
 
-.top-actions {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.nav-btn {
-  border-radius: 10px;
-  padding: 7px 14px;
-  border: 1px solid var(--border);
-  background: var(--card-strong);
-  color: var(--text);
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  letter-spacing: 0.01em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  height: 32px;
-  /* Enforce height for alignment */
+.top-bar .nav-btn,
+.top-nav .nav-btn {
+  line-height: 1.2;
+  min-height: 36px;
 }
 
 /* ... */
@@ -279,32 +271,6 @@ h4 {
   /* Fixed gap */
 }
 
-.nav-btn .icon,
-.nav-btn .icon * {
-  display: block;
-  stroke: currentColor;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  fill: none;
-}
-
-.nav-btn.active {
-  border-color: var(--accent);
-  color: var(--accent);
-  box-shadow: 0 0 0 1px rgba(123, 230, 166, 0.35), var(--shadow);
-}
-
-.nav-btn:hover {
-  border-color: var(--accent);
-}
-
-.nav-btn.danger {
-  color: var(--danger);
-  border-color: rgba(249, 115, 115, 0.5);
-  background: rgba(249, 115, 115, 0.08);
-}
-
 .hub-link {
   text-decoration: none;
   display: inline-flex;
@@ -313,12 +279,6 @@ h4 {
   font-size: 14px;
   font-weight: 700;
   line-height: 1.2;
-}
-
-.hub-link svg {
-  stroke: currentColor;
-  width: 14px;
-  height: 14px;
 }
 
 .actions-cell {

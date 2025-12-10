@@ -70,16 +70,14 @@
             </svg>
             import / backup
           </button>
-        </nav>
-        <div class="top-actions">
-          <a class="nav-btn hub-link hidden" id="go-hub" href="/" aria-label="Back to hub">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <button class="nav-btn hub-link hidden" id="go-hub" type="button" aria-label="Back to hub">
+            <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M15 5l-7 7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             <span>Back to hub</span>
-          </a>
+          </button>
           <button class="nav-btn danger hidden" id="auth-logout" type="button">Log out</button>
-        </div>
+        </nav>
       </div>
 
       <!-- DASHBOARD -->
@@ -330,11 +328,11 @@
           <h2>Import / Backup</h2>
           <div class="hint">easily import or export your data</div>
 
-          <div class="stacked-fields">
-            <!-- JSON import/export -->
-            <div class="field-group group-box">
-              <label><strong>Import from JSON</strong></label>
-              <div class="inline-row">
+            <div class="stacked-fields">
+              <!-- JSON import/export -->
+              <div class="field-group group-box">
+                <label><strong>Import from JSON</strong></label>
+                <div class="inline-row">
                 <input type="file" id="importBackupInput" accept=".json" />
                 <button class="nav-btn" id="exportBackupButton">Export JSON</button>
               </div>
@@ -350,6 +348,7 @@
               </div>
             </div>
 
+            <h3>Danger zone</h3>
             <div class="danger-zone">
               <button class="nav-btn danger" id="fullPurgeButton">🧨 delete all data</button>
             </div>
