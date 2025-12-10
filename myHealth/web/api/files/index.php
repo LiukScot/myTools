@@ -230,6 +230,7 @@ $mysqli->query(
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
 );
+// Note: gemini_key now stores the user's Mistral API key; column name kept for compatibility.
 $mysqli->query(
     "CREATE TABLE IF NOT EXISTS {$USER_SETTINGS_TABLE} (
         user_id INT NOT NULL,
@@ -358,7 +359,7 @@ function enforce_rate_limit(string $bucket, int $limit = 5, int $windowSeconds =
     $_SESSION['rate'][$bucket][] = $now;
 }
 
-function enforce_chat_limits(int $maxRequestsPerMinute = 2, int $maxApproxTokens = 450000)
+function enforce_chat_limits(int $maxRequestsPerMinute = 2, ?int $maxApproxTokens = 450000)
 {
     $now = time();
     if (!isset($_SESSION['chat_times'])) {
@@ -369,6 +370,11 @@ function enforce_chat_limits(int $maxRequestsPerMinute = 2, int $maxApproxTokens
         respond(429, ['error' => 'chat_rate_limited', 'detail' => 'Too many chat requests per minute']);
     }
     $_SESSION['chat_times'][] = $now;
+    if ($maxApproxTokens === null) {
+        return static function (int $approxTokens) {
+            return $approxTokens; // no-op while keeping signature
+        };
+    }
     return function (int $approxTokens) use ($maxApproxTokens) {
         if ($approxTokens > $maxApproxTokens) {
             respond(400, ['error' => 'chat_token_limit', 'detail' => 'Request too large for token budget']);
@@ -459,31 +465,32 @@ function rows_to_text(?array $dataset, string $label, ?int $limit = null): strin
     return strtoupper($label) . ":\n" . implode("\n", $parts);
 }
 
-function call_gemini_single(string $apiKey, string $prompt, float $temperature, int $maxTokens, string $model): array
+function call_mistral_single(string $apiKey, string $prompt, float $temperature, ?int $maxTokens, string $model): array
 {
     if (!function_exists('curl_init')) {
         throw new RuntimeException('curl extension missing');
     }
-    $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . rawurlencode($apiKey);
+    $url = "https://api.mistral.ai/v1/chat/completions";
     $payload = [
-        "contents" => [
-            [
-                "role" => "user",
-                "parts" => [
-                    ["text" => $prompt],
-                ],
-            ],
+        "model" => $model,
+        "messages" => [
+            ["role" => "system", "content" => "You are an assistant for the myHealth diary and pain tracker. Use only the provided context to answer, be concise and actionable."],
+            ["role" => "user", "content" => $prompt],
         ],
-        "generationConfig" => [
-            "temperature" => $temperature,
-            "maxOutputTokens" => $maxTokens,
-        ],
+        "temperature" => $temperature,
+        "safe_prompt" => false,
     ];
+    if ($maxTokens !== null) {
+        $payload["max_tokens"] = $maxTokens;
+    }
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
-        CURLOPT_HTTPHEADER => ["Content-Type: application/json"],
+        CURLOPT_HTTPHEADER => [
+            "Content-Type: application/json",
+            "Authorization: " . "Bearer {$apiKey}",
+        ],
         CURLOPT_POSTFIELDS => json_encode($payload),
         CURLOPT_TIMEOUT => 20,
     ]);
@@ -493,65 +500,42 @@ function call_gemini_single(string $apiKey, string $prompt, float $temperature, 
     $info = curl_getinfo($ch);
     curl_close($ch);
     if ($errno) {
-        throw new RuntimeException("gemini request failed (curl errno {$errno})");
+        throw new RuntimeException("mistral request failed (curl errno {$errno})");
     }
     $decoded = json_decode($response, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
-        log_api_error("Gemini {$model} bad JSON status {$status}; curl info: " . json_encode($info) . "; body: " . substr($response ?? '', 0, 500));
-        throw new RuntimeException("gemini returned non-json (status {$status})");
+        log_api_error("Mistral {$model} bad JSON status {$status}; curl info: " . json_encode($info) . "; body: " . substr($response ?? '', 0, 500));
+        throw new RuntimeException("mistral returned non-json (status {$status})");
     }
     if ($status >= 400) {
-        $detail = isset($decoded['error']['message']) ? $decoded['error']['message'] : 'gemini error';
-        log_api_error("Gemini {$model} error status {$status}: {$detail}; body: " . substr(json_encode($decoded), 0, 500));
-        throw new RuntimeException("gemini error status {$status}: {$detail}");
+        $detail = isset($decoded['error']['message']) ? $decoded['error']['message'] : 'mistral error';
+        log_api_error("Mistral {$model} error status {$status}: {$detail}; body: " . substr(json_encode($decoded), 0, 500));
+        throw new RuntimeException("mistral error status {$status}: {$detail}");
     }
-    // Extract text from the first candidate with parts
-    $text = null;
-    if (isset($decoded['candidates']) && is_array($decoded['candidates'])) {
-        foreach ($decoded['candidates'] as $cand) {
-            $parts = $cand['content']['parts'] ?? [];
-            $texts = [];
-            foreach ($parts as $p) {
-                if (isset($p['text'])) {
-                    $texts[] = $p['text'];
-                }
-            }
-            if ($texts) {
-                $text = implode("\n", $texts);
-                break;
-            }
-            // If safety blocked, surface that
-            if (($cand['finishReason'] ?? '') === 'SAFETY') {
-                $ratings = $cand['safetyRatings'] ?? [];
-                $cat = array_column($ratings, 'category');
-                $msg = $cat ? ('Safety block: ' . implode(', ', $cat)) : 'Safety block';
-                throw new RuntimeException($msg);
-            }
-        }
-    }
+    $text = $decoded['choices'][0]['message']['content'] ?? null;
     if (!$text) {
-        log_api_error("Gemini {$model} empty response status {$status}; body: " . substr(json_encode($decoded), 0, 500));
-        throw new RuntimeException("gemini returned empty response (status {$status})");
+        log_api_error("Mistral {$model} empty response status {$status}; body: " . substr(json_encode($decoded), 0, 500));
+        throw new RuntimeException("mistral returned empty response (status {$status})");
     }
-    return ['text' => $text, 'raw' => $decoded, 'model_used' => $model];
+    return [
+        'text' => is_array($text) ? implode("\n", $text) : $text,
+        'raw' => $decoded,
+        'model_used' => $decoded['model'] ?? $model,
+    ];
 }
 
-function call_gemini(string $apiKey, string $prompt, float $temperature = 0.4, int $maxTokens = 512, string $model = 'gemini-1.5-flash'): array
+function call_mistral(string $apiKey, string $prompt, float $temperature = 0.3, ?int $maxTokens = null, string $model = 'mistral-small-latest'): array
 {
     $fallbacks = [
-        'gemini-2.5-flash' => ['gemini-2.5-pro', 'gemini-flash-latest', 'gemini-pro-latest'],
-        'gemini-2.5-pro' => ['gemini-2.5-flash', 'gemini-pro-latest', 'gemini-flash-latest'],
-        'gemini-flash-latest' => ['gemini-pro-latest', 'gemini-2.5-flash'],
-        'gemini-pro-latest' => ['gemini-2.5-pro', 'gemini-2.5-flash'],
-        'gemini-2.0-flash' => ['gemini-2.5-flash', 'gemini-flash-latest'],
-        'gemini-2.0-flash-001' => ['gemini-2.5-flash', 'gemini-flash-latest'],
-        'gemini-2.0-flash-lite' => ['gemini-2.5-flash', 'gemini-flash-latest'],
+        'mistral-small-latest' => ['mistral-medium-latest', 'mistral-large-latest'],
+        'mistral-medium-latest' => ['mistral-small-latest', 'mistral-large-latest'],
+        'mistral-large-latest' => ['mistral-medium-latest', 'mistral-small-latest'],
     ];
     $sequence = array_unique(array_merge([$model], $fallbacks[$model] ?? []));
     $errors = [];
     foreach ($sequence as $candidate) {
         try {
-            return call_gemini_single($apiKey, $prompt, $temperature, $maxTokens, $candidate);
+            return call_mistral_single($apiKey, $prompt, $temperature, $maxTokens, $candidate);
         } catch (RuntimeException $e) {
             $errors[] = $candidate . ": " . $e->getMessage();
         }
@@ -604,7 +588,7 @@ function compose_fallback_reply(?array $diary, ?array $pain, string $reason): st
     return implode("\n", array_filter($parts));
 }
 
-// Gemini API key: GET status, PUT/POST save, DELETE clear
+// Mistral API key: GET status, PUT/POST save, DELETE clear
 if (preg_match('#/api(?:/files)?/ai-key/?$#', $rawUri)) {
     require_auth();
     $userId = $_SESSION['user_id'];
@@ -660,31 +644,26 @@ if (preg_match('#/api(?:/files)?/chat/?$#', $rawUri)) {
     if ($message === '') {
         respond(400, ['error' => 'message required']);
     }
-    $tokenGuard = enforce_chat_limits(2, 450000);
-    // Load Gemini key
+    enforce_chat_limits(2, null);
+    // Load Mistral key (stored in gemini_key column for compatibility)
     $stmt = $mysqli->prepare("SELECT gemini_key FROM {$USER_SETTINGS_TABLE} WHERE user_id=? LIMIT 1");
     $stmt->bind_param("i", $_SESSION['user_id']);
     $stmt->execute();
     $stmt->bind_result($apiKey);
     if (!$stmt->fetch() || !$apiKey) {
         $stmt->close();
-        respond(400, ['error' => 'no gemini key saved']);
+        respond(400, ['error' => 'no mistral key saved']);
     }
     $stmt->close();
 
-    $model = isset($body['model']) && is_string($body['model']) ? trim($body['model']) : 'gemini-2.5-flash';
+    $model = isset($body['model']) && is_string($body['model']) ? trim($body['model']) : 'mistral-small-latest';
     $allowedModels = [
-        'gemini-2.5-flash',
-        'gemini-2.5-pro',
-        'gemini-flash-latest',
-        'gemini-pro-latest',
-        'gemini-2.0-flash',
-        'gemini-2.0-flash-001',
-        'gemini-2.0-flash-lite',
-        'gemini-pro',
+        'mistral-small-latest',
+        'mistral-medium-latest',
+        'mistral-large-latest',
     ];
     if (!in_array($model, $allowedModels, true)) {
-        $model = 'gemini-2.5-flash';
+        $model = 'mistral-small-latest';
     }
 
     $range = isset($body['range']) && is_string($body['range']) ? trim($body['range']) : 'all';
@@ -703,19 +682,15 @@ if (preg_match('#/api(?:/files)?/chat/?$#', $rawUri)) {
     if ($ctxPain) $ctxParts[] = $ctxPain;
     $context = $ctxParts ? implode("\n\n", $ctxParts) : "No diary or pain logs available.";
 
-    $maxOutputTokens = 8192;
+    $maxOutputTokens = null; // let Mistral decide output length
 
-    $prompt = "You are an assistant for the myHealth diary and pain tracker.\n"
-        . "Use only the provided context to answer. If the context is missing information, say you do not know.\n"
-        . "Be concise and actionable.\n\n"
+    $prompt = "Use only the provided diary and pain context to answer. If the context is missing information, say you do not know.\n"
+        . "Be concise, actionable, and avoid speculation.\n"
         . "Context:\n{$context}\n\n"
         . "User question:\n{$message}\n\n"
         . "Answer with bullet points or short paragraphs. Cite specifics from the context when possible.";
-    $approxTokens = (int)ceil(strlen($prompt) / 4) + $maxOutputTokens + 2000; // headroom for model "thought" tokens
-    $tokenGuard($approxTokens);
-
     try {
-        $llm = call_gemini($apiKey, $prompt, 0.4, $maxOutputTokens, $model);
+        $llm = call_mistral($apiKey, $prompt, 0.25, $maxOutputTokens, $model);
         $reply = $llm['text'] ?? 'No answer returned.';
         respond(200, [
             'reply' => $reply,

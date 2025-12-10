@@ -603,13 +603,58 @@ tbody tr:hover {
 .stacked-fields {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 14px;
+}
+
+.group-box {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card-strong);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    width: min(100%, 840px);
+    align-self: flex-start;
+}
+
+.import-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.import-label {
+    min-width: 60px;
+    font-size: 13px;
+}
+
+.hint-inline {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.danger-zone {
+    margin-top: 28px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.stacked-fields button {
+    width: auto;
+    align-self: flex-start;
 }
 
 .field-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.inline-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
 }
 
 .field-group label {
@@ -735,13 +780,7 @@ tbody tr:hover {
     font-size: 12px;
 }
 
-.chat-range .quick-btn.active {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px rgba(255, 94, 138, 0.3);
-    color: var(--accent);
-    background: rgba(255, 94, 138, 0.2);
-    font-weight: 800;
-}
+
 
 @keyframes spin {
     to {
@@ -1131,6 +1170,7 @@ canvas {
     background: var(--card);
     color: var(--text);
     font-size: 12px;
+    font-weight: 700;
     cursor: pointer;
     transition: border-color 0.2s ease, background 0.2s ease;
 }
@@ -1142,8 +1182,8 @@ canvas {
 
 .quick-btn.active {
     border-color: var(--accent);
-    background: rgba(255, 94, 138, 0.2);
-    color: var(--text);
+    box-shadow: 0 0 0 1px rgba(255, 94, 138, 0.3), var(--shadow);
+    color: var(--accent);
 }
 
 .tooltip {

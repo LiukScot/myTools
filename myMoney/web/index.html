@@ -132,7 +132,8 @@
                 <label><strong>current liquidity (quick snapshot)</strong></label>
                 <div class="flex-row-gap-8 mt-6">
                   <input type="number" step="0.01" id="quickLiquidityInput" class="flex-1" placeholder="0.00" />
-                  <button type="button" id="addTodaySnapshotButton" class="btn-primary btn-plain no-top-margin no-wrap">➕ add</button>
+                  <button type="button" id="addTodaySnapshotButton"
+                    class="btn-primary btn-plain no-top-margin no-wrap">➕ add</button>
                 </div>
               </div>
             </div>
@@ -206,7 +207,8 @@
             </div>
             <button type="submit" id="monthlySubmitButton" class="btn-primary btn-plain mt-28">💾
               save</button>
-            <button type="button" id="monthlyCancelEditButton" class="btn-accent ml-8-half" style="display:none;">↩️ cancel</button>
+            <button type="button" id="monthlyCancelEditButton" class="btn-accent ml-8-half" style="display:none;">↩️
+              cancel</button>
           </form>
           <p class="small-text mt-14">
             monthly movements <strong>do not affect</strong> the total invested: they are only a monthly income/expense
@@ -293,7 +295,8 @@
 
             <button type="submit" id="txSubmitButton" class="btn-primary btn-plain mt-28">💾
               save</button>
-            <button type="button" id="txCancelEditButton" class="btn-accent ml-8-half" style="display:none;">↩️ cancel</button>
+            <button type="button" id="txCancelEditButton" class="btn-accent ml-8-half" style="display:none;">↩️
+              cancel</button>
           </form>
         </div>
 
@@ -327,33 +330,28 @@
           <h2>Import / Backup</h2>
           <div class="hint">easily import or export your data</div>
 
-          <div class="stacked-fields stacked-gap-14">
-            <!-- JSON area -->
-            <div class="field-group">
-              <label><strong>Import from JSON</strong></label><br>
-              <input type="file" id="importBackupInput" accept=".json" />
-            </div>
-            <div class="field-group">
-              <button id="exportBackupButton" class="btn-primary btn-plain">Export JSON</button>
-            </div>
-
-            <div class="section-divider"></div>
-
-            <!-- XLSX area -->
-            <div class="field-group">
-              <label><strong>Import from XLSX</strong> (sheets: <code>rawTransactions</code>, <code>movements</code>,
-                <code>monthlySnapshots</code>)</label><br>
-              <input type="file" id="fileInput" accept=".xlsx,.xls" />
-            </div>
-            <div class="field-group">
-              <button id="exportXlsxButton" class="btn-primary btn-plain">Export XLSX</button>
+          <div class="stacked-fields">
+            <!-- JSON import/export -->
+            <div class="field-group group-box">
+              <label><strong>Import from JSON</strong></label>
+              <div class="inline-row">
+                <input type="file" id="importBackupInput" accept=".json" />
+                <button class="nav-btn" id="exportBackupButton">Export JSON</button>
+              </div>
             </div>
 
-            <div class="section-divider"></div>
+            <!-- XLSX import/export -->
+            <div class="field-group group-box">
+              <label><strong>Import from XLSX</strong> <span class="hint-inline">(sheets: <code>rawTransactions</code>,
+                  <code>movements</code>, <code>monthlySnapshots</code>)</span></label>
+              <div class="inline-row">
+                <input type="file" id="fileInput" accept=".xlsx,.xls" />
+                <button class="nav-btn" id="exportXlsxButton">Export XLSX</button>
+              </div>
+            </div>
 
-            <!-- Purge -->
-            <div class="field-group">
-              <button id="fullPurgeButton" class="btn-danger">🧨 delete all data</button>
+            <div class="danger-zone">
+              <button class="nav-btn danger" id="fullPurgeButton">🧨 delete all data</button>
             </div>
           </div>
         </div>
@@ -361,7 +359,7 @@
     </div>
   </div>
 
-    <script type="module" src="/mymoney/js/app.js"></script>
+  <script type="module" src="/mymoney/js/app.js"></script>
 
 </body>
 

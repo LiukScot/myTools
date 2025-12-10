@@ -263,13 +263,13 @@
       <section id="chatbot-section" class="hidden">
         <div class="card">
           <h2>Chatbot</h2>
-          <div class="hint">Ask the assistant about your diary and pain logs. Configure your Gemini key in
+          <div class="hint">Ask the assistant about your diary and pain logs. Configure your Mistral key in
             Settings.</div>
 
           <div class="stacked-fields" style="gap: 15px;">
             <div class="field-group">
               <label for="chatbot-prompt"><strong>Message</strong></label>
-              <div class="hint" id="chatbot-helper">Save a Gemini key in Settings to enable sending.</div>
+              <div class="hint" id="chatbot-helper">Save a Mistral key in Settings to enable sending.</div>
               <div class="chat-range" aria-label="Chat context range">
                 <span class="sub-label">How many days should the model read?</span>
                 <div class="quick-filters">
@@ -281,7 +281,7 @@
               </div>
               <div class="chat-input-row constrained">
                 <textarea id="chatbot-prompt" class="inline-input multiline" rows="3"
-                  placeholder="Ask about your trends, e.g. \"Summarize my pain this week\""></textarea>
+                  placeholder="Ask about your trends, e.g. \" Summarize my pain this week\""></textarea>
                 <button class="btn-primary btn-plain" id="chatbot-send-btn" type="button" disabled>Send</button>
               </div>
               <div class="status" id="chatbot-status"></div>
@@ -305,58 +305,59 @@
           <h2>Settings</h2>
           <div class="hint">Import/export your data and manage the chatbot connection.</div>
 
-          <div class="stacked-fields" style="gap: 15px;">
-            <div class="field-group">
-              <label><strong>Import from JSON</strong></label><br>
-              <input type="file" id="import-backup-input" accept=".json" />
-            </div>
-            <div class="field-group">
-              <button class="btn-primary btn-plain" id="export-backup-button">Export JSON</button>
-            </div>
-
-            <div class="section-divider"></div>
-
-            <div class="field-group">
-              <label><strong>Import from XLSX</strong> (sheets: <code>diary</code>, <code>pain</code>)</label><br>
-              <input type="file" id="import-xlsx-input" accept=".xlsx,.xls" />
-            </div>
-            <div class="field-group">
-              <button class="btn-primary btn-plain" id="export-xlsx-button">Export XLSX</button>
+          <div class="stacked-fields">
+            <!-- JSON import/export -->
+            <div class="field-group group-box">
+              <label><strong>Import from JSON</strong></label>
+              <div class="inline-row">
+                <input type="file" id="import-backup-input" accept=".json" />
+                <button class="nav-btn" id="export-backup-button">Export JSON</button>
+              </div>
             </div>
 
-            <div class="section-divider"></div>
-
-            <div class="field-group">
-              <button class="nav-btn danger" id="full-purge-button">🧨 delete all data</button>
+            <!-- XLSX import/export -->
+            <div class="field-group group-box">
+              <label><strong>Import from XLSX</strong> <span class="hint-inline">(sheets: <code>diary</code>,
+                  <code>pain</code>)</span></label>
+              <div class="inline-row">
+                <input type="file" id="import-xlsx-input" accept=".xlsx,.xls" />
+                <button class="nav-btn" id="export-xlsx-button">Export XLSX</button>
+              </div>
             </div>
 
             <div class="section-divider"></div>
 
-            <div class="field-group">
-              <label for="gemini-api-key"><strong>Google Gemini API key</strong></label>
-              <div class="hint" id="gemini-key-helper">Key is stored server-side for your account and never shown back.
+            <h3>Chatbot</h3>
+
+            <div class="field-group group-box">
+              <label for="mistral-api-key"><strong>Mistral API key</strong></label>
+              <div class="hint" id="mistral-key-helper">Key is stored server-side for your account and never shown back.
+                Only the chat prompt and selected log context are sent to Mistral (EU-based) when you ask a question.
               </div>
               <div class="settings-inline">
-                <input class="inline-input long" type="password" id="gemini-api-key"
-                  placeholder="Paste your Gemini API key" autocomplete="off" />
-                <button class="btn-primary btn-plain" id="save-gemini-key" type="button">Save key</button>
-                <button class="nav-btn" id="clear-gemini-key" type="button">Clear</button>
+                <input class="inline-input long" type="password" id="mistral-api-key"
+                  placeholder="Paste your Mistral API key" autocomplete="off" />
+                <button class="nav-btn" id="save-mistral-key" type="button">Save key</button>
+                <button class="nav-btn" id="clear-mistral-key" type="button">Clear</button>
               </div>
-              <div class="status" id="gemini-key-status"></div>
+              <div class="status" id="mistral-key-status"></div>
             </div>
 
-            <div class="field-group">
-              <label for="gemini-model"><strong>Gemini model</strong></label>
-              <div class="hint">Choose between speed (Flash) and quality (Pro). Flash is recommended for quick chats.
+            <div class="field-group group-box">
+              <label for="mistral-model"><strong>Mistral model</strong></label>
+              <div class="hint">Pick a balance of speed, cost, and quality. Small is the fastest default; Large gives the most detail.
               </div>
               <div class="settings-inline">
-                <select class="inline-input long" id="gemini-model">
-                  <option value="gemini-2.5-flash" selected>gemini-2.5-flash (fast)</option>
-                  <option value="gemini-2.5-pro">gemini-2.5-pro (higher quality)</option>
-                  <option value="gemini-flash-latest">gemini-flash-latest</option>
-                  <option value="gemini-pro-latest">gemini-pro-latest</option>
+                <select class="inline-input long" id="mistral-model">
+                  <option value="mistral-small-latest" selected>mistral-small-latest (fast, default)</option>
+                  <option value="mistral-medium-latest">mistral-medium-latest (balanced)</option>
+                  <option value="mistral-large-latest">mistral-large-latest (highest quality)</option>
                 </select>
               </div>
+            </div>
+
+            <div class="danger-zone">
+              <button class="nav-btn danger" id="full-purge-button">🧨 delete all data</button>
             </div>
           </div>
         </div>
