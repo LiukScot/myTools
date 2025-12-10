@@ -27,3 +27,4 @@ Personal site stack for `liukscot.com`, housing multiple sub-apps.
 ## Notes
 - Both apps share the same DB and FTP credentials; `.env` at repo root is the single source for local dev.
 - Legacy per-app run scripts now delegate to the unified runner for convenience.
+- Shared styling: both apps import `shared/base.css` (includes Open Props via CDN) and override accent colors in their own `style.css`. If CSS looks missing, ensure the web server exposes `shared/` so the `@import "../../shared/base.css";` in `myhealth/web/style.css` and `mymoney/web/style.css` can load. Keep new UI pieces aligned by adding tokens/components to `shared/base.css` first, then app-specific tweaks afterwards.

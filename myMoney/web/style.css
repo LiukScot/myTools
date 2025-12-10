@@ -1,3 +1,5 @@
+@import "../../shared/base.css";
+
 :root {
   --bg: #000000;
   --panel: #0b0b0d;
@@ -10,6 +12,8 @@
   --border: #35353b;
   --danger: #f97373;
   --shadow: 0 20px 55px rgba(0, 0, 0, 0.5);
+  --bg-spot-1: rgba(123, 230, 166, 0.10);
+  --bg-spot-2: rgba(111, 143, 194, 0.08);
 }
 
 * {
