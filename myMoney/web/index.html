@@ -152,8 +152,8 @@
           </div>
 
           <p class="small-text mb-16">
-            add a new chart column dated today using the last snapshot’s low/medium/high and the liquidity you enter
-            here.
+            add a new chart column dated today using your current assets (grouped by their risk tags) and the liquidity
+            you enter here.
           </p>
 
           <div id="monthlySummary" class="small-text">
@@ -161,6 +161,27 @@
           </div>
           <div class="monthly-chart-box">
             <canvas id="monthlyRiskChart" height="200"></canvas>
+          </div>
+
+          <div class="divider mt-20 mb-12"></div>
+          <h3 class="mt-0"><strong>Snapshots</strong></h3>
+          <div class="list-wrap">
+            <div class="table-scroll">
+              <table id="monthlySnapshotsTable">
+                <thead>
+                  <tr>
+                    <th>date</th>
+                    <th>low</th>
+                    <th>medium</th>
+                    <th>high</th>
+                    <th>liquid</th>
+                    <th>total</th>
+                    <th>actions</th>
+                  </tr>
+                </thead>
+                <tbody id="monthlySnapshotsTableBody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>

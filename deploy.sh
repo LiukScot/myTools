@@ -7,6 +7,7 @@
 #   REMOTE_HUB=/public_html
 #   REMOTE_HEALTH=/public_html/myhealth
 #   REMOTE_MONEY=/public_html/mymoney
+#   REMOTE_SHARED=/public_html/shared
 
 set -euo pipefail
 
@@ -21,11 +22,13 @@ BASE_REMOTE="${BASE_REMOTE:-/public_html}"
 REMOTE_HUB="${REMOTE_HUB:-${BASE_REMOTE}}"
 REMOTE_HEALTH="${REMOTE_HEALTH:-${BASE_REMOTE}/myhealth}"
 REMOTE_MONEY="${REMOTE_MONEY:-${BASE_REMOTE}/mymoney}"
+REMOTE_SHARED="${REMOTE_SHARED:-${BASE_REMOTE}/shared}"
 
 TARGETS=(
   "$ROOT_DIR/hub:${REMOTE_HUB}"
   "$ROOT_DIR/myHealth/web:${REMOTE_HEALTH}"
   "$ROOT_DIR/myMoney/web:${REMOTE_MONEY}"
+  "$ROOT_DIR/shared:${REMOTE_SHARED}"
 )
 
 FTP_HOST="${FTP_HOST:-}"

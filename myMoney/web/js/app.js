@@ -5,7 +5,8 @@ import {
   formatCurrencyWithColor,
   formatPercentWithColor,
   randomColor,
-  normalizeColor
+  normalizeColor,
+  parseNumberInput
 } from './utils.js';
 
 const primaryStorageKey = 'investments_state_v2';
@@ -556,6 +557,17 @@ function wireAuthForm() {
       return { byAsset, labels, data, totalCurrent };
     }
 
+    function calculateRiskTotalsFromAssets() {
+      const { byAsset } = getAssetAggregation();
+      const totals = { low: 0, medium: 0, high: 0, liquid: 0 };
+      Object.entries(byAsset).forEach(([asset, stats]) => {
+        const rawRisk = assetRiskMap[asset] || 'low';
+        const risk = ['low', 'medium', 'high', 'liquid'].includes(rawRisk) ? rawRisk : 'low';
+        totals[risk] += stats.current || 0;
+      });
+      return { totals, hasAssets: Object.keys(byAsset).length > 0 };
+    }
+
     // ---------- BLOCCHETTI + GRAFICI ----------
     function cycleAssetRisk(asset) {
       const current = assetRiskMap[asset] || 'low'; // Default to 'low' if not set
@@ -743,6 +755,16 @@ function wireAuthForm() {
     }
 
     // ---------- MONTHLY REVIEW ----------
+    function deleteSnapshot(id) {
+      const snap = monthlySnapshots.find(s => s.id === id);
+      if (!snap) return;
+      const label = snap.date || 'this snapshot';
+      if (!confirm(`Delete snapshot ${label}?`)) return;
+      monthlySnapshots = monthlySnapshots.filter(s => s.id !== id);
+      saveState();
+      renderMonthlyReview();
+    }
+
     function renderMonthlyReview(range = 'all') {
 
       let filtered = [...monthlySnapshots];
@@ -803,6 +825,35 @@ function wireAuthForm() {
           }
         }
       });
+
+      const tbody = document.getElementById('monthlySnapshotsTableBody');
+      if (tbody) {
+        const sorted = [...filtered].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+        if (!sorted.length) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:12px 0; color:var(--muted);">no snapshots for this range</td></tr>`;
+        } else {
+          tbody.innerHTML = sorted.map(s => {
+            const total = (s.low || 0) + (s.medium || 0) + (s.high || 0) + (s.liquid || 0);
+            return `
+              <tr>
+                <td>${escapeHtml(s.date || '')}</td>
+                <td>${formatCurrency(s.low)}</td>
+                <td>${formatCurrency(s.medium)}</td>
+                <td>${formatCurrency(s.high)}</td>
+                <td>${formatCurrency(s.liquid)}</td>
+                <td>${formatCurrency(total)}</td>
+                <td>
+                  <button class="nav-btn danger small delete-snapshot" data-id="${s.id}">🗑️ delete</button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+        tbody.querySelectorAll('.delete-snapshot').forEach(btn => {
+          btn.addEventListener('click', () => deleteSnapshot(btn.dataset.id));
+        });
+      }
     }
 
     function inferTypeFromValues(buyValue, pnl) {
@@ -1113,19 +1164,25 @@ function wireAuthForm() {
       if (quickLiquidityInput && addTodaySnapshotButton) {
         addTodaySnapshotButton.addEventListener('click', () => {
           const raw = quickLiquidityInput.value;
-          if (!raw) {
+          if (raw === null || raw === undefined || String(raw).trim() === '') {
             alert('Enter a liquidity value');
             return;
           }
-          const liquid = parseFloat(raw);
-          if (Number.isNaN(liquid)) {
+          const inputLiquid = parseNumberInput(raw);
+          if (inputLiquid === null) {
             alert('Invalid liquidity value');
             return;
           }
           const today = new Date().toISOString().slice(0, 10);
 
-          let baseLow = 0, baseMedium = 0, baseHigh = 0;
-          if (monthlySnapshots.length) {
+          const { totals, hasAssets } = calculateRiskTotalsFromAssets();
+          let baseLow = totals.low || 0;
+          let baseMedium = totals.medium || 0;
+          let baseHigh = totals.high || 0;
+          let baseLiquid = totals.liquid || 0;
+
+          // If there are no assets yet, fall back to the last snapshot to avoid losing data.
+          if (!hasAssets && monthlySnapshots.length) {
             const sorted = [...monthlySnapshots].sort((a, b) =>
               (a.date || '').localeCompare(b.date || '')
             );
@@ -1133,6 +1190,7 @@ function wireAuthForm() {
             baseLow = last.low || 0;
             baseMedium = last.medium || 0;
             baseHigh = last.high || 0;
+            baseLiquid = last.liquid || 0;
           }
 
           monthlySnapshots = monthlySnapshots.filter(s => s.date !== today);
@@ -1142,7 +1200,7 @@ function wireAuthForm() {
             low: baseLow,
             medium: baseMedium,
             high: baseHigh,
-            liquid
+            liquid: baseLiquid + inputLiquid
           });
 
           saveState();

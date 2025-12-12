@@ -55,3 +55,29 @@ export function normalizeColor(color) {
   }
   return '#7be6a6';
 }
+
+// Parse user-entered numbers in both EU (29.526,19) and US (29,526.19) formats.
+export function parseNumberInput(raw) {
+  const str = raw?.toString().trim();
+  if (!str) return null;
+  const cleaned = str.replace(/\s+/g, '');
+  const commaPos = cleaned.lastIndexOf(',');
+  const dotPos = cleaned.lastIndexOf('.');
+
+  let normalized = cleaned;
+  if (commaPos !== -1 && dotPos !== -1) {
+    // Both separators are present: whichever comes last is the decimal separator.
+    normalized = commaPos > dotPos
+      ? cleaned.replace(/\./g, '').replace(',', '.')
+      : cleaned.replace(/,/g, '');
+  } else if (commaPos !== -1) {
+    normalized = cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (dotPos !== -1) {
+    const parts = cleaned.split('.');
+    const looksLikeThousands = parts.length > 1 && parts[parts.length - 1].length === 3;
+    normalized = looksLikeThousands ? cleaned.replace(/\./g, '') : cleaned;
+  }
+
+  const num = Number(normalized);
+  return Number.isFinite(num) ? num : null;
+}
