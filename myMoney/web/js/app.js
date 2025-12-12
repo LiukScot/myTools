@@ -791,9 +791,38 @@ function wireAuthForm() {
           : 'loaded from <code>monthlySnapshots</code> (xlsx) – no data yet.';
       }
 
+      const tbody = document.getElementById('monthlySnapshotsTableBody');
+      if (tbody) {
+        const sorted = [...filtered].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+        if (!sorted.length) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:12px 0; color:var(--muted);">no snapshots for this range</td></tr>`;
+        } else {
+          tbody.innerHTML = sorted.map(s => {
+            const total = (s.low || 0) + (s.medium || 0) + (s.high || 0) + (s.liquid || 0);
+            return `
+              <tr>
+                <td>${escapeHtml(s.date || '')}</td>
+                <td>${formatCurrency(s.low)}</td>
+                <td>${formatCurrency(s.medium)}</td>
+                <td>${formatCurrency(s.high)}</td>
+                <td>${formatCurrency(s.liquid)}</td>
+                <td>${formatCurrency(total)}</td>
+                <td>
+                  <button class="nav-btn danger small delete-snapshot" data-id="${s.id}">🗑️ delete</button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+        tbody.querySelectorAll('.delete-snapshot').forEach(btn => {
+          btn.addEventListener('click', () => deleteSnapshot(btn.dataset.id));
+        });
+      }
+
       const ctx = document.getElementById('monthlyRiskChart');
-      if (!ctx) return;
       if (monthlyRiskChart) monthlyRiskChart.destroy();
+      if (!ctx) return;
 
       const labels = filtered.map(s => s.date || '');
       const lowData = filtered.map(s => s.low || 0);
