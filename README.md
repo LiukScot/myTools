@@ -11,6 +11,14 @@ Personal site stack for `liukscot.com`, housing multiple sub-apps.
 - Keep frontend JS in small modules instead of inline `<script>` tags. Each app now loads a top-level module (`/myhealth/js/app.js`, `/mymoney/js/app.js`) plus helper modules (e.g. `api.js`, `utils.js`). Add new helpers there rather than growing a single file.
 - Prefer separating concerns: API/fetch helpers, state/load/save, and UI wiring/rendering should live in distinct modules to ease debugging and testing.
 - Keep sensitive artifacts (sessions, .env) out of the webroot and under `.gitignore` (already configured).
+- CSS naming/scoping: each app is namespaced via `body.mh-app` (myHealth) and `body.mm-app` (myMoney); prefer scoping selectors under those roots and using prefixed BEM-style class names (`mh-card__title`, `mm-nav__button--active`). Avoid bare element selectors; legacy global buttons/nav/quick styles have been removed.
+- New BEM-style helpers: myHealth nav/auth/filters now expose `mh-nav__*`, `mh-entry-*`, `mh-quick-*`, `mh-auth__*`; myMoney nav/auth has `mm-nav__*`, `mm-auth__*`. Use these instead of generic `.quick-btn`/`.auth-row` (no longer present).
+- myHealth buttons use namespaced helpers (`mh-btn-primary`, `mh-btn-muted`, `mh-btn-plain`); avoid legacy `.btn-*`.
+- myMoney buttons use namespaced helpers (`mm-btn-primary`, `mm-btn-plain`, `mm-btn-accent`); legacy `.btn-*` styles are removed.
+- Tables: myMoney tables now have `mm-table` and scroll wrappers `mm-table-scroll`; prefer targeting these over bare `table`/`.table-scroll` when adjusting styles.
+- myMoney quick filters/buttons now have namespaced helpers (`mm-quick-filters`, `mm-quick-btn`) and primary/accent buttons (`mm-btn-primary`, `mm-btn-accent`) on all save/cancel actions.
+- Status/hint: both apps now expose `mh-status`/`mm-status` and `mh-hint`/`mm-hint`; use these instead of styling `.status`/`.hint` directly.
+- Forms/layout: myMoney forms use `mm-form-grid`, `mm-form-card`, `mm-field-group`, `mm-inline-row`, `mm-stacked-fields`, `mm-group-box`; myHealth forms use `mh-field-group`, `mh-group-box`, `mh-inline-row`, `mh-stacked-fields`. Keep legacy classes for JS hooks until you update selectors.
 
 ## Local dev (one runner)
 - Put DB creds in the repo root `.env` (DB_HOST, DB_USER, DB_PASS, DB_NAME).

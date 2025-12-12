@@ -808,7 +808,7 @@ function wireAuthForm() {
                 <td>${formatCurrency(s.liquid)}</td>
                 <td>${formatCurrency(total)}</td>
                 <td>
-                  <button class="nav-btn danger small delete-snapshot" data-id="${s.id}">🗑️ delete</button>
+                  <button class="mm-nav__btn danger small delete-snapshot" data-id="${s.id}">🗑️ delete</button>
                 </td>
               </tr>
             `;
@@ -854,35 +854,6 @@ function wireAuthForm() {
           }
         }
       });
-
-      const tbody = document.getElementById('monthlySnapshotsTableBody');
-      if (tbody) {
-        const sorted = [...filtered].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-        if (!sorted.length) {
-          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:12px 0; color:var(--muted);">no snapshots for this range</td></tr>`;
-        } else {
-          tbody.innerHTML = sorted.map(s => {
-            const total = (s.low || 0) + (s.medium || 0) + (s.high || 0) + (s.liquid || 0);
-            return `
-              <tr>
-                <td>${escapeHtml(s.date || '')}</td>
-                <td>${formatCurrency(s.low)}</td>
-                <td>${formatCurrency(s.medium)}</td>
-                <td>${formatCurrency(s.high)}</td>
-                <td>${formatCurrency(s.liquid)}</td>
-                <td>${formatCurrency(total)}</td>
-                <td>
-                  <button class="nav-btn danger small delete-snapshot" data-id="${s.id}">🗑️ delete</button>
-                </td>
-              </tr>
-            `;
-          }).join('');
-        }
-
-        tbody.querySelectorAll('.delete-snapshot').forEach(btn => {
-          btn.addEventListener('click', () => deleteSnapshot(btn.dataset.id));
-        });
-      }
     }
 
     function inferTypeFromValues(buyValue, pnl) {
@@ -1396,9 +1367,9 @@ function wireAuthForm() {
         renderEverything();
       });
 
-      document.querySelectorAll('.quick-btn').forEach(btn => {
+      document.querySelectorAll('.mm-quick-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.mm-quick-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           renderMonthlyReview(btn.dataset.range);
         });
@@ -1449,7 +1420,7 @@ function wireAuthForm() {
     }
 
     function wireNav() {
-      const buttons = document.querySelectorAll(".nav-btn[data-page]");
+      const buttons = document.querySelectorAll(".mm-nav__btn[data-page]");
       const pages = document.querySelectorAll(".page");
 
       function setActive(pageId) {
@@ -1471,7 +1442,7 @@ function wireAuthForm() {
       });
 
       // Default active
-      const current = document.querySelector(".nav-btn.active");
+      const current = document.querySelector(".mm-nav__btn.active");
       if (current) setActive(current.dataset.page);
     }
 

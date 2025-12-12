@@ -867,10 +867,10 @@ function renderTable(kind, headers, rows, withActions = false, limit = null) {
                 ` : ""}
                 ${isLogView ? `
                 <div class="log-card-actions">
-                  <button class="nav-btn small" data-edit-row="${originalIdx}" data-kind="${kind}" title="Edit">
+                  <button class="mh-nav__btn small" data-edit-row="${originalIdx}" data-kind="${kind}" title="Edit">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   </button>
-                  <button class="nav-btn danger small" data-delete-row="${originalIdx}" data-kind="${kind}" title="Delete">
+                  <button class="mh-nav__btn danger small" data-delete-row="${originalIdx}" data-kind="${kind}" title="Delete">
                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                   </button>
                 </div>
@@ -1719,7 +1719,7 @@ async function persist(kind, parsed, sourceName) {
 }
 
 function wireEntryTabs() {
-  const buttons = document.querySelectorAll(".entry-btn");
+      const buttons = document.querySelectorAll(".mh-entry-btn");
   const panels = document.querySelectorAll("[data-entry-panel]");
   const autotherapyTab = document.getElementById("autotherapy-tab");
   const setAutotherapyLabel = (key) => {
@@ -1737,7 +1737,9 @@ function wireEntryTabs() {
     btn.addEventListener("click", () => setActive(btn.dataset.entry));
   });
   if (buttons.length) {
-    const current = document.querySelector(".entry-btn.active")?.dataset.entry || buttons[0].dataset.entry;
+        const current =
+          document.querySelector(".mh-entry-btn.active")?.dataset.entry
+          || buttons[0].dataset.entry;
     setActive(current);
   }
   entryTabSetter = setActive;
@@ -2074,7 +2076,7 @@ function wireChatbot() {
 }
 
 function wireNav() {
-  const buttons = document.querySelectorAll(".nav-btn[data-target]");
+      const buttons = document.querySelectorAll(".mh-nav__btn[data-target]");
   const sections = {
     dashboard: document.getElementById("dashboard-section"),
     newlog: document.getElementById("newlog-section"),
@@ -2091,8 +2093,8 @@ function wireNav() {
         }
       });
       if (target === "newlog" && entryTabSetter) {
-        const current = document.querySelector(".entry-btn.active")?.dataset.entry
-          || document.querySelector(".entry-btn")?.dataset.entry;
+        const current = document.querySelector(".mh-entry-btn.active")?.dataset.entry
+          || document.querySelector(".mh-entry-btn")?.dataset.entry;
         entryTabSetter(current);
       }
     });
@@ -2431,13 +2433,13 @@ function getTooltip() {
 
 function setQuickActive(btn) {
   // Only affect dashboard quick buttons, not chatbot range buttons
-  document.querySelectorAll(".quick-btn:not(.chat-range-btn)").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".mh-quick-btn:not(.chat-range-btn)").forEach(b => b.classList.remove("active"));
   if (btn) btn.classList.add("active");
 }
 
 function clearQuickActive() {
   // Only affect dashboard quick buttons, not chatbot range buttons
-  document.querySelectorAll(".quick-btn:not(.chat-range-btn)").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".mh-quick-btn:not(.chat-range-btn)").forEach(b => b.classList.remove("active"));
   localStorage.removeItem("myhealth:lastRange");
 }
 
@@ -2580,7 +2582,7 @@ function applyQuickRange(range, skipPersist = false) {
     if (toInput) toInput.value = toStr;
   }
   // Only select dashboard quick buttons, not chatbot range buttons
-  const btn = document.querySelector(`.quick-btn:not(.chat-range-btn)[data-range="${range}"]`);
+  const btn = document.querySelector(`.mh-quick-btn:not(.chat-range-btn)[data-range="${range}"]`);
   if (btn) setQuickActive(btn);
   if (!skipPersist) {
     localStorage.setItem("myhealth:lastRange", range);
@@ -2589,7 +2591,7 @@ function applyQuickRange(range, skipPersist = false) {
 }
 
 // Only add dashboard event listeners to non-chatbot quick buttons
-document.querySelectorAll(".quick-btn:not(.chat-range-btn)").forEach((btn) => {
+document.querySelectorAll(".mh-quick-btn:not(.chat-range-btn)").forEach((btn) => {
   btn.addEventListener("click", () => {
     const range = btn.dataset.range;
     applyQuickRange(range);

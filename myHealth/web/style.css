@@ -16,6 +16,171 @@
     --bg-spot-2: rgba(255, 143, 177, 0.08);
 }
 
+.mh-app * {
+    box-sizing: border-box;
+}
+
+body.mh-app {
+    margin: 0;
+    font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+        radial-gradient(140% 120% at 20% 10%, rgba(255, 94, 138, 0.14), rgba(0, 0, 0, 0)),
+        radial-gradient(120% 100% at 80% 5%, rgba(255, 143, 177, 0.08), rgba(0, 0, 0, 0)),
+        var(--bg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    color: var(--text);
+}
+
+body.mh-app .shell {
+    max-width: 1700px;
+    width: 98vw;
+    margin: 0 auto;
+    padding: 14px 60px 28px;
+}
+
+body.mh-app header {
+    margin-bottom: 14px;
+}
+
+body.mh-app .title {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+body.mh-app .heart {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    background: radial-gradient(circle at 30% 30%, #e44d75, #ff7fa6);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 14px;
+    box-shadow: 0 4px 10px rgba(228, 77, 117, 0.14);
+}
+
+body.mh-app .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+body.mh-app .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+}
+
+body.mh-app .card h1,
+body.mh-app .card h2,
+body.mh-app .card h3,
+body.mh-app .card h4 {
+    margin: 0 0 7px;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+    color: var(--accent);
+}
+
+body.mh-app .hint {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+
+body.mh-app .drop {
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: var(--card);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+}
+
+body.mh-app .drop:hover {
+    border-color: var(--accent);
+    background: rgba(255, 94, 138, 0.08);
+}
+
+body.mh-app .drop strong {
+    display: block;
+}
+
+body.mh-app .drop input {
+    display: none;
+}
+
+body.mh-app .status {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 14px;
+    min-height: 18px;
+}
+
+body.mh-app .debug-log {
+    font-size: 12px;
+    color: #f59e0b;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px;
+    margin-top: 7px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+body.mh-app .error-box {
+    font-size: 12px;
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.08);
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    border-radius: 8px;
+    padding: 7px;
+    margin-top: 7px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+body.mh-app .status .ok {
+    color: var(--accent-2);
+    font-weight: 700;
+}
+
+body.mh-app .status .err {
+    color: var(--danger);
+    font-weight: 700;
+}
+
+.mh-status {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 14px;
+    min-height: 18px;
+}
+
+.mh-status .ok {
+    color: var(--accent-2);
+    font-weight: 700;
+}
+
+.mh-status .err {
+    color: var(--danger);
+    font-weight: 700;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -91,6 +256,12 @@ header {
 }
 
 .hint {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+
+.mh-hint {
     color: var(--muted);
     font-size: 13px;
     margin-bottom: 14px;
@@ -174,12 +345,31 @@ header {
     box-sizing: border-box;
 }
 
+.mh-table-wrap {
+    margin-top: 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    width: 100%;
+    padding-right: 14px;
+    box-sizing: border-box;
+}
+
 .list-wrap {
     margin-top: 14px;
     width: 100%;
 }
 
 .table-scroll {
+    width: 100%;
+    max-width: 100%;
+    max-height: 70vh;
+    overflow: auto;
+    padding-bottom: 7px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mh-table-scroll {
     width: 100%;
     max-width: 100%;
     max-height: 70vh;
@@ -272,6 +462,32 @@ header {
 }
 
 .inline-input.multiline {
+    min-height: 64px;
+    height: auto;
+    line-height: 1.5;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    resize: vertical;
+}
+
+.mh-inline-input {
+    width: 100%;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card-strong);
+    color: var(--text);
+    box-sizing: border-box;
+    height: 40px;
+    line-height: 1.4;
+}
+
+.mh-inline-input.long {
+    min-width: 320px;
+    max-width: 520px;
+}
+
+.mh-inline-input.multiline {
     min-height: 64px;
     height: auto;
     line-height: 1.5;
@@ -374,7 +590,7 @@ tbody tr:hover {
     }
 }
 
-.top-nav {
+body.mh-app .top-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -382,7 +598,7 @@ tbody tr:hover {
     margin-bottom: 14px;
 }
 
-.top-nav nav {
+body.mh-app .top-nav nav {
     display: flex;
     gap: 14px;
     margin: 0;
@@ -390,7 +606,7 @@ tbody tr:hover {
     flex: 1 1 auto;
 }
 
-.top-actions {
+body.mh-app .top-actions {
     display: flex;
     gap: 14px;
     flex-wrap: wrap;
@@ -398,18 +614,24 @@ tbody tr:hover {
     justify-content: flex-end;
 }
 
-.entry-tabs {
+/* Scoped BEM-style helpers */
+body.mh-app .mh-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+body.mh-app .mh-nav__list {
     display: flex;
     gap: 14px;
+    margin: 0;
     flex-wrap: wrap;
-    margin: 14px 0 7px;
+    flex: 1 1 auto;
 }
 
-.entry-panel {
-    margin-top: 7px;
-}
-
-.nav-btn {
+body.mh-app .mh-nav__btn {
     padding: 7px 14px;
     border-radius: 10px;
     border: 1px solid var(--border);
@@ -424,13 +646,35 @@ tbody tr:hover {
     gap: 8px;
 }
 
-.nav-btn.danger {
+body.mh-app .mh-nav__btn .icon,
+body.mh-app .mh-nav__btn .icon * {
+    display: block;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+body.mh-app .mh-nav__btn.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(255, 94, 138, 0.3), var(--shadow);
+    color: var(--accent);
+}
+
+body.mh-app .mh-nav__btn.danger {
     border-color: rgba(244, 63, 94, 0.5);
     color: var(--danger);
     background: rgba(244, 63, 94, 0.08);
 }
 
-.hub-link {
+body.mh-app .mh-nav__btn.small {
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+body.mh-app .mh-nav__hub {
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -440,14 +684,14 @@ tbody tr:hover {
     line-height: 1.2;
 }
 
-.hub-link svg {
+body.mh-app .mh-nav__hub svg {
     stroke: currentColor;
     width: 14px;
     height: 14px;
 }
 
-.nav-btn .icon,
-.nav-btn .icon * {
+body.mh-app .mh-nav__btn .icon,
+body.mh-app .mh-nav__btn .icon * {
     display: block;
     stroke: currentColor;
     stroke-width: 1.6;
@@ -456,10 +700,153 @@ tbody tr:hover {
     fill: none;
 }
 
-.nav-btn.active {
+body.mh-app .mh-entry-tabs {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 14px 0 7px;
+}
+
+body.mh-app .mh-entry-btn {
+    padding: 7px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.01em;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.mh-app .mh-entry-btn.active,
+body.mh-app .mh-entry-btn.quick-active {
     border-color: var(--accent);
     box-shadow: 0 0 0 1px rgba(255, 94, 138, 0.3), var(--shadow);
     color: var(--accent);
+}
+
+body.mh-app .mh-quick-filters {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+body.mh-app .mh-quick-btn {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+body.mh-app .mh-quick-btn:hover {
+    border-color: var(--accent);
+    background: rgba(255, 94, 138, 0.1);
+}
+
+body.mh-app .mh-quick-btn.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(255, 94, 138, 0.3), var(--shadow);
+    color: var(--accent);
+}
+
+body.mh-app .mh-auth {
+    margin: 14px 0 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+body.mh-app .mh-auth__row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+body.mh-app .mh-auth__input {
+    background: var(--card-strong);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 7px 14px;
+    font-size: 14px;
+    outline: none;
+    min-width: 220px;
+    flex: 1;
+}
+
+body.mh-app .mh-auth__input:focus {
+    border-color: var(--accent);
+    background: rgba(255, 94, 138, 0.08);
+}
+
+body.mh-app .mh-auth__status {
+    font-size: 13px;
+    color: var(--muted);
+    min-height: 18px;
+}
+
+body.mh-app .mh-toast {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    min-width: 260px;
+    max-width: 360px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 999;
+}
+
+body.mh-app .mh-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+body.mh-app .mh-toast.success {
+    border-color: rgba(34, 197, 94, 0.5);
+}
+
+body.mh-app .mh-toast.error {
+    border-color: rgba(244, 63, 94, 0.5);
+}
+
+.entry-tabs {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 14px 0 7px;
+}
+
+.entry-panel {
+    margin-top: 7px;
+}
+
+body.mh-app .mh-entry-tabs {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 14px 0 7px;
+}
+
+body.mh-app .mh-entry-panel {
+    margin-top: 7px;
 }
 
 .auth-card {
@@ -489,6 +876,45 @@ tbody tr:hover {
 }
 
 .auth-row input:focus {
+    border-color: var(--accent);
+    background: rgba(255, 94, 138, 0.08);
+}
+
+body.mh-app .mh-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+}
+
+body.mh-app .mh-card__title {
+    margin: 0 0 7px;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+    color: var(--accent);
+}
+
+body.mh-app .mh-auth-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+body.mh-app .mh-auth-input {
+    background: var(--card-strong);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 7px 14px;
+    font-size: 14px;
+    outline: none;
+    min-width: 220px;
+    flex: 1;
+}
+
+body.mh-app .mh-auth-input:focus {
     border-color: var(--accent);
     background: rgba(255, 94, 138, 0.08);
 }
@@ -627,7 +1053,23 @@ tbody tr:hover {
     gap: 10px;
 }
 
+body.mh-app .mh-stacked-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .group-box {
+    padding: 12px 12px 10px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card-strong);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    width: 100%;
+    align-self: stretch;
+}
+
+body.mh-app .mh-group-box {
     padding: 12px 12px 10px;
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -652,6 +1094,26 @@ tbody tr:hover {
 .hint-inline {
     color: var(--muted);
     font-size: 12px;
+}
+
+body.mh-app .mh-inline-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+body.mh-app .mh-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+body.mh-app .mh-field-group label {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 700;
+    letter-spacing: -0.01em;
 }
 
 .danger-zone {
@@ -809,7 +1271,7 @@ tbody tr:hover {
     }
 }
 
-.btn-primary {
+.mh-btn-primary {
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
     color: #0b0b0d;
     border: none;
@@ -821,14 +1283,14 @@ tbody tr:hover {
     letter-spacing: 0.01em;
 }
 
-.btn-primary.btn-plain {
+.mh-btn-primary.mh-btn-plain {
     box-shadow: none;
     background: rgba(255, 94, 138, 0.18);
     color: #fff;
     border: 1px solid rgba(255, 94, 138, 0.35);
 }
 
-.btn-muted {
+.mh-btn-muted {
     background: var(--card-strong);
     border: 1px solid var(--border);
     color: var(--text);
@@ -1180,29 +1642,6 @@ canvas {
     gap: 14px;
     flex-wrap: wrap;
     align-items: center;
-}
-
-.quick-btn {
-    padding: 8px 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--text);
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.quick-btn:hover {
-    border-color: var(--accent);
-    background: rgba(255, 94, 138, 0.1);
-}
-
-.quick-btn.active {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px rgba(255, 94, 138, 0.3), var(--shadow);
-    color: var(--accent);
 }
 
 .tooltip {

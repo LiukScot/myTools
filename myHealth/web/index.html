@@ -21,40 +21,40 @@
       </div>
     </header>
 
-    <div class="card auth-card">
-      <div class="auth-row">
-        <input type="email" id="auth-email" placeholder="Email" autocomplete="username" />
-        <input type="password" id="auth-pass" placeholder="Password" autocomplete="current-password" />
-        <button class="btn-primary" id="auth-login" type="button">Log in</button>
+    <div class="card auth-card mh-auth">
+      <div class="auth-row mh-auth__row">
+        <input class="mh-auth__input" type="email" id="auth-email" placeholder="Email" autocomplete="username" />
+        <input class="mh-auth__input" type="password" id="auth-pass" placeholder="Password" autocomplete="current-password" />
+        <button class="mh-btn-primary" id="auth-login" type="button">Log in</button>
       </div>
-      <div class="status" id="auth-status"></div>
+      <div class="mh-status mh-auth__status" id="auth-status"></div>
       <pre class="debug-log hidden" id="auth-debug"></pre>
     </div>
 
     <div id="app-main" class="hidden">
-      <div class="top-nav">
-        <nav>
-          <button class="nav-btn active" data-target="dashboard">
+      <div class="top-nav mh-nav">
+        <nav class="mh-nav__list">
+          <button class="mh-nav__btn active" data-target="dashboard">
             <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M4 13h6V4H4v9zm10 7h6V4h-6v16z" />
             </svg>
             Dashboard
           </button>
-          <button class="nav-btn" data-target="newlog">
+          <button class="mh-nav__btn" data-target="newlog">
             <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M6 5h12v14H6z" />
               <path d="M9 3v4m6-4v4M8 10h8m-8 4h6" />
             </svg>
             Logs and new entries
           </button>
-          <button class="nav-btn" data-target="chatbot">
+          <button class="mh-nav__btn" data-target="chatbot">
             <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M5 5h14v9a2 2 0 0 1-2 2H9l-4 3V7a2 2 0 0 1 2-2z" />
               <path d="M8 9h8m-8 4h5" />
             </svg>
             Chatbot
           </button>
-          <button class="nav-btn" data-target="settings">
+          <button class="mh-nav__btn" data-target="settings">
             <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z" />
               <path
@@ -62,20 +62,20 @@
             </svg>
             Settings
           </button>
-          <a class="nav-btn hub-link hidden" id="go-hub" href="/" aria-label="Back to hub">
+          <a class="mh-nav__btn mh-nav__hub hidden" id="go-hub" href="/" aria-label="Back to hub">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M15 5l-7 7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             <span>Back to hub</span>
           </a>
-          <button class="nav-btn danger logout-btn hidden" id="auth-logout" type="button">Log out</button>
+          <button class="mh-nav__btn danger logout-btn hidden" id="auth-logout" type="button">Log out</button>
         </nav>
       </div>
 
       <section id="dashboard-section">
         <div class="card" id="dashboard-stats">
           <h2>Dashboard</h2>
-          <div class="hint">Overview of diary and pain logs.</div>
+          <div class="mh-hint">Overview of diary and pain logs.</div>
           <div class="filters">
             <label>From
               <input type="date" id="filter-from" />
@@ -84,14 +84,14 @@
               <input type="date" id="filter-to" />
             </label>
             <div class="divider"></div>
-            <div class="quick-filters">
-              <button class="quick-btn" data-range="7">1 week</button>
-              <button class="quick-btn" data-range="30">1 month</button>
-              <button class="quick-btn" data-range="90">3 months</button>
-              <button class="quick-btn" data-range="180">6 months</button>
-              <button class="quick-btn" data-range="365">1 year</button>
-              <button class="quick-btn" data-range="1095">3 years</button>
-              <button class="quick-btn" data-range="all">Since start</button>
+            <div class="mh-quick-filters">
+              <button class="mh-quick-btn" data-range="7">1 week</button>
+              <button class="mh-quick-btn" data-range="30">1 month</button>
+              <button class="mh-quick-btn" data-range="90">3 months</button>
+              <button class="mh-quick-btn" data-range="180">6 months</button>
+              <button class="mh-quick-btn" data-range="365">1 year</button>
+              <button class="mh-quick-btn" data-range="1095">3 years</button>
+              <button class="mh-quick-btn" data-range="all">Since start</button>
             </div>
           </div>
           <div class="dash-grid" id="dash-cards"></div>
@@ -102,10 +102,10 @@
       <section id="newlog-section" class="hidden">
         <div class="card">
           <h2>New Entry</h2>
-          <div class="hint">Capture a quick log without waiting for a CSV import.</div>
-          <div class="entry-tabs" role="tablist" aria-label="New entry categories">
-            <button class="nav-btn entry-btn active" data-entry="pain" type="button">Physical pain</button>
-            <button class="nav-btn entry-btn" id="autotherapy-tab" data-entry="autotherapy" type="button">Autotherapy
+          <div class="mh-hint">Capture a quick log without waiting for a CSV import.</div>
+          <div class="mh-entry-tabs" role="tablist" aria-label="New entry categories">
+            <button class="mh-entry-btn active" data-entry="pain" type="button">Physical pain</button>
+            <button class="mh-entry-btn" id="autotherapy-tab" data-entry="autotherapy" type="button">Autotherapy
               ◀</button>
           </div>
 
@@ -168,9 +168,9 @@
                 </div>
               </div>
               <div class="form-actions">
-                <button class="btn-primary btn-plain" id="pain-submit-btn" type="submit">Save new entry</button>
-                <button class="btn-muted hidden" id="pain-cancel-btn" type="button">Cancel edit</button>
-                <div id="pain-form-status" class="status"></div>
+        <button class="mh-btn-primary mh-btn-plain" id="pain-submit-btn" type="submit">Save new entry</button>
+                <button class="mh-btn-muted hidden" id="pain-cancel-btn" type="button">Cancel edit</button>
+                <div id="pain-form-status" class="mh-status"></div>
               </div>
             </form>
             <div class="form-divider"></div>
@@ -185,11 +185,11 @@
 
           <div class="entry-panel hidden" data-entry-panel="autotherapy">
             <div id="autotherapy-stack">
-              <div class="entry-tabs autotherapy-subnav" role="tablist" aria-label="Autotherapy entries">
-                <button class="nav-btn entry-btn secondary" data-autotherapy="journal" type="button">Journal</button>
-                <button class="nav-btn entry-btn secondary" data-autotherapy="cbt" type="button">CBT thought
+              <div class="entry-tabs autotherapy-subnav mh-entry-tabs" role="tablist" aria-label="Autotherapy entries">
+                <button class="mh-entry-btn secondary" data-autotherapy="journal" type="button">Journal</button>
+                <button class="mh-entry-btn secondary" data-autotherapy="cbt" type="button">CBT thought
                   response</button>
-                <button class="nav-btn entry-btn secondary" data-autotherapy="dbt" type="button">DBT distress
+                <button class="mh-entry-btn secondary" data-autotherapy="dbt" type="button">DBT distress
                   tolerance</button>
               </div>
               <div class="entry-panel hidden" data-autotherapy-panel="journal">
@@ -232,10 +232,10 @@
                     </div>
                   </div>
                   <div class="form-actions">
-                    <button class="btn-primary btn-plain" id="journal-submit-btn" type="submit">Save journal
+                    <button class="mh-btn-primary mh-btn-plain" id="journal-submit-btn" type="submit">Save journal
                       entry</button>
-                    <button class="btn-muted hidden" id="journal-cancel-btn" type="button">Cancel edit</button>
-                    <div id="journal-form-status" class="status"></div>
+                    <button class="mh-btn-muted hidden" id="journal-cancel-btn" type="button">Cancel edit</button>
+                    <div id="journal-form-status" class="mh-status"></div>
                   </div>
                 </form>
                 <div class="form-divider"></div>
@@ -248,10 +248,10 @@
                 </div>
               </div>
               <div class="entry-panel hidden" data-autotherapy-panel="cbt">
-                <div class="hint">CBT thought response coming soon.</div>
+                <div class="mh-hint">CBT thought response coming soon.</div>
               </div>
               <div class="entry-panel hidden" data-autotherapy-panel="dbt">
-                <div class="hint">DBT distress tolerance coming soon.</div>
+                <div class="mh-hint">DBT distress tolerance coming soon.</div>
               </div>
             </div>
           </div>
@@ -261,28 +261,28 @@
       <section id="chatbot-section" class="hidden">
         <div class="card">
           <h2>Chatbot</h2>
-          <div class="hint">Ask the assistant about your diary and pain logs. Configure your Mistral key in
+          <div class="mh-hint">Ask the assistant about your diary and pain logs. Configure your Mistral key in
             Settings.</div>
 
           <div class="stacked-fields" style="gap: 15px;">
             <div class="field-group">
               <label for="chatbot-prompt"><strong>Message</strong></label>
-              <div class="hint" id="chatbot-helper">Save a Mistral key in Settings to enable sending.</div>
-              <div class="chat-range" aria-label="Chat context range">
-                <span class="sub-label">How many days should the model read?</span>
-                <div class="quick-filters">
-                  <button class="quick-btn chat-range-btn" data-range="30">1 month</button>
-                  <button class="quick-btn chat-range-btn" data-range="90">3 months</button>
-                  <button class="quick-btn chat-range-btn" data-range="365">1 year</button>
-                  <button class="quick-btn chat-range-btn" data-range="all">Since start</button>
-                </div>
-              </div>
+              <div class="mh-hint" id="chatbot-helper">Save a Mistral key in Settings to enable sending.</div>
+          <div class="chat-range" aria-label="Chat context range">
+            <span class="sub-label">How many days should the model read?</span>
+            <div class="mh-quick-filters">
+              <button class="mh-quick-btn chat-range-btn" data-range="30">1 month</button>
+              <button class="mh-quick-btn chat-range-btn" data-range="90">3 months</button>
+              <button class="mh-quick-btn chat-range-btn" data-range="365">1 year</button>
+              <button class="mh-quick-btn chat-range-btn" data-range="all">Since start</button>
+            </div>
+          </div>
               <div class="chat-input-row constrained">
                 <textarea id="chatbot-prompt" class="inline-input multiline" rows="3"
                   placeholder="Ask about your trends, e.g. \" Summarize my pain this week\""></textarea>
-                <button class="btn-primary btn-plain" id="chatbot-send-btn" type="button" disabled>Send</button>
+                <button class="mh-btn-primary mh-btn-plain" id="chatbot-send-btn" type="button" disabled>Send</button>
               </div>
-              <div class="status" id="chatbot-status"></div>
+              <div class="mh-status" id="chatbot-status"></div>
             </div>
 
             <div class="field-group">
@@ -291,7 +291,7 @@
                 <span>Generating...</span>
               </div>
               <div class="chat-log" id="chatbot-log">
-                <div class="hint">No messages yet. The assistant will answer here once connected.</div>
+              <div class="mh-hint">No messages yet. The assistant will answer here once connected.</div>
               </div>
             </div>
           </div>
@@ -301,31 +301,31 @@
       <section id="settings-section" class="hidden">
         <div class="card">
           <h2>Settings</h2>
-          <div class="hint">Import/export your data and manage the chatbot connection.</div>
+          <div class="mh-hint">Import/export your data and manage the chatbot connection.</div>
 
           <div class="stacked-fields settings-grid">
             <!-- JSON import/export -->
-            <div class="field-group group-box">
+            <div class="mh-field-group mh-group-box">
               <label><strong>Import from JSON</strong></label>
-              <div class="inline-row">
+              <div class="mh-inline-row">
                 <input type="file" id="import-backup-input" accept=".json" />
-                <button class="nav-btn" id="export-backup-button">Export JSON</button>
+                <button class="mh-nav__btn" id="export-backup-button">Export JSON</button>
               </div>
             </div>
 
             <!-- XLSX import/export -->
-            <div class="field-group group-box">
+            <div class="mh-field-group mh-group-box">
               <label><strong>Import from XLSX</strong> <span class="hint-inline">(sheets: <code>diary</code>,
                   <code>pain</code>)</span></label>
-              <div class="inline-row">
+              <div class="mh-inline-row">
                 <input type="file" id="import-xlsx-input" accept=".xlsx,.xls" />
-                <button class="nav-btn" id="export-xlsx-button">Export XLSX</button>
+                <button class="mh-nav__btn" id="export-xlsx-button">Export XLSX</button>
               </div>
             </div>
 
             <h3>Chatbot</h3>
 
-            <div class="field-group group-box">
+            <div class="mh-field-group mh-group-box">
               <label for="mistral-api-key"><strong>Mistral API key</strong></label>
               <div class="hint" id="mistral-key-helper">Key is stored server-side for your account and never shown back.
                 Only the chat prompt and selected log context are sent to Mistral (EU-based) when you ask a question.
@@ -333,13 +333,13 @@
               <div class="settings-inline">
                 <input class="inline-input long" type="password" id="mistral-api-key"
                   placeholder="Paste your Mistral API key" autocomplete="off" />
-                <button class="nav-btn" id="save-mistral-key" type="button">Save key</button>
-                <button class="nav-btn" id="clear-mistral-key" type="button">Clear</button>
+                <button class="mh-nav__btn" id="save-mistral-key" type="button">Save key</button>
+                <button class="mh-nav__btn" id="clear-mistral-key" type="button">Clear</button>
               </div>
-              <div class="status" id="mistral-key-status"></div>
+              <div class="mh-status" id="mistral-key-status"></div>
             </div>
 
-            <div class="field-group group-box">
+            <div class="mh-field-group mh-group-box">
               <label for="mistral-model"><strong>Mistral model</strong></label>
               <div class="hint">Pick a balance of speed, cost, and quality. Small is the fastest default; Large gives the most detail.
               </div>
@@ -354,17 +354,17 @@
 
             <h3>Danger zone</h3>
             <div class="danger-zone">
-              <button class="nav-btn danger" id="full-purge-button">🧨 delete all data</button>
+              <button class="mh-nav__btn danger" id="full-purge-button">🧨 delete all data</button>
             </div>
           </div>
         </div>
 
-        <div class="status" id="backup-status"></div>
+        <div class="mh-status" id="backup-status"></div>
         <pre class="error-box hidden" id="backup-error"></pre>
 
         <!-- hidden status nodes to satisfy existing refs -->
-        <div class="status hidden" id="diary-status-import"></div>
-        <div class="status hidden" id="pain-status-import"></div>
+        <div class="mh-status hidden" id="diary-status-import"></div>
+        <div class="mh-status hidden" id="pain-status-import"></div>
       </section>
     </div>
   </div>
