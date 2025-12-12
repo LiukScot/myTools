@@ -368,12 +368,19 @@ textarea {
   border-radius: 12px;
   background: var(--card-strong);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-  width: min(100%, 840px);
-  align-self: flex-start;
+  width: 100%;
+  align-self: stretch;
 }
 
 #page-import-backup .stacked-fields .field-group {
   margin: 0;
+}
+
+#page-import-backup .stacked-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+  align-items: stretch;
 }
 
 #page-import-backup .stacked-fields .field-group input,
@@ -412,9 +419,9 @@ textarea {
 }
 
 .danger-zone {
-  margin-top: 28px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
+  margin-top: 14px;
+  padding-top: 0;
+  border-top: none;
 }
 
 .stacked-fields button {

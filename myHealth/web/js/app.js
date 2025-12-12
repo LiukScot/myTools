@@ -173,6 +173,18 @@ const EMOJI_CHOICES = ["📒", "📓", "🙂", "😔", "😨", "🤕", "🥱", "
 let emojiPickerEl = null;
 let emojiScriptLoading = null;
 
+const NUMERIC_FIELDS = {
+  diary: [
+    { key: "mood level", label: "Mood" },
+    { key: "depression", label: "Depression" },
+    { key: "anxiety", label: "Anxiety" },
+  ],
+  pain: [
+    { key: "pain level", label: "Pain" },
+    { key: "fatigue level", label: "Fatigue" },
+  ],
+};
+
 function closeEmojiPicker() {
   if (emojiPickerEl) {
     emojiPickerEl.remove();
@@ -381,14 +393,9 @@ async function doLogout() {
 function buildOptionCacheFromStore() {
   const saved = loadSavedOptionCache();
   optionFields.forEach((field) => {
-    const derived = collectOptions(field);
     const stored = Array.isArray(saved.options?.[field]) ? saved.options[field] : [];
     const removed = new Set(Array.isArray(saved.removed?.[field]) ? saved.removed[field] : []);
-    const merged = dedupe([
-      ...stored,
-      ...(derived || []).filter((v) => !removed.has(v)),
-    ]);
-    optionsCache[field] = merged;
+    optionsCache[field] = stored;
     removedOptions[field] = Array.from(removed);
   });
   persistOptionCache();
@@ -624,7 +631,7 @@ function updateMistralUi(state = { hasKey: false, last4: "" }) {
   }
   if (chatbotUI.helper) {
     chatbotUI.helper.textContent = hasKey
-      ? "Chatbot will use your saved Mistral key."
+      ? ""
       : "Save a Mistral key in Settings to enable chatbot calls.";
   }
   if (chatbotUI.sendBtn) {
@@ -771,6 +778,21 @@ function sortRowsWithIndex(rows, headers) {
     });
 }
 
+function collectNumericFields(kind, headers, row) {
+  const defs = NUMERIC_FIELDS[kind] || [];
+  const parts = [];
+  defs.forEach((def) => {
+    const key = findHeader(headers, def.key);
+    if (!key) return;
+    const raw = row?.[key];
+    if (raw === null || raw === undefined || raw === "") return;
+    const num = Number(raw);
+    const value = Number.isFinite(num) ? num : raw;
+    parts.push({ label: def.label, value });
+  });
+  return parts;
+}
+
 function renderTable(kind, headers, rows, withActions = false, limit = null) {
   const cfg = datasets[kind];
   const isLogView = withActions; // Usually true for the main log view
@@ -818,6 +840,7 @@ function renderTable(kind, headers, rows, withActions = false, limit = null) {
     const timeKey = findHeader(headers, "hour") || "hour";
     const dateStr = row[dateKey] || "No date";
     const timeStr = row[timeKey] || "";
+    const numericFields = collectNumericFields(kind, headers, row);
 
     // Format nice date if possible
     let niceDate = dateStr;
@@ -832,6 +855,16 @@ function renderTable(kind, headers, rows, withActions = false, limit = null) {
                   <span>${escapeHtml(niceDate)}</span>
                   <span style="color:var(--accent);">${escapeHtml(timeStr)}</span>
                 </div>
+                ${numericFields.length ? `
+                  <div class="log-card-meta">
+                    ${numericFields.map(f => `
+                      <div class="log-card-meta-row">
+                        <span class="label">${escapeHtml(f.label)}:</span>
+                        <strong>${escapeHtml(String(f.value))}</strong>
+                      </div>
+                    `).join("")}
+                  </div>
+                ` : ""}
                 ${isLogView ? `
                 <div class="log-card-actions">
                   <button class="nav-btn small" data-edit-row="${originalIdx}" data-kind="${kind}" title="Edit">

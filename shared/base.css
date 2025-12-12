@@ -176,6 +176,26 @@ header {
     border-color: var(--accent);
 }
 
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+    align-items: start;
+}
+
+.settings-grid > * {
+    break-inside: avoid;
+    width: 100%;
+    margin: 0;
+}
+
+.settings-grid h3,
+.settings-grid .section-title {
+    grid-column: 1 / -1;
+    margin: 4px 0 2px;
+}
+
 .nav-btn.danger {
     border-color: color-mix(in srgb, var(--danger) 50%, transparent);
     color: var(--danger);
@@ -447,6 +467,12 @@ tbody tr:hover {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
+}
+
+.stacked-fields h3,
+.stacked-fields .section-title {
+    grid-column: 1 / -1;
+    margin: 4px 0 2px;
 }
 
 .chip-row {
