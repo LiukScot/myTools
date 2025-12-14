@@ -2177,19 +2177,53 @@ function renderDashboard() {
     .join("");
 
   const graphDefs = [
-    { id: "graph-diary-mood", title: "Diary: Mood over time", yLabel: "Mood level", data: timeSeries(diary, "mood level") },
-    { id: "graph-pain-level", title: "Pain: Pain level over time", yLabel: "Pain level", data: timeSeries(pain, "pain level") },
+    {
+      id: "graph-wellbeing",
+      title: "Metrics over time",
+      yLabel: "Level",
+      series: [
+        { key: "pain", label: "Pain", color: "#ff6f91", data: timeSeries(pain, "pain level") },
+        { key: "fatigue", label: "Fatigue", color: "#f6c344", data: timeSeries(pain, "fatigue level") },
+        { key: "mood", label: "Mood", color: "#7bd3f1", data: timeSeries(diary, "mood level") },
+        { key: "depression", label: "Depression", color: "#c6a1ff", data: timeSeries(diary, "depression") },
+        { key: "anxiety", label: "Anxiety", color: "#6fe1b0", data: timeSeries(diary, "anxiety") },
+      ],
+    },
   ];
 
   graphs.innerHTML = graphDefs
-    .map(
-      (g) => `
+    .map((g) => {
+      const selection = graphSelectionState[g.id] || {};
+      const togglesHtml = g.series
+        .map((s) => {
+          const hasData = Array.isArray(s.data) && s.data.length > 0;
+          const preferred = selection[s.key];
+          const isChecked = preferred === undefined ? true : !!preferred;
+          const checkedAttr = hasData && isChecked ? "checked" : "";
+          const disabledAttr = hasData ? "" : "disabled";
+          const disabledClass = hasData ? "" : " is-disabled";
+          const title = hasData ? "" : "No data for this metric";
+          return `
+                        <label class="series-toggle${disabledClass}" data-series="${s.key}" aria-disabled="${hasData ? "false" : "true"}" style="--toggle-color:${s.color || "#ff5e8a"}" title="${title}">
+                          <input type="checkbox" data-series="${s.key}" ${checkedAttr} ${disabledAttr} />
+                          <span class="series-slider"></span>
+                          <span class="series-label">${escapeHtml(s.label)}</span>
+                        </label>
+                      `;
+        })
+        .join("");
+      return `
             <div class="graph-card">
-              <div class="graph-title">${escapeHtml(g.title)}</div>
+              <div class="graph-title">
+                <span class="graph-heading">${escapeHtml(g.title)}</span>
+                <div class="graph-toggles" data-toggle-for="${g.id}">
+                  ${togglesHtml}
+                </div>
+              </div>
               <canvas id="${g.id}"></canvas>
             </div>
-          `
-    )
+          `;
+    })
     .join("");
 
   container.querySelectorAll(".dash-emoji").forEach((el) => {
@@ -2202,7 +2236,30 @@ function renderDashboard() {
 
   graphDefs.forEach((g, idx) => {
     const canvas = document.getElementById(g.id);
-    drawLineChart(canvas, g.data, idx, { yLabel: g.yLabel });
+    const toggles = Array.from(document.querySelectorAll(`.graph-toggles[data-toggle-for="${g.id}"] input[type="checkbox"]`));
+    const ensureGraphSelection = () => {
+      if (!graphSelectionState[g.id]) graphSelectionState[g.id] = {};
+      return graphSelectionState[g.id];
+    };
+    const saveSelection = (seriesKey, value) => {
+      const state = ensureGraphSelection();
+      state[seriesKey] = value;
+      persistGraphSelection();
+    };
+    const renderVisibleSeries = () => {
+      const activeSeries = g.series.filter((s) => {
+        const toggle = toggles.find((t) => t.dataset.series === s.key);
+        return toggle ? toggle.checked : true;
+      });
+      drawLineChart(canvas, activeSeries, idx, { yLabel: g.yLabel, allSeries: g.series });
+    };
+    toggles.forEach((input) =>
+      input.addEventListener("change", () => {
+        saveSelection(input.dataset.series, input.checked);
+        renderVisibleSeries();
+      })
+    );
+    renderVisibleSeries();
   });
 }
 
@@ -2263,54 +2320,157 @@ function timeSeries(store, field) {
 }
 
 const graphMeta = {};
+const GRAPH_SELECTION_KEY = "myhealth:graphSelection";
+const graphSelectionState = loadGraphSelection();
 
-function drawLineChart(canvas, data, idx, opts = {}) {
+function loadGraphSelection() {
+  try {
+    const raw = localStorage.getItem(GRAPH_SELECTION_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (err) {
+    return {};
+  }
+}
+
+function persistGraphSelection() {
+  try {
+    localStorage.setItem(GRAPH_SELECTION_KEY, JSON.stringify(graphSelectionState));
+  } catch (err) {
+    // ignore storage errors
+  }
+}
+
+function drawLineChart(canvas, seriesList, idx, opts = {}) {
   if (!canvas || !canvas.getContext) return;
   const ctx = canvas.getContext("2d");
   const width = (canvas.width = canvas.offsetWidth || 320);
   const height = (canvas.height = canvas.offsetHeight || 180);
   ctx.clearRect(0, 0, width, height);
-  ctx.strokeStyle = ["#ff5e8a", "#ff8fb1", "#ffb3c9"][idx % 3];
-  ctx.lineWidth = 2;
   ctx.fillStyle = "rgba(255,255,255,0.04)";
   ctx.fillRect(0, 0, width, height);
-  if (!data.length) {
+
+  const allSeries = Array.isArray(opts.allSeries) ? opts.allSeries : seriesList || [];
+  const desiredPoints = Math.max(10, Math.min(20, Math.floor((width || 320) / 40)));
+  const visibleSeries = (seriesList || [])
+    .filter((s) => Array.isArray(s?.data) && s.data.length)
+    .map((s) => ({ ...s, data: bucketSeries(s.data, desiredPoints) }))
+    .filter((s) => s.data.length);
+  const hasAnyData = (allSeries || []).some((s) => Array.isArray(s?.data) && s.data.length);
+
+  if (!visibleSeries.length) {
     ctx.fillStyle = "rgba(226,232,240,0.7)";
-    ctx.fillText("No data yet", 12, 20);
+    ctx.font = "12px Manrope, sans-serif";
+    ctx.fillText(hasAnyData ? "Toggle on a metric to see it" : "No data yet", 12, 22);
+    graphMeta[canvas.id] = { points: [], yLabel: opts.yLabel || "Value", startTime: 0 };
+    canvas.onmousemove = null;
+    canvas.onmouseleave = null;
     return;
   }
-  const yBounds = getYBounds(opts.yLabel, data);
+
+  const defaults = ["#ff5e8a", "#f6c344", "#7bd3f1", "#c6a1ff", "#6fe1b0", "#ff8fb1"];
+  const valuePoints = visibleSeries.flatMap((s) => s.data);
+  const yBounds = getYBounds(opts.yLabel, valuePoints);
   const minY = yBounds.min;
   const maxY = yBounds.max;
-  const minX = data[0].t.getTime();
-  const maxX = data[data.length - 1].t.getTime();
-  const startTs = minX;
+  const allTimes = visibleSeries.flatMap((s) => s.data.map((pt) => pt.t.getTime()));
+  const minX = Math.min(...allTimes);
+  const maxX = Math.max(...allTimes);
   const pad = 28;
-  ctx.beginPath();
   const points = [];
-  data.forEach((pt, i) => {
-    const x = scale(pt.t.getTime(), minX, maxX || minX + 1, pad, width - pad);
-    const y = scale(pt.v, maxY === minY ? minY - 1 : minY, maxY === minY ? minY + 1 : maxY, height - pad, pad);
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-    points.push({ x, y, ...pt });
-  });
-  ctx.stroke();
-  ctx.fillStyle = ctx.strokeStyle;
-  data.forEach((pt) => {
-    const x = scale(pt.t.getTime(), minX, maxX || minX + 1, pad, width - pad);
-    const y = scale(pt.v, maxY === minY ? minY - 1 : minY, maxY === minY ? minY + 1 : maxY, height - pad, pad);
-    ctx.beginPath();
-    ctx.arc(x, y, 3, 0, Math.PI * 2);
-    ctx.fill();
+
+  visibleSeries.forEach((s, seriesIdx) => {
+    const stroke = s.color || defaults[seriesIdx % defaults.length];
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 2;
+    const coords = s.data.map((pt) => {
+      const x = scale(pt.t.getTime(), minX, maxX || minX + 1, pad, width - pad);
+      const y = scale(pt.v, maxY === minY ? minY - 1 : minY, maxY === minY ? minY + 1 : maxY, height - pad, pad);
+      const enriched = { x, y, ...pt, seriesKey: s.key, seriesLabel: s.label, color: stroke };
+      points.push(enriched);
+      return enriched;
+    });
+    drawSmoothPath(ctx, coords);
+    ctx.fillStyle = stroke;
+    s.data.forEach((pt) => {
+      const x = scale(pt.t.getTime(), minX, maxX || minX + 1, pad, width - pad);
+      const y = scale(pt.v, maxY === minY ? minY - 1 : minY, maxY === minY ? minY + 1 : maxY, height - pad, pad);
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
   });
 
   // axis ticks
-  drawAxes(ctx, width, height, pad, minX, maxX, minY, maxY, data, startTs);
+  drawAxes(ctx, width, height, pad, minX, maxX, minY, maxY, valuePoints, minX);
 
-  graphMeta[canvas.id] = { points, yLabel: opts.yLabel || "Value", startTime: startTs };
+  graphMeta[canvas.id] = { points, yLabel: opts.yLabel || "Value", startTime: minX };
   canvas.onmousemove = (e) => handleHover(canvas, e);
   canvas.onmouseleave = () => hideTooltip();
+}
+
+// Draw a smoothed path that passes through each point using Catmull-Rom splines.
+function drawSmoothPath(ctx, coords) {
+  if (!coords.length) return;
+  if (coords.length === 1) {
+    ctx.beginPath();
+    ctx.moveTo(coords[0].x, coords[0].y);
+    ctx.stroke();
+    return;
+  }
+  ctx.beginPath();
+  ctx.moveTo(coords[0].x, coords[0].y);
+  if (coords.length === 2) {
+    ctx.lineTo(coords[1].x, coords[1].y);
+  } else {
+    for (let i = 0; i < coords.length - 1; i++) {
+      const p0 = coords[i - 1] || coords[0];
+      const p1 = coords[i];
+      const p2 = coords[i + 1];
+      const p3 = coords[i + 2] || coords[i + 1];
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+    }
+  }
+  ctx.stroke();
+}
+
+function bucketSeries(data, maxPoints) {
+  if (!Array.isArray(data) || data.length <= maxPoints) return data || [];
+  const sorted = [...data].sort((a, b) => a.t - b.t);
+  const minTs = sorted[0].t.getTime();
+  const maxTs = sorted[sorted.length - 1].t.getTime();
+  const span = Math.max(1, maxTs - minTs);
+  const bucketSize = span / maxPoints;
+  const buckets = Array.from({ length: maxPoints }, () => ({ sum: 0, count: 0, tsSum: 0, minTs: null, maxTs: null }));
+  sorted.forEach((pt) => {
+    const ts = pt.t.getTime();
+    const idx = Math.min(maxPoints - 1, Math.floor((ts - minTs) / bucketSize));
+    const b = buckets[idx];
+    b.sum += pt.v;
+    b.tsSum += ts;
+    b.count += 1;
+    b.minTs = b.minTs === null ? ts : Math.min(b.minTs, ts);
+    b.maxTs = b.maxTs === null ? ts : Math.max(b.maxTs, ts);
+  });
+  return buckets
+    .filter((b) => b.count > 0)
+    .map((b, i) => {
+      const avgTs = b.tsSum / b.count;
+      const midTs = minTs + bucketSize * i + bucketSize / 2;
+      const start = b.minTs ?? (minTs + bucketSize * i);
+      const end = b.maxTs ?? (minTs + bucketSize * (i + 1));
+      return {
+        t: new Date(isFinite(avgTs) ? avgTs : midTs),
+        v: b.sum / b.count,
+        aggregated: b.count > 1,
+        count: b.count,
+        bucketStart: new Date(start),
+        bucketEnd: new Date(end),
+      };
+    });
 }
 
 function scale(val, min, max, outMin, outMax) {
@@ -2319,10 +2479,14 @@ function scale(val, min, max, outMin, outMax) {
 }
 
 function getYBounds(label, data) {
-  const rawMin = Math.min(...data.map(d => d.v));
-  const rawMax = Math.max(...data.map(d => d.v));
+  if (!Array.isArray(data) || !data.length) return { min: 0, max: 10 };
+  const values = data.map(d => d.v).filter((v) => Number.isFinite(v));
+  if (!values.length) return { min: 0, max: 10 };
+  const rawMin = Math.min(...values);
+  const rawMax = Math.max(...values);
   const normLabel = (label || "").toLowerCase();
-  const preset = ["pain", "fatigue", "mood", "depression", "anxiety"].some(k => normLabel.includes(k));
+  const bounded = rawMin >= 0 && rawMax <= 10;
+  const preset = bounded || ["pain", "fatigue", "mood", "depression", "anxiety"].some(k => normLabel.includes(k));
   let min = preset ? 0 : rawMin;
   let max = preset ? 10 : rawMax;
   if (!preset) {
@@ -2407,9 +2571,25 @@ function handleHover(canvas, evt) {
   });
   if (!closest || minDist > 12) return hideTooltip();
   const tooltip = getTooltip();
-  const start = meta.startTime || (meta.points[0]?.t?.getTime?.() ?? 0);
-  const dateText = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(closest.t);
-  tooltip.innerHTML = `<strong>${meta.yLabel}:</strong> ${closest.v}<br/><span style="color:${'var(--muted)'}">${dateText}</span>`;
+  const fmt = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
+  const isAvg = !!closest.aggregated;
+  const valText = Number.isFinite(closest.v) ? parseFloat(closest.v.toFixed(isAvg ? 2 : 2)).toString() : closest.v;
+  const hasRange = isAvg && closest.bucketStart instanceof Date && closest.bucketEnd instanceof Date;
+  const startText = hasRange ? fmt.format(closest.bucketStart) : "";
+  const endText = hasRange ? fmt.format(closest.bucketEnd) : "";
+  const rangeText = hasRange ? (startText === endText ? startText : `${startText} – ${endText}`) : "";
+  const aggLine = isAvg
+    ? `<div style="color:${"var(--muted)"}; margin-top:2px;">Avg of ${closest.count || "multiple"} entries${rangeText ? ` (${escapeHtml(rangeText)})` : ""}</div>`
+    : "";
+  const dot = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${closest.color || "var(--accent)"};"></span>`;
+  tooltip.innerHTML = `
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+      ${dot}
+      <strong style="color:${closest.color || "var(--text)"}">${escapeHtml(closest.seriesLabel || meta.yLabel)}</strong>
+    </div>
+    <div>${escapeHtml(meta.yLabel)}: ${escapeHtml(String(valText))}</div>
+    ${aggLine}
+  `;
   tooltip.style.left = `${evt.clientX + 12}px`;
   tooltip.style.top = `${evt.clientY + 12}px`;
   tooltip.style.opacity = "1";

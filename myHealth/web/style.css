@@ -37,7 +37,13 @@ body.mh-app .shell {
     max-width: 1700px;
     width: 98vw;
     margin: 0 auto;
-    padding: 14px 60px 28px;
+    padding: 11px 48px 22px;
+}
+
+@media (max-width: 640px) {
+    body.mh-app .shell {
+        padding: 3px 12px 6px;
+    }
 }
 
 body.mh-app header {
@@ -1569,7 +1575,7 @@ body.mh-app .mh-field-group label {
 
 .graph-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: 1fr;
     gap: 14px;
     margin-top: 16px;
 }
@@ -1584,22 +1590,130 @@ body.mh-app .mh-field-group label {
 }
 
 .graph-title {
-    margin: 0 0 8px;
+    margin: 0 0 10px;
     font-size: 14px;
     color: var(--muted);
     display: flex;
     align-items: center;
+    gap: 12px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.graph-heading {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.graph-toggles {
+    display: flex;
     gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.series-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.series-toggle.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.series-toggle input {
+    display: none;
+}
+
+.series-slider {
+    position: relative;
+    width: 38px;
+    height: 20px;
+    border-radius: 12px;
+    background: var(--card-strong);
+    border: 1px solid var(--border);
+    transition: background 0.2s ease, border-color 0.2s ease;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.series-slider::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: transform 0.2s ease, background 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.series-toggle input:checked + .series-slider {
+    background: var(--toggle-color, var(--accent));
+    border-color: var(--toggle-color, var(--accent));
+}
+
+.series-toggle input:checked + .series-slider::after {
+    transform: translateX(16px);
+    background: var(--card);
+}
+
+.series-label {
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--text);
+}
+
+.series-toggle input:disabled + .series-slider {
+    opacity: 0.5;
+}
+
+.series-toggle input:disabled ~ .series-label {
+    color: var(--muted);
 }
 
 canvas {
     width: 100%;
-    height: 160px;
+    height: 400px;
 }
 
 @media (max-width: 640px) {
     .graph-grid {
         grid-template-columns: 1fr;
+    }
+
+    .graph-title {
+        align-items: flex-start;
+    }
+
+    .graph-toggles {
+        width: 100%;
+        justify-content: flex-start;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+    }
+
+    .series-toggle {
+        width: 100%;
+        justify-content: space-between;
+        padding: 8px 10px;
+    }
+
+    .series-label {
+        font-size: 13px;
     }
 }
 
