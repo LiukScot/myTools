@@ -140,7 +140,6 @@ const LONG_TEXT_FIELDS = [
 ];
 let entryTabSetter = null;
 const optionFields = ["area", "symptoms", "activities", "medicines", "habits", "other"];
-const OPTION_CACHE_KEY = "myhealth:painOptions:v2";
 const optionsCache = {
   area: [],
   symptoms: [],
@@ -302,32 +301,39 @@ function openEmojiPicker(label, anchor) {
 }
 
 function loadSavedOptionCache() {
-  try {
-    const raw = localStorage.getItem(OPTION_CACHE_KEY);
-    if (!raw) {
-      return { options: {}, removed: {} };
-    }
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") {
-      return { options: {}, removed: {} };
-    }
+  if (dataStore.pain?.options && typeof dataStore.pain.options === "object") {
     return {
-      options: parsed.options || {},
-      removed: parsed.removed || {},
+      options: dataStore.pain.options.options || {},
+      removed: dataStore.pain.options.removed || {},
     };
-  } catch (err) {
-    return { options: {}, removed: {} };
   }
+  if (dataStore.pain?.rows?.length) {
+    const derived = {};
+    optionFields.forEach((field) => {
+      derived[field] = dedupe(collectOptions(field));
+    });
+    return { options: derived, removed: {} };
+  }
+  return { options: {}, removed: {} };
 }
 
-function persistOptionCache() {
+async function persistOptionCache() {
+  if (!dataStore.pain) return;
+  const optionsPayload = {
+    options: optionFields.reduce((acc, field) => {
+      acc[field] = Array.isArray(optionsCache[field]) ? [...optionsCache[field]] : [];
+      return acc;
+    }, {}),
+    removed: optionFields.reduce((acc, field) => {
+      acc[field] = Array.isArray(removedOptions[field]) ? [...removedOptions[field]] : [];
+      return acc;
+    }, {}),
+  };
+  dataStore.pain.options = optionsPayload;
   try {
-    localStorage.setItem(
-      OPTION_CACHE_KEY,
-      JSON.stringify({ options: optionsCache, removed: removedOptions })
-    );
+    await persistNormalized("pain", dataStore.pain);
   } catch (err) {
-    // best effort; ignore
+    console.warn("Failed to persist pain options", err);
   }
 }
 
@@ -394,11 +400,22 @@ function buildOptionCacheFromStore() {
   const saved = loadSavedOptionCache();
   optionFields.forEach((field) => {
     const stored = Array.isArray(saved.options?.[field]) ? saved.options[field] : [];
-    const removed = new Set(Array.isArray(saved.removed?.[field]) ? saved.removed[field] : []);
-    optionsCache[field] = stored;
-    removedOptions[field] = Array.from(removed);
+    const removed = Array.isArray(saved.removed?.[field]) ? saved.removed[field] : [];
+    optionsCache[field] = dedupe(stored);
+    removedOptions[field] = dedupe(removed);
   });
-  persistOptionCache();
+  if (dataStore.pain) {
+    dataStore.pain.options = {
+      options: optionFields.reduce((acc, field) => {
+        acc[field] = optionsCache[field];
+        return acc;
+      }, {}),
+      removed: optionFields.reduce((acc, field) => {
+        acc[field] = removedOptions[field];
+        return acc;
+      }, {}),
+    };
+  }
 }
 
 function wireJournalForm() {
@@ -491,13 +508,15 @@ async function fetchExisting(kind, opts = {}) {
       const sortedRows = sortRowsByDateTime(normalized.data.rows, normalized.data.headers);
       const updated = { ...normalized.data, rows: sortedRows };
       dataStore[kind] = updated;
+      if (kind === "pain") {
+        buildOptionCacheFromStore();
+      }
       renderLog(kind);
       setStatus(kind, `Loaded ${updated.rows.length} rows from ${cfg.file}`, true, "logs");
       if (normalized.changed) {
-        await persistNormalized(kind, updated);
+        await persistNormalized(kind, dataStore[kind]);
       }
       if (kind === "pain") {
-        buildOptionCacheFromStore();
         renderPainOptionButtons();
       }
       renderDashboard();
@@ -1288,15 +1307,20 @@ async function saveRows(kind, rows) {
     headers: normalized.headers,
     rows: sortedRows,
   };
+  dataStore[kind] = payload;
+  if (kind === "pain") {
+    buildOptionCacheFromStore();
+  }
+  const finalPayload = withPainOptions(kind, dataStore[kind]);
   try {
     const res = await apiFetch(`/api/files/${datasets[kind].file}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(finalPayload),
     });
     if (res.status === 401) throw new Error("Please log in to save");
     if (!res.ok) throw new Error(`Server returned ${res.status}`);
-    dataStore[kind] = payload;
+    dataStore[kind] = finalPayload;
     renderLog(kind);
     setStatus(kind, "Saved edits", true, "logs");
     if (kind === "pain") {
@@ -1623,14 +1647,30 @@ function entryDateFromRow(row, headers) {
   return d.toString() === "Invalid Date" ? null : d;
 }
 
+function withPainOptions(kind, payload) {
+  if (kind !== "pain") return payload;
+  const optionsPayload = {
+    options: optionFields.reduce((acc, field) => {
+      acc[field] = Array.isArray(optionsCache[field]) ? [...optionsCache[field]] : [];
+      return acc;
+    }, {}),
+    removed: optionFields.reduce((acc, field) => {
+      acc[field] = Array.isArray(removedOptions[field]) ? [...removedOptions[field]] : [];
+      return acc;
+    }, {}),
+  };
+  return { ...payload, options: optionsPayload };
+}
+
 async function persistNormalized(kind, payload) {
   const cfg = datasets[kind];
   if (!cfg) return;
+  const finalPayload = withPainOptions(kind, payload);
   try {
     const res = await apiFetch(`/api/files/${cfg.file}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(finalPayload),
     });
     if (res.status === 401) throw new Error("Please log in to save");
     if (!res.ok) throw new Error(`Server returned ${res.status}`);
@@ -1644,11 +1684,13 @@ async function saveDataset(kind, payload) {
   const sorted = sortRowsByDateTime(normalized.rows, normalized.headers);
   const final = { headers: normalized.headers, rows: sorted, source: payload.source || "import", imported_at: new Date().toISOString() };
   dataStore[kind] = final;
-  renderLog(kind);
-  setStatus(kind, `Saved ${sorted.length} rows`, true, "logs");
-  await persistNormalized(kind, final);
   if (kind === "pain") {
     buildOptionCacheFromStore();
+  }
+  renderLog(kind);
+  setStatus(kind, `Saved ${sorted.length} rows`, true, "logs");
+  await persistNormalized(kind, dataStore[kind]);
+  if (kind === "pain") {
     renderPainOptionButtons();
   }
   renderDashboard();
@@ -1694,10 +1736,15 @@ async function persist(kind, parsed, sourceName) {
       headers: mergedHeaders,
       rows: sortedRows,
     };
+    dataStore[kind] = payload;
+    if (kind === "pain") {
+      buildOptionCacheFromStore();
+    }
+    const finalPayload = withPainOptions(kind, dataStore[kind]);
     const res = await apiFetch(`/api/files/${cfg.file}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(finalPayload),
     });
     if (res.status === 401) {
       throw new Error("Please log in to save");
@@ -1705,7 +1752,7 @@ async function persist(kind, parsed, sourceName) {
     if (!res.ok) {
       throw new Error(`Server returned ${res.status}`);
     }
-    dataStore[kind] = payload;
+    dataStore[kind] = finalPayload;
     renderLog(kind);
     setStatus(kind, `Saved to ${cfg.file} (${mergedRows.length} total rows)`, true, "import");
     setStatus(kind, `Updated ${mergedRows.length} rows from ${sourceName}`, true, "logs");
