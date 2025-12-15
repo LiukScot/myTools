@@ -66,18 +66,13 @@ function setAuthDebug(text) {
 }
 function setAuthVisibility(authed) {
   isAuthed = authed;
-  const toHide = [authUI.email, authUI.pass, authUI.loginBtn, authUI.status];
-  toHide.forEach((el) => el?.classList.toggle("hidden", authed));
-  authUI.logoutBtn?.classList.toggle("hidden", !authed);
-  authUI.hubBtn?.classList.toggle("hidden", !authed);
+  // Always keep the app visible; auth card is hidden permanently now.
   const authCard = document.querySelector(".auth-card");
-  authCard?.classList.toggle("hidden", authed);
-  if (!authed) {
-    setAuthStatus("");
-  }
+  authCard?.classList.add("hidden");
+  authUI.hubBtn?.classList.remove("hidden");
 }
 function setAppVisible(isAuthed) {
-  if (appMain) appMain.classList.toggle("hidden", !isAuthed);
+  if (appMain) appMain.classList.remove("hidden");
 }
 function resetAppState() {
   dataStore.diary = null;
@@ -157,8 +152,6 @@ const removedOptions = {
   other: [],
 };
 let mistralState = { hasKey: false, last4: "" };
-const MISTRAL_MODEL_KEY = "myhealth:mistral:model";
-const CHAT_RANGE_KEY = "myhealth:chatRange";
 const cardEmojiMap = {
   "Journal entries": "📒",
   "Pain entries": "📓",
@@ -171,6 +164,17 @@ const cardEmojiMap = {
 const EMOJI_CHOICES = ["📒", "📓", "🙂", "😔", "😨", "🤕", "🥱", "😊", "💪", "🧠", "🩺", "🌿", "⭐", "🔥", "✨"];
 let emojiPickerEl = null;
 let emojiScriptLoading = null;
+
+const PREFS_FILE = "prefs.json";
+const GUEST_DATA_KEY = "myhealth:guest:data";
+const GUEST_PREFS_KEY = "myhealth:guest:prefs";
+const defaultPrefs = {
+  model: "mistral-small-latest",
+  chatRange: "all",
+  graphSelection: {},
+  lastRange: "all",
+};
+let prefs = { ...defaultPrefs };
 
 const NUMERIC_FIELDS = {
   diary: [
@@ -347,52 +351,16 @@ function wireAuthForm() {
 }
 
 async function doLogin() {
-  const email = authUI.email?.value?.trim();
-  const password = authUI.pass?.value || "";
-  if (!email || !password) {
-    setAuthStatus("Email and password required");
-    return;
-  }
-  try {
-    const res = await apiFetch("/api/files/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await safeParseJson(res);
-    if (!res.ok) {
-      setAuthDebug(`HTTP ${res.status}\n${typeof data === "string" ? data : JSON.stringify(data)}`);
-      throw new Error((data && data.error) || (typeof data === "string" ? data : "") || "Login failed");
-    }
-    setAuthStatus(`Logged in as ${data.email || email}`, true);
-    setAuthDebug("");
-    if (authUI.pass) authUI.pass.value = "";
-    setAuthVisibility(true);
-    setAppVisible(true);
-    await fetchExisting("diary");
-    await fetchExisting("pain");
-    await refreshMistralKeyState({ silent: true });
-    renderDashboard();
-  } catch (err) {
-    setAuthStatus(err.message || "Login failed");
-    if (!authUI.debug?.textContent) {
-      setAuthDebug(err?.stack || err?.message || String(err));
-    }
-  }
+  setAuthStatus("Please log in from the hub, then reopen myHealth.", false);
+  setAuthDebug("Direct login here is disabled. Use the hub login.");
 }
 
 async function doLogout() {
   try {
     await apiFetch("/api/files/logout", { method: "POST" });
-    setAuthStatus("Logged out", true);
-    resetAppState();
-    setAppVisible(false);
-    setAuthVisibility(false);
-    mistralState = { hasKey: false, last4: "" };
-    updateMistralUi(mistralState);
-    setMistralStatus("");
+    setAuthStatus("Logged out. Data access requires hub login.", false);
   } catch (err) {
-    setAuthStatus(err.message || "Logout failed");
+    setAuthStatus(err.message || "Logout failed", false);
   }
 }
 
@@ -491,6 +459,7 @@ async function fetchExisting(kind, opts = {}) {
   const cfg = datasets[kind];
   try {
     const res = await apiFetch(`/api/files/${cfg.file}`);
+    if (!isAuthed) return false;
     if (res.status === 401) {
       if (!silentAuthFail) setAuthStatus("Please log in to load data");
       const body = await res.text();
@@ -531,6 +500,20 @@ async function fetchExisting(kind, opts = {}) {
 async function ensureLoaded(kind) {
   if (dataStore[kind] && dataStore[kind].headers && dataStore[kind].rows) {
     return true;
+  }
+  if (!isAuthed) {
+    const guest = loadGuestData();
+    if (guest[kind]?.headers && guest[kind].rows) {
+      dataStore[kind] = guest[kind];
+      renderLog(kind);
+      if (kind === "pain") {
+        buildOptionCacheFromStore();
+        renderPainOptionButtons();
+      }
+      renderDashboard();
+      return true;
+    }
+    return false;
   }
   return fetchExisting(kind);
 }
@@ -605,25 +588,101 @@ function setMistralStatus(message, ok = false) {
     : "";
 }
 
+function normalizePrefs(raw = {}) {
+  const allowedModels = ["mistral-small-latest", "mistral-medium-latest", "mistral-large-latest"];
+  const next = { ...defaultPrefs, ...(typeof raw === "object" && raw ? raw : {}) };
+  if (!allowedModels.includes(next.model)) next.model = defaultPrefs.model;
+  const allowedRanges = ["30", "90", "365", "all"];
+  if (!allowedRanges.includes(next.chatRange)) next.chatRange = defaultPrefs.chatRange;
+  if (!allowedRanges.includes(next.lastRange)) next.lastRange = defaultPrefs.lastRange;
+  if (!next.graphSelection || typeof next.graphSelection !== "object") {
+    next.graphSelection = {};
+  }
+  return next;
+}
+
+async function savePrefs(update = {}, { applyRange = false } = {}) {
+  prefs = normalizePrefs({ ...prefs, ...update });
+  if (isAuthed) {
+    try {
+      await apiFetch(`/api/files/${PREFS_FILE}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(prefs),
+      });
+    } catch (err) {
+      console.warn("Failed to save prefs", err);
+    }
+  }
+  if (!isAuthed) {
+    saveGuestPrefs(prefs);
+  }
+  applyPrefsToUi({ applyRange });
+}
+
+async function loadPrefsFromServer({ applyRange = false } = {}) {
+  try {
+    const res = await apiFetch(`/api/files/${PREFS_FILE}`);
+    if (res.status === 401) {
+      prefs = normalizePrefs(loadGuestPrefs());
+      applyPrefsToUi({ applyRange });
+      return false;
+    }
+    if (res.status === 404) {
+      prefs = { ...defaultPrefs };
+      applyPrefsToUi({ applyRange });
+      if (isAuthed) {
+        await savePrefs({}, { applyRange: false });
+      }
+      return true;
+    }
+    if (!res.ok) throw new Error(`Prefs load failed ${res.status}`);
+    const data = await res.json();
+    prefs = normalizePrefs(data);
+    applyPrefsToUi({ applyRange });
+    return true;
+  } catch (err) {
+    console.warn("Prefs load error", err);
+    prefs = normalizePrefs(loadGuestPrefs());
+    applyPrefsToUi({ applyRange });
+    return false;
+  }
+}
+
+function applyPrefsToUi({ applyRange = false } = {}) {
+  // Sync graph selection state with prefs
+  Object.keys(graphSelectionState).forEach((k) => delete graphSelectionState[k]);
+  if (prefs.graphSelection && typeof prefs.graphSelection === "object") {
+    Object.entries(prefs.graphSelection).forEach(([k, v]) => {
+      if (v && typeof v === "object") {
+        graphSelectionState[k] = { ...v };
+      }
+    });
+  }
+  if (!isAuthed) {
+    saveGuestPrefs(prefs);
+  }
+  syncModelSelect();
+  syncChatRangeButtons();
+  if (applyRange) {
+    applyQuickRange(prefs.lastRange || defaultPrefs.lastRange, true);
+  }
+}
+
 function loadModelChoice() {
-  const legacy = localStorage.getItem("myhealth:gemini:model");
-  return localStorage.getItem(MISTRAL_MODEL_KEY) || legacy || "mistral-small-latest";
+  return prefs.model || defaultPrefs.model;
 }
 
 function saveModelChoice(value) {
-  localStorage.setItem(MISTRAL_MODEL_KEY, value);
+  savePrefs({ model: value });
 }
 
 function loadChatRange() {
-  const val = localStorage.getItem(CHAT_RANGE_KEY);
-  const allowed = ["30", "90", "365", "all"];
-  if (allowed.includes(val)) return val;
-  localStorage.setItem(CHAT_RANGE_KEY, "all");
-  return "all";
+  return prefs.chatRange || defaultPrefs.chatRange;
 }
 
 function saveChatRange(value) {
-  localStorage.setItem(CHAT_RANGE_KEY, value);
+  savePrefs({ chatRange: value }, { applyRange: false });
 }
 
 function syncChatRangeButtons() {
@@ -1311,6 +1370,13 @@ async function saveRows(kind, rows) {
   if (kind === "pain") {
     buildOptionCacheFromStore();
   }
+  if (!isAuthed) {
+    saveGuestDataset(kind, dataStore[kind]);
+    renderLog(kind);
+    setStatus(kind, "Saved edits locally (not logged in)", true, "logs");
+    renderDashboard();
+    return;
+  }
   const finalPayload = withPainOptions(kind, dataStore[kind]);
   try {
     const res = await apiFetch(`/api/files/${datasets[kind].file}`, {
@@ -1665,6 +1731,15 @@ function withPainOptions(kind, payload) {
 async function persistNormalized(kind, payload) {
   const cfg = datasets[kind];
   if (!cfg) return;
+  if (!isAuthed) {
+    if (kind === "pain") {
+      dataStore.pain = payload;
+    } else if (kind === "diary") {
+      dataStore.diary = payload;
+    }
+    saveGuestDataset(kind, payload);
+    return;
+  }
   const finalPayload = withPainOptions(kind, payload);
   try {
     const res = await apiFetch(`/api/files/${cfg.file}`, {
@@ -1688,7 +1763,7 @@ async function saveDataset(kind, payload) {
     buildOptionCacheFromStore();
   }
   renderLog(kind);
-  setStatus(kind, `Saved ${sorted.length} rows`, true, "logs");
+  setStatus(kind, `Saved ${sorted.length} rows${isAuthed ? "" : " (local only, log in to sync)"}`, true, "logs");
   await persistNormalized(kind, dataStore[kind]);
   if (kind === "pain") {
     renderPainOptionButtons();
@@ -1739,6 +1814,14 @@ async function persist(kind, parsed, sourceName) {
     dataStore[kind] = payload;
     if (kind === "pain") {
       buildOptionCacheFromStore();
+    }
+    if (!isAuthed) {
+      saveGuestDataset(kind, dataStore[kind]);
+      renderLog(kind);
+      setStatus(kind, `Saved locally (${mergedRows.length} rows). Log in to sync.`, true, "import");
+      setStatus(kind, `Updated ${mergedRows.length} rows from ${sourceName}`, true, "logs");
+      renderDashboard();
+      return { added, skipped };
     }
     const finalPayload = withPainOptions(kind, dataStore[kind]);
     const res = await apiFetch(`/api/files/${cfg.file}`, {
@@ -2367,24 +2450,46 @@ function timeSeries(store, field) {
 }
 
 const graphMeta = {};
-const GRAPH_SELECTION_KEY = "myhealth:graphSelection";
-const graphSelectionState = loadGraphSelection();
+const graphSelectionState = {};
 
-function loadGraphSelection() {
+function loadGuestData() {
   try {
-    const raw = localStorage.getItem(GRAPH_SELECTION_KEY);
-    return raw ? JSON.parse(raw) : {};
+    const raw = localStorage.getItem(GUEST_DATA_KEY);
+    return raw ? JSON.parse(raw) || {} : {};
   } catch (err) {
     return {};
   }
 }
 
-function persistGraphSelection() {
+function saveGuestDataset(kind, payload) {
   try {
-    localStorage.setItem(GRAPH_SELECTION_KEY, JSON.stringify(graphSelectionState));
+    const guest = loadGuestData();
+    guest[kind] = payload;
+    localStorage.setItem(GUEST_DATA_KEY, JSON.stringify(guest));
   } catch (err) {
-    // ignore storage errors
+    console.warn("Failed to save guest data", err);
   }
+}
+
+function loadGuestPrefs() {
+  try {
+    const raw = localStorage.getItem(GUEST_PREFS_KEY);
+    return raw ? JSON.parse(raw) || {} : {};
+  } catch (err) {
+    return {};
+  }
+}
+
+function saveGuestPrefs(data) {
+  try {
+    localStorage.setItem(GUEST_PREFS_KEY, JSON.stringify(data || {}));
+  } catch (err) {
+    // ignore
+  }
+}
+
+function persistGraphSelection() {
+  savePrefs({ graphSelection: graphSelectionState });
 }
 
 function drawLineChart(canvas, seriesList, idx, opts = {}) {
@@ -2667,7 +2772,7 @@ function setQuickActive(btn) {
 function clearQuickActive() {
   // Only affect dashboard quick buttons, not chatbot range buttons
   document.querySelectorAll(".mh-quick-btn:not(.chat-range-btn)").forEach(b => b.classList.remove("active"));
-  localStorage.removeItem("myhealth:lastRange");
+  savePrefs({ lastRange: defaultPrefs.lastRange }, { applyRange: false });
 }
 
 function toCSV(headers, rows) {
@@ -2745,15 +2850,28 @@ function wirePurge() {
 }
 
 async function restoreSessionIfPossible() {
-  // Try to load data with an existing session; if successful, show the app.
-  const loadedDiary = await fetchExisting("diary", { silentAuthFail: true });
-  const loadedPain = await fetchExisting("pain", { silentAuthFail: true });
-  const hasData = loadedDiary || loadedPain;
-  setAppVisible(hasData);
-  setAuthVisibility(hasData);
-  if (hasData) {
-    await refreshMistralKeyState({ silent: true });
-    renderDashboard();
+  try {
+    const res = await apiFetch("/api/files/session");
+    const data = await safeParseJson(res);
+    const authed = res.ok && data?.authed;
+    setAuthVisibility(authed);
+    setAppVisible(true);
+    const loadedDiary = await fetchExisting("diary", { silentAuthFail: true });
+    const loadedPain = await fetchExisting("pain", { silentAuthFail: true });
+    if (loadedDiary || loadedPain) {
+      await loadPrefsFromServer({ applyRange: true });
+      await refreshMistralKeyState({ silent: true });
+      renderDashboard();
+    }
+    if (!authed) {
+      setAuthStatus("Browsing without login. Log in via the hub to load/save data.");
+    }
+    return authed;
+  } catch (err) {
+    setAppVisible(true);
+    setAuthVisibility(false);
+    setAuthStatus("Browsing without login. Log in via the hub to sync.");
+    return false;
   }
 }
 
@@ -2812,7 +2930,7 @@ function applyQuickRange(range, skipPersist = false) {
   const btn = document.querySelector(`.mh-quick-btn:not(.chat-range-btn)[data-range="${range}"]`);
   if (btn) setQuickActive(btn);
   if (!skipPersist) {
-    localStorage.setItem("myhealth:lastRange", range);
+    savePrefs({ lastRange: range }, { applyRange: false });
   }
   renderDashboard();
 }
@@ -2825,8 +2943,7 @@ document.querySelectorAll(".mh-quick-btn:not(.chat-range-btn)").forEach((btn) =>
   });
 });
 setAuthVisibility(false);
-setAppVisible(false);
+setAppVisible(true);
 resetAppState();
 restoreSessionIfPossible();
-const lastRange = localStorage.getItem("myhealth:lastRange") || "all";
-applyQuickRange(lastRange, true);
+applyQuickRange(defaultPrefs.lastRange, true);

@@ -53,6 +53,7 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
+      position: relative;
     }
 
     .title {
@@ -79,6 +80,109 @@
     .subtitle {
       color: var(--muted);
       font-size: 14px;
+    }
+
+    .auth-bar {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .auth-btn {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--card-strong);
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+      min-width: 120px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .auth-btn.logged-in {
+      border-color: var(--accent-health);
+      box-shadow: 0 0 0 1px var(--glow-health), 0 10px 24px rgba(255, 94, 138, 0.25);
+    }
+
+    .auth-panel {
+      position: absolute;
+      right: 0;
+      top: 60px;
+      width: 320px;
+      max-width: 90vw;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--card);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+      padding: 14px;
+      display: none;
+      z-index: 10;
+    }
+
+    .auth-panel.open {
+      display: block;
+    }
+
+    .auth-panel h4 {
+      margin: 0 0 6px;
+      font-size: 15px;
+    }
+
+    .auth-panel .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 10px 0;
+    }
+
+    .auth-panel label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .auth-panel input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card-strong);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .auth-panel .actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .auth-panel button.primary {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card-strong);
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .auth-panel button.link {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .auth-panel .status {
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 18px;
     }
 
     .grid {
@@ -201,6 +305,31 @@
           <div class="subtitle">Pick a workspace</div>
         </div>
       </div>
+      <div class="auth-bar">
+        <button id="hub-auth-btn" class="auth-btn">Log in</button>
+        <div id="hub-auth-panel" class="auth-panel">
+          <h4>Account</h4>
+          <div id="hub-auth-status" class="status"></div>
+          <div id="hub-auth-form">
+            <div class="field">
+              <label for="hub-auth-email">Email</label>
+              <input id="hub-auth-email" type="email" autocomplete="email" placeholder="you@example.com" />
+            </div>
+            <div class="field">
+              <label for="hub-auth-pass">Password</label>
+              <input id="hub-auth-pass" type="password" autocomplete="current-password" placeholder="••••••••" />
+            </div>
+            <div class="actions">
+              <button id="hub-auth-submit" class="primary">Sign in</button>
+              <button id="hub-auth-cancel" class="link" type="button">Close</button>
+            </div>
+          </div>
+          <div id="hub-authed-actions" class="actions" style="display:none;">
+            <button id="hub-auth-logout" class="primary">Log out</button>
+            <button id="hub-auth-close" class="link" type="button">Close</button>
+          </div>
+        </div>
+      </div>
     </header>
 
     <div class="grid">
@@ -225,6 +354,151 @@
 
     <div class="footnote"></div>
   </div>
+  <script>
+    (function () {
+      const apiBase = '/myhealth/api/files';
+      const authBtn = document.getElementById('hub-auth-btn');
+      const panel = document.getElementById('hub-auth-panel');
+      const emailInput = document.getElementById('hub-auth-email');
+      const passInput = document.getElementById('hub-auth-pass');
+      const submitBtn = document.getElementById('hub-auth-submit');
+      const statusEl = document.getElementById('hub-auth-status');
+      const formWrap = document.getElementById('hub-auth-form');
+      const authedActions = document.getElementById('hub-authed-actions');
+      const logoutBtn = document.getElementById('hub-auth-logout');
+      const cancelBtns = Array.from(document.querySelectorAll('#hub-auth-cancel, #hub-auth-close'));
+
+      const state = { authed: false, loading: false, email: '' };
+
+      function setStatus(msg, ok = false) {
+        if (!statusEl) return;
+        statusEl.textContent = msg || '';
+        statusEl.style.color = ok ? '#a0f0c5' : 'var(--muted)';
+      }
+
+      function closePanel() {
+        panel?.classList.remove('open');
+      }
+
+      function render() {
+        authBtn.textContent = state.authed
+          ? state.email
+            ? `Log out (${state.email})`
+            : 'Log out'
+          : 'Log in';
+        authBtn.classList.toggle('logged-in', state.authed);
+        if (formWrap) formWrap.style.display = state.authed ? 'none' : 'block';
+        if (authedActions) authedActions.style.display = state.authed ? 'flex' : 'none';
+        if (submitBtn) submitBtn.disabled = state.loading;
+        if (logoutBtn) logoutBtn.disabled = state.loading;
+      }
+
+      async function fetchSession() {
+        try {
+          const res = await fetch(`${apiBase}/session`, { credentials: 'include' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (data.authed) {
+            state.authed = true;
+            state.email = data.email || '';
+            setStatus(`Signed in as ${state.email || 'user'}`, true);
+          } else {
+            state.authed = false;
+            state.email = '';
+            setStatus('Not signed in');
+          }
+        } catch (err) {
+          state.authed = false;
+          state.email = '';
+          setStatus('Unable to check session');
+        } finally {
+          render();
+        }
+      }
+
+      async function login() {
+        const email = emailInput?.value?.trim();
+        const password = passInput?.value || '';
+        if (!email || !password) {
+          setStatus('Email and password required');
+          return;
+        }
+        state.loading = true;
+        render();
+        setStatus('Signing in...');
+        try {
+          const res = await fetch(`${apiBase}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+          state.authed = true;
+          state.email = data.email || email;
+          setStatus(`Signed in as ${state.email}`, true);
+          passInput.value = '';
+          closePanel();
+        } catch (err) {
+          state.authed = false;
+          state.email = '';
+          setStatus(err.message || 'Login failed');
+        } finally {
+          state.loading = false;
+          render();
+        }
+      }
+
+      async function logout() {
+        state.loading = true;
+        render();
+        setStatus('Signing out...');
+        try {
+          await fetch(`${apiBase}/logout`, { method: 'POST', credentials: 'include' });
+        } catch (err) {
+          // ignore
+        }
+        state.authed = false;
+        state.email = '';
+        state.loading = false;
+        setStatus('Logged out', true);
+        render();
+      }
+
+      authBtn?.addEventListener('click', () => {
+        if (state.authed) {
+          logout();
+          return;
+        }
+        panel?.classList.toggle('open');
+        if (panel?.classList.contains('open')) {
+          setStatus('');
+          setTimeout(() => emailInput?.focus(), 10);
+        }
+      });
+
+      submitBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!state.loading) login();
+      });
+
+      logoutBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!state.loading) logout();
+      });
+
+      cancelBtns.forEach((btn) => btn?.addEventListener('click', () => closePanel()));
+
+      document.addEventListener('click', (e) => {
+        if (!panel?.classList.contains('open')) return;
+        if (panel.contains(e.target) || authBtn.contains(e.target)) return;
+        closePanel();
+      });
+
+      fetchSession();
+    })();
+  </script>
 </body>
 
 </html>

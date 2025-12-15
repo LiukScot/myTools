@@ -1,13 +1,15 @@
 # myTools
 
-Personal site stack for `liukscot.com`, housing multiple sub-apps.
+## What is myTools?
+myTools is a site hosting a variety of useful tools.
+Site doesn't require login, and it's self-hostable.
+Made 99% by AI, since i have skill issue.
 
-## Projects
-- `hub/` – root landing page on `liukscot.com` that links to myHealth and myMoney.
-- `myHealth/` – health tracker static frontend + PHP file API (`/myhealth`).
-- `myMoney/` – money/investment tracker with login + PHP file API (`/mymoney`).
+### Projects
+- `myHealth/` – mental and physical health tracker (`/myhealth`).
+- `myMoney/` – money/investment tracker (`/mymoney`).
 
-## Guidelines for developers
+## Guidelines for AI agents
 - Keep frontend JS in small modules instead of inline `<script>` tags. Each app now loads a top-level module (`/myhealth/js/app.js`, `/mymoney/js/app.js`) plus helper modules (e.g. `api.js`, `utils.js`). Add new helpers there rather than growing a single file.
 - Prefer separating concerns: API/fetch helpers, state/load/save, and UI wiring/rendering should live in distinct modules to ease debugging and testing.
 - Keep sensitive artifacts (sessions, .env) out of the webroot and under `.gitignore` (already configured).

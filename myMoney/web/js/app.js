@@ -54,17 +54,13 @@ const primaryStorageKey = 'investments_state_v2';
 
     function setAuthVisibility(authed) {
       isAuthed = authed;
-      const toHide = [authUI.email, authUI.pass, authUI.loginBtn, authUI.status];
-      toHide.forEach(el => el?.classList.toggle('hidden', authed));
-      authUI.logoutBtn?.classList.toggle('hidden', !authed);
-      authUI.hubBtn?.classList.toggle('hidden', !authed);
       const card = document.querySelector('.auth-card');
-      card?.classList.toggle('hidden', authed);
-      if (!authed) setAuthStatus('');
+      card?.classList.add('hidden'); // hide standalone login card
+      authUI.hubBtn?.classList.remove('hidden');
     }
 
     function setAppVisible(authed) {
-      if (appMain) appMain.classList.toggle('hidden', !authed);
+      if (appMain) appMain.classList.remove('hidden');
     }
 
     function resetAppState() {
@@ -75,28 +71,7 @@ const primaryStorageKey = 'investments_state_v2';
     }
 
     async function doLogin() {
-      const email = authUI.email?.value?.trim();
-      const password = authUI.pass?.value || '';
-      if (!email || !password) {
-        setAuthStatus('Email and password required');
-        return;
-      }
-      try {
-        const res = await apiFetch('/api/files/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await safeParseJson(res);
-        if (!res.ok) throw new Error((data && data.error) || (typeof data === 'string' ? data : '') || 'Login failed');
-        setAuthVisibility(true);
-        setAppVisible(true);
-        setAuthStatus(`Logged in as ${data.email || email}`, true);
-        if (authUI.pass) authUI.pass.value = '';
-        await initApp();
-      } catch (err) {
-        setAuthStatus(err.message || 'Login failed');
-      }
+      setAuthStatus('Please log in from the hub, then reopen myMoney.', false);
     }
 
     async function doLogout() {
@@ -105,10 +80,7 @@ const primaryStorageKey = 'investments_state_v2';
       } catch (err) {
         // ignore
       }
-      setAuthStatus('Logged out', true);
-      resetAppState();
-      setAppVisible(false);
-      setAuthVisibility(false);
+      setAuthStatus('Logged out. Log in via hub to sync data.', false);
     }
 
 function wireAuthForm() {
@@ -209,10 +181,9 @@ function wireAuthForm() {
           body: JSON.stringify(state),
         });
         if (res.status === 401) {
-          setAuthStatus('Session expired. Please log in again.');
+          setAuthStatus('Session expired. Working offline; log in via hub to sync.');
           setAuthVisibility(false);
-          setAppVisible(false);
-          resetAppState();
+          setAppVisible(true);
           return;
         }
         if (!res.ok) throw new Error(`Server returned ${res.status}`);
@@ -1403,6 +1374,16 @@ function wireAuthForm() {
 
     async function restoreSessionIfPossible() {
       try {
+        const res = await apiFetch('/api/files/session');
+        const data = await safeParseJson(res);
+        if (!res.ok || !data?.authed) {
+          setAuthStatus('Browsing without login. Log in via the hub to sync.');
+          setAuthVisibility(false);
+          setAppVisible(true);
+          const localState = loadFromLocalStorage();
+          applyState(localState);
+          return false;
+        }
         const state = await loadState();
         setAuthVisibility(true);
         setAppVisible(true);
@@ -1410,8 +1391,11 @@ function wireAuthForm() {
         return true;
       } catch (err) {
         if ((err.message || '').includes('unauthorized')) {
+          setAuthStatus('Browsing without login. Log in via the hub to sync.');
           setAuthVisibility(false);
-          setAppVisible(false);
+          setAppVisible(true);
+          const localState = loadFromLocalStorage();
+          applyState(localState);
           return false;
         }
         console.warn('could not restore session', err);
@@ -1450,7 +1434,7 @@ function wireAuthForm() {
       wireNav();
       wireAuthForm();
       setAuthVisibility(false);
-      setAppVisible(false);
+      setAppVisible(true);
       resetAppState();
       await restoreSessionIfPossible();
     });

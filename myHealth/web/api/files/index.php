@@ -44,7 +44,7 @@ $USER_SETTINGS_TABLE = 'user_settings';
 
 $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
 
-// Keep session files outside the webroot (one level above /web)
+// Keep session files shared across apps (one level above app folders)
 $sessDir = dirname(__DIR__, 3) . '/sessions';
 if (!is_dir($sessDir)) {
     @mkdir($sessDir, 0700, true);
@@ -54,7 +54,7 @@ $logFile = $sessDir . '/api-error.log';
 
 // Use 5-arg compatible signature for broader PHP support
 session_set_cookie_params(0, '/', '', $isSecure, true);
-session_name('MYHEALTH_SESSID');
+session_name('MYTOOLS_SESSID');
 session_start();
 
 header('Content-Type: application/json');
@@ -151,6 +151,12 @@ function send_session_cookie($isSecure)
     $name = session_name();
     $value = session_id();
     $params = session_get_cookie_params();
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    $host = preg_replace('/:\d+$/', '', strtolower($host));
+    $baseDomain = $host;
+    if (strpos($host, 'localhost') === false && strpos($host, '127.0.0.1') === false) {
+        $baseDomain = preg_replace('/^www\./', '', $host);
+    }
     // 30 days persistence
     $expires = time() + 60 * 60 * 24 * 30;
     $date = gmdate('D, d M Y H:i:s T', $expires);
@@ -162,8 +168,9 @@ function send_session_cookie($isSecure)
         "path={$params['path']}",
         "HttpOnly"
     ];
-    if ($params['domain'])
-        $parts[] = "domain={$params['domain']}";
+    if ($baseDomain && strpos($baseDomain, 'localhost') === false && strpos($baseDomain, '127.0.0.1') === false) {
+        $parts[] = "domain=.{$baseDomain}";
+    }
     if ($isSecure)
         $parts[] = "Secure";
     $parts[] = "SameSite=Lax";
@@ -256,6 +263,23 @@ function require_auth()
 // Determine the path
 $rawUri = strtok($_SERVER['REQUEST_URI'] ?? '', '?');
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+// Session status: GET /api/session or /api/files/session
+if (preg_match('#/api(?:/files)?/session/?$#', $rawUri)) {
+    if ($method !== 'GET') {
+        respond(405, ['error' => 'method not allowed']);
+    }
+    if (!is_authed()) {
+        respond(200, ['authed' => false]);
+    }
+    respond(200, [
+        'authed' => true,
+        'email' => $_SESSION['email'] ?? null,
+        'name' => $_SESSION['name'] ?? null,
+        'role' => $_SESSION['role'] ?? null,
+        'session_name' => session_name(),
+    ]);
+}
 
 // Register endpoint: POST /api/register or /api/files/register {email, password, name}
 if (preg_match('#/api(?:/files)?/register/?$#', $rawUri)) {
