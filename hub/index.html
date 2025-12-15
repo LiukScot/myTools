@@ -160,6 +160,12 @@
       margin-top: 4px;
     }
 
+    .auth-panel .actions.column {
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+    }
+
     .auth-panel button.primary {
       flex: 1;
       padding: 10px 12px;
@@ -177,6 +183,17 @@
       color: var(--muted);
       cursor: pointer;
       font-weight: 600;
+    }
+
+    .auth-panel button.danger {
+      border-color: #ff97b1;
+      color: #ffd5e1;
+      box-shadow: 0 0 0 1px var(--glow-health);
+    }
+
+    .auth-panel .change-pass {
+      display: none;
+      margin-top: 8px;
     }
 
     .auth-panel .status {
@@ -324,9 +341,28 @@
               <button id="hub-auth-cancel" class="link" type="button">Close</button>
             </div>
           </div>
-          <div id="hub-authed-actions" class="actions" style="display:none;">
-            <button id="hub-auth-logout" class="primary">Log out</button>
+          <div id="hub-authed-actions" class="actions column" style="display:none;">
+            <button id="hub-open-change-pass" class="primary">Change password</button>
+            <button id="hub-auth-logout" class="primary danger">Log out</button>
             <button id="hub-auth-close" class="link" type="button">Close</button>
+          </div>
+          <div id="hub-change-pass" class="change-pass">
+            <div class="field">
+              <label for="hub-current-pass">Current password</label>
+              <input id="hub-current-pass" type="password" autocomplete="current-password" placeholder="••••••••" />
+            </div>
+            <div class="field">
+              <label for="hub-new-pass">New password</label>
+              <input id="hub-new-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters" />
+            </div>
+            <div class="field">
+              <label for="hub-new-pass-2">Confirm new password</label>
+              <input id="hub-new-pass-2" type="password" autocomplete="new-password" placeholder="Repeat new password" />
+            </div>
+            <div class="actions">
+              <button id="hub-change-pass-submit" class="primary">Update password</button>
+              <button id="hub-change-pass-cancel" class="link" type="button">Back</button>
+            </div>
           </div>
         </div>
       </div>
@@ -365,10 +401,17 @@
       const statusEl = document.getElementById('hub-auth-status');
       const formWrap = document.getElementById('hub-auth-form');
       const authedActions = document.getElementById('hub-authed-actions');
+      const changeWrap = document.getElementById('hub-change-pass');
+      const openChangeBtn = document.getElementById('hub-open-change-pass');
+      const changeSubmit = document.getElementById('hub-change-pass-submit');
+      const changeCancel = document.getElementById('hub-change-pass-cancel');
+      const changeCurrent = document.getElementById('hub-current-pass');
+      const changeNew = document.getElementById('hub-new-pass');
+      const changeNew2 = document.getElementById('hub-new-pass-2');
       const logoutBtn = document.getElementById('hub-auth-logout');
       const cancelBtns = Array.from(document.querySelectorAll('#hub-auth-cancel, #hub-auth-close'));
 
-      const state = { authed: false, loading: false, email: '' };
+      const state = { authed: false, loading: false, email: '', panelMode: 'login' }; // login | menu | change
 
       function setStatus(msg, ok = false) {
         if (!statusEl) return;
@@ -378,18 +421,21 @@
 
       function closePanel() {
         panel?.classList.remove('open');
+        state.panelMode = state.authed ? 'menu' : 'login';
       }
 
       function render() {
         authBtn.textContent = state.authed
           ? state.email
-            ? `Log out (${state.email})`
-            : 'Log out'
+            ? state.email
+            : 'Account'
           : 'Log in';
         authBtn.classList.toggle('logged-in', state.authed);
         if (formWrap) formWrap.style.display = state.authed ? 'none' : 'block';
-        if (authedActions) authedActions.style.display = state.authed ? 'flex' : 'none';
+        if (authedActions) authedActions.style.display = state.authed && state.panelMode === 'menu' ? 'flex' : 'none';
+        if (changeWrap) changeWrap.style.display = state.authed && state.panelMode === 'change' ? 'block' : 'none';
         if (submitBtn) submitBtn.disabled = state.loading;
+        if (changeSubmit) changeSubmit.disabled = state.loading;
         if (logoutBtn) logoutBtn.disabled = state.loading;
       }
 
@@ -402,14 +448,17 @@
             state.authed = true;
             state.email = data.email || '';
             setStatus(`Signed in as ${state.email || 'user'}`, true);
+            state.panelMode = 'menu';
           } else {
             state.authed = false;
             state.email = '';
             setStatus('Not signed in');
+            state.panelMode = 'login';
           }
         } catch (err) {
           state.authed = false;
           state.email = '';
+          state.panelMode = 'login';
           setStatus('Unable to check session');
         } finally {
           render();
@@ -463,24 +512,103 @@
         state.email = '';
         state.loading = false;
         setStatus('Logged out', true);
+        closePanel();
         render();
+      }
+
+      function resetChangeForm() {
+        if (changeCurrent) changeCurrent.value = '';
+        if (changeNew) changeNew.value = '';
+        if (changeNew2) changeNew2.value = '';
+      }
+
+      function openPanelWith(mode) {
+        state.panelMode = mode;
+        panel?.classList.add('open');
+        setStatus('');
+        render();
+        if (mode === 'login') {
+          setTimeout(() => emailInput?.focus(), 10);
+        }
+      }
+
+      async function changePassword() {
+        const current = changeCurrent?.value || '';
+        const next = changeNew?.value || '';
+        const next2 = changeNew2?.value || '';
+        if (!current || !next || !next2) {
+          setStatus('Fill all password fields');
+          return;
+        }
+        if (next !== next2) {
+          setStatus('New passwords do not match');
+          return;
+        }
+        if (next.length < 8) {
+          setStatus('New password is too short (min 8 chars)');
+          return;
+        }
+        state.loading = true;
+        render();
+        setStatus('Updating password...');
+        try {
+          const res = await fetch(`${apiBase}/change-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ current_password: current, new_password: next }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+          setStatus('Password updated', true);
+          resetChangeForm();
+          state.panelMode = 'menu';
+        } catch (err) {
+          setStatus(err.message || 'Failed to change password');
+        } finally {
+          state.loading = false;
+          render();
+        }
       }
 
       authBtn?.addEventListener('click', () => {
         if (state.authed) {
-          logout();
+          if (panel?.classList.contains('open') && state.panelMode === 'menu') {
+            closePanel();
+          } else {
+            openPanelWith('menu');
+          }
           return;
         }
-        panel?.classList.toggle('open');
-        if (panel?.classList.contains('open')) {
-          setStatus('');
-          setTimeout(() => emailInput?.focus(), 10);
-        }
+        openPanelWith('login');
       });
 
       submitBtn?.addEventListener('click', (e) => {
         e.preventDefault();
         if (!state.loading) login();
+      });
+
+      openChangeBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (state.loading) return;
+        setStatus('');
+        state.panelMode = 'change';
+        render();
+        setTimeout(() => changeCurrent?.focus(), 10);
+      });
+
+      changeSubmit?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!state.loading) changePassword();
+      });
+
+      changeCancel?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (state.loading) return;
+        setStatus('');
+        resetChangeForm();
+        state.panelMode = 'menu';
+        render();
       });
 
       logoutBtn?.addEventListener('click', (e) => {

@@ -1,0 +1,15 @@
+services:
+  mytools:
+    build: .
+    image: mytools:local
+    container_name: mytools
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+    environment:
+      HOST: 0.0.0.0
+      PORT: ${PORT:-8000}
+    volumes:
+      - ./data:/app/data
+      - ./myHealth/sessions:/app/myHealth/sessions
+      - ./myMoney/sessions:/app/myMoney/sessions
+    restart: unless-stopped

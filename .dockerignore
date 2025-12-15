@@ -1,0 +1,20 @@
+.git
+.gitignore
+data
+*.sqlite
+.env
+**/.env
+
+# Local session stores and logs
+myHealth/sessions
+myMoney/sessions
+myHealth/web/api/sessions
+myMoney/web/api/sessions
+sessions
+*.log
+
+# Local dev artifacts
+testing
+node_modules
+.vscode
+.idea

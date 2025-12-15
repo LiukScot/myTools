@@ -1,9 +1,9 @@
 <?php
-// Tiny JSON file API for Hetzner Webhosting (PHP + MySQL) with simple login.
-// Drop this file (and the .htaccess in the same folder) into public_html/myhealth/api/files/
+// Tiny JSON file API using a local SQLite database with simple login.
+// Drop this file into public_html/myhealth/api/files/ (or serve locally via testing/run.sh)
 // Then point your frontend requests to /api/files/...
 
-// ---- DB credentials are provided via environment (.env file or hosting panel) ----
+// ---- Optional env vars are loaded from .env (ALLOWED_ORIGINS, LOCAL_DB_PATH, etc.) ----
 $_ENV_PATHS_LOADED = [];
 function load_env_files(array $paths)
 {
@@ -36,8 +36,8 @@ function load_env_files(array $paths)
     }
 }
 
-// Session login only; users are pre-created by you.
-$ALLOW_SIGNUP = false; // leave false to block self-registration
+// Session login only; users can self-register when enabled.
+$ALLOW_SIGNUP = true; // allow self-registration
 $FILES_TABLE = 'files';
 $USER_SETTINGS_TABLE = 'user_settings';
 // ---- No edits needed below unless you want to customize behavior ----
@@ -179,73 +179,98 @@ function send_session_cookie($isSecure)
     // This ensures our fully-configured cookie is the one that sticks.
     header("Set-Cookie: " . implode('; ', $parts), true);
 }
-function env_or_fail($key)
+
+function resolve_db_path(): string
 {
-    global $_ENV_PATHS_LOADED;
-    $candidates = [
-        getenv($key),
-        $_ENV[$key] ?? null,
-        $_SERVER[$key] ?? null,
-    ];
-    foreach ($candidates as $val) {
-        if ($val !== false && $val !== null && $val !== '') {
-            return $val;
+    $envPath = getenv('LOCAL_DB_PATH') ?: ($_ENV['LOCAL_DB_PATH'] ?? '');
+    if ($envPath !== '') {
+        return $envPath;
+    }
+
+    $candidates = [];
+    $root = dirname(__DIR__, 4);
+    if ($root && $root !== '/' && $root !== '\\') {
+        $candidates[] = $root . '/data/mytools.sqlite';
+    }
+    $candidates[] = dirname(__DIR__, 3) . '/data/mytools.sqlite';
+    $candidates[] = dirname(__DIR__, 2) . '/data/mytools.sqlite';
+    $candidates[] = dirname(__DIR__) . '/mytools.sqlite';
+    $candidates[] = __DIR__ . '/mytools.sqlite';
+
+    foreach ($candidates as $path) {
+        $dir = dirname($path);
+        if (!is_dir($dir) && !@mkdir($dir, 0700, true)) {
+            continue;
+        }
+        return $path;
+    }
+
+    respond(500, ['error' => 'no writable db path found']);
+}
+
+function ensure_tables(PDO $db, string $filesTable, string $userSettingsTable): void
+{
+    foreach ([$filesTable, $userSettingsTable] as $tbl) {
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $tbl)) {
+            respond(500, ['error' => 'invalid table name']);
         }
     }
-    $hint = 'set it via hosting env vars or a .env file';
-    if ($_ENV_PATHS_LOADED) {
-        $short = array_map(static function ($p) {
-            $root = dirname(__DIR__, 4);
-            $rel = ltrim(str_replace($root, '', $p), '/');
-            return $rel ?: $p;
-        }, $_ENV_PATHS_LOADED);
-        $hint .= ' (checked: ' . implode(', ', $short) . ')';
+    $db->exec(
+        "CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            name TEXT DEFAULT NULL,
+            role TEXT DEFAULT 'user',
+            email_verified_at TEXT DEFAULT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )"
+    );
+    $db->exec(
+        "CREATE TABLE IF NOT EXISTS {$filesTable} (
+            name TEXT PRIMARY KEY,
+            data TEXT NOT NULL,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )"
+    );
+    // Note: gemini_key now stores the user's Mistral API key; column name kept for compatibility.
+    $db->exec(
+        "CREATE TABLE IF NOT EXISTS {$userSettingsTable} (
+            user_id INTEGER PRIMARY KEY,
+            gemini_key TEXT DEFAULT NULL,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )"
+    );
+}
+
+function connect_db(string $filesTable, string $userSettingsTable): PDO
+{
+    if (!extension_loaded('pdo_sqlite')) {
+        respond(500, ['error' => 'pdo_sqlite extension not loaded']);
     }
-    respond(500, ['error' => "missing env $key", 'hint' => $hint]);
+    $path = resolve_db_path();
+    try {
+        $db = new PDO(
+            'sqlite:' . $path,
+            null,
+            null,
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]
+        );
+    } catch (Throwable $e) {
+        log_api_error("DB connect failed: " . $e->getMessage());
+        respond(500, ['error' => 'db connect failed', 'detail' => $e->getMessage()]);
+    }
+    $db->exec('PRAGMA foreign_keys = ON');
+    ensure_tables($db, $filesTable, $userSettingsTable);
+    return $db;
 }
-$DB_HOST = env_or_fail('DB_HOST');
-$DB_USER = env_or_fail('DB_USER');
-$DB_PASS = env_or_fail('DB_PASS');
-$DB_NAME = env_or_fail('DB_NAME');
 
-if (!extension_loaded('mysqli')) {
-    respond(500, ['error' => 'mysqli extension not loaded']);
-}
-
-$mysqli = @new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
-if ($mysqli->connect_errno) {
-    respond(500, ['error' => 'db connect failed']);
-}
-
-// Ensure tables exist
-$mysqli->query(
-    "CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        email VARCHAR(190) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
-        name VARCHAR(190) DEFAULT NULL,
-        role VARCHAR(50) DEFAULT 'user',
-        email_verified_at DATETIME DEFAULT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
-);
-$mysqli->query(
-    "CREATE TABLE IF NOT EXISTS {$FILES_TABLE} (
-        name VARCHAR(150) PRIMARY KEY,
-        data LONGTEXT NOT NULL,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
-);
-// Note: gemini_key now stores the user's Mistral API key; column name kept for compatibility.
-$mysqli->query(
-    "CREATE TABLE IF NOT EXISTS {$USER_SETTINGS_TABLE} (
-        user_id INT NOT NULL,
-        gemini_key TEXT DEFAULT NULL,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        PRIMARY KEY (user_id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
-);
+$db = connect_db($FILES_TABLE, $USER_SETTINGS_TABLE);
 
 // Helpers
 function is_authed()
@@ -295,18 +320,13 @@ if (preg_match('#/api(?:/files)?/register/?$#', $rawUri)) {
         respond(400, ['error' => 'email and password required']);
     if (strlen($password) < 8)
         respond(400, ['error' => 'password too short']);
-    $stmt = $mysqli->prepare("SELECT id FROM users WHERE email=? LIMIT 1");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->store_result();
-    if ($stmt->num_rows > 0)
+    $stmt = $db->prepare("SELECT id FROM users WHERE email=? LIMIT 1");
+    $stmt->execute([$email]);
+    if ($stmt->fetch())
         respond(400, ['error' => 'email already exists']);
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = $mysqli->prepare("INSERT INTO users (email, password_hash, name, role) VALUES (?, ?, ?, 'user')");
-    $stmt->bind_param("sss", $email, $hash, $name);
-    if (!$stmt->execute()) {
-        respond(500, ['error' => 'failed to create user']);
-    }
+    $stmt = $db->prepare("INSERT INTO users (email, password_hash, name, role) VALUES (?, ?, ?, 'user')");
+    $stmt->execute([$email, $hash, $name]);
     respond(201, ['status' => 'ok', 'email' => $email]);
 }
 
@@ -320,11 +340,9 @@ if (preg_match('#/api(?:/files)?/login/?$#', $rawUri)) {
         $password = $body['password'] ?? '';
         if ($email === '' || $password === '')
             respond(400, ['error' => 'email and password required']);
-        $stmt = $mysqli->prepare("SELECT id, email, password_hash, name, role FROM users WHERE email=? LIMIT 1");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $user = $result ? $result->fetch_assoc() : null;
+        $stmt = $db->prepare("SELECT id, email, password_hash, name, role FROM users WHERE email=? LIMIT 1");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch();
         if (!$user || !password_verify($password, $user['password_hash'])) {
             respond(401, ['error' => 'invalid credentials']);
         }
@@ -365,6 +383,34 @@ if (preg_match('#/api(?:/files)?/logout/?$#', $rawUri)) {
         );
     }
     session_destroy();
+    respond(200, ['status' => 'ok']);
+}
+
+// Change password: POST /api/change-password {current_password, new_password}
+if (preg_match('#/api(?:/files)?/change-password/?$#', $rawUri)) {
+    require_auth();
+    if ($method !== 'POST')
+        respond(405, ['error' => 'method not allowed']);
+    $body = read_json();
+    $current = $body['current_password'] ?? '';
+    $new = $body['new_password'] ?? '';
+    if (!is_string($current) || !is_string($new) || $current === '' || $new === '') {
+        respond(400, ['error' => 'current and new password required']);
+    }
+    if (strlen($new) < 8) {
+        respond(400, ['error' => 'new password too short']);
+    }
+    $stmt = $db->prepare("SELECT password_hash FROM users WHERE id=? LIMIT 1");
+    $stmt->execute([$_SESSION['user_id']]);
+    $row = $stmt->fetch();
+    if (!$row || !password_verify($current, $row['password_hash'] ?? '')) {
+        respond(400, ['error' => 'current password incorrect']);
+    }
+    $newHash = password_hash($new, PASSWORD_DEFAULT);
+    $up = $db->prepare("UPDATE users SET password_hash=?, updated_at=CURRENT_TIMESTAMP WHERE id=?");
+    $up->execute([$newHash, $_SESSION['user_id']]);
+    session_regenerate_id(true);
+    send_session_cookie($isSecure);
     respond(200, ['status' => 'ok']);
 }
 
@@ -418,20 +464,18 @@ function secure_bytes(int $len): string
     respond(500, ['error' => 'no secure random source available']);
 }
 
-function json_from_files_table(mysqli $mysqli, string $name): ?array
+function json_from_files_table(PDO $db, string $name): ?array
 {
-    $stmt = $mysqli->prepare("SELECT data FROM files WHERE name=? LIMIT 1");
-    $stmt->bind_param("s", $name);
-    $stmt->execute();
-    $stmt->bind_result($data);
-    if ($stmt->fetch()) {
-        $decoded = json_decode($data, true);
+    global $FILES_TABLE;
+    $stmt = $db->prepare("SELECT data FROM {$FILES_TABLE} WHERE name=? LIMIT 1");
+    $stmt->execute([$name]);
+    $row = $stmt->fetch();
+    if ($row && isset($row['data'])) {
+        $decoded = json_decode($row['data'], true);
         if (json_last_error() === JSON_ERROR_NONE) {
-            $stmt->close();
             return $decoded;
         }
     }
-    $stmt->close();
     return null;
 }
 
@@ -618,16 +662,13 @@ if (preg_match('#/api(?:/files)?/ai-key/?$#', $rawUri)) {
     $userId = $_SESSION['user_id'];
     if ($method === 'GET') {
         enforce_rate_limit('ai-key:get', 8, 60);
-        $stmt = $mysqli->prepare("SELECT gemini_key, updated_at FROM {$USER_SETTINGS_TABLE} WHERE user_id=? LIMIT 1");
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
-        $stmt->bind_result($key, $updated);
-        if ($stmt->fetch() && $key !== null && $key !== '') {
-            $last4 = strlen($key) >= 4 ? substr($key, -4) : '';
-            $stmt->close();
-            respond(200, ['has_key' => true, 'last4' => $last4, 'updated_at' => $updated]);
+        $stmt = $db->prepare("SELECT gemini_key, updated_at FROM {$USER_SETTINGS_TABLE} WHERE user_id=? LIMIT 1");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch();
+        if ($row && isset($row['gemini_key']) && $row['gemini_key'] !== null && $row['gemini_key'] !== '') {
+            $last4 = strlen($row['gemini_key']) >= 4 ? substr($row['gemini_key'], -4) : '';
+            respond(200, ['has_key' => true, 'last4' => $last4, 'updated_at' => $row['updated_at'] ?? null]);
         }
-        $stmt->close();
         respond(200, ['has_key' => false]);
     }
     if ($method === 'PUT' || $method === 'POST') {
@@ -638,19 +679,15 @@ if (preg_match('#/api(?:/files)?/ai-key/?$#', $rawUri)) {
             respond(400, ['error' => 'key required']);
         if (strlen($key) > 4096)
             respond(400, ['error' => 'key too long']);
-        $stmt = $mysqli->prepare("INSERT INTO {$USER_SETTINGS_TABLE} (user_id, gemini_key) VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE gemini_key=VALUES(gemini_key), updated_at=CURRENT_TIMESTAMP");
-        $stmt->bind_param("is", $userId, $key);
-        $stmt->execute();
-        $stmt->close();
+        $stmt = $db->prepare("INSERT INTO {$USER_SETTINGS_TABLE} (user_id, gemini_key, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(user_id) DO UPDATE SET gemini_key=excluded.gemini_key, updated_at=CURRENT_TIMESTAMP");
+        $stmt->execute([$userId, $key]);
         respond(200, ['status' => 'saved', 'has_key' => true]);
     }
     if ($method === 'DELETE') {
         enforce_rate_limit('ai-key:write', 5, 300);
-        $stmt = $mysqli->prepare("UPDATE {$USER_SETTINGS_TABLE} SET gemini_key=NULL, updated_at=CURRENT_TIMESTAMP WHERE user_id=?");
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
-        $stmt->close();
+        $stmt = $db->prepare("UPDATE {$USER_SETTINGS_TABLE} SET gemini_key=NULL, updated_at=CURRENT_TIMESTAMP WHERE user_id=?");
+        $stmt->execute([$userId]);
         respond(200, ['status' => 'cleared', 'has_key' => false]);
     }
     respond(405, ['error' => 'method not allowed']);
@@ -670,15 +707,13 @@ if (preg_match('#/api(?:/files)?/chat/?$#', $rawUri)) {
     }
     enforce_chat_limits(2, null);
     // Load Mistral key (stored in gemini_key column for compatibility)
-    $stmt = $mysqli->prepare("SELECT gemini_key FROM {$USER_SETTINGS_TABLE} WHERE user_id=? LIMIT 1");
-    $stmt->bind_param("i", $_SESSION['user_id']);
-    $stmt->execute();
-    $stmt->bind_result($apiKey);
-    if (!$stmt->fetch() || !$apiKey) {
-        $stmt->close();
+    $stmt = $db->prepare("SELECT gemini_key FROM {$USER_SETTINGS_TABLE} WHERE user_id=? LIMIT 1");
+    $stmt->execute([$_SESSION['user_id']]);
+    $row = $stmt->fetch();
+    $apiKey = $row['gemini_key'] ?? null;
+    if (!$apiKey) {
         respond(400, ['error' => 'no mistral key saved']);
     }
-    $stmt->close();
 
     $model = isset($body['model']) && is_string($body['model']) ? trim($body['model']) : 'mistral-small-latest';
     $allowedModels = [
@@ -697,8 +732,8 @@ if (preg_match('#/api(?:/files)?/chat/?$#', $rawUri)) {
     }
 
     // Build context from stored datasets (filtered by range)
-    $diary = filter_dataset_by_days(json_from_files_table($mysqli, 'diary.json'), $days);
-    $pain = filter_dataset_by_days(json_from_files_table($mysqli, 'pain.json'), $days);
+    $diary = filter_dataset_by_days(json_from_files_table($db, 'diary.json'), $days);
+    $pain = filter_dataset_by_days(json_from_files_table($db, 'pain.json'), $days);
     $ctxParts = [];
     $ctxDiary = rows_to_text($diary, 'diary'); // filtered rows
     $ctxPain = rows_to_text($pain, 'pain');   // filtered rows
@@ -752,8 +787,8 @@ if ($name !== '' && substr($name, -5) !== '.json') {
 // List files: GET /api/files
 if ($name === '' && $method === 'GET') {
     require_auth();
-    $res = $mysqli->query("SELECT name, CHAR_LENGTH(data) AS size, updated_at FROM {$FILES_TABLE} ORDER BY name ASC");
-    $rows = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
+    $res = $db->query("SELECT name, LENGTH(data) AS size, updated_at FROM {$FILES_TABLE} ORDER BY name ASC");
+    $rows = $res ? $res->fetchAll() : [];
     respond(200, $rows);
 }
 
@@ -765,12 +800,11 @@ if ($name === '') {
 // Get a file: GET /api/files/{name}.json
 if ($method === 'GET') {
     require_auth();
-    $stmt = $mysqli->prepare("SELECT data FROM {$FILES_TABLE} WHERE name=?");
-    $stmt->bind_param("s", $name);
-    $stmt->execute();
-    $stmt->bind_result($data);
-    if ($stmt->fetch()) {
-        echo $data; // already JSON
+    $stmt = $db->prepare("SELECT data FROM {$FILES_TABLE} WHERE name=? LIMIT 1");
+    $stmt->execute([$name]);
+    $row = $stmt->fetch();
+    if ($row && isset($row['data'])) {
+        echo $row['data']; // already JSON
     } else {
         respond(404, ['error' => 'not found']);
     }
@@ -788,10 +822,9 @@ if ($method === 'PUT' || $method === 'POST') {
     if (json_last_error() !== JSON_ERROR_NONE) {
         respond(400, ['error' => 'invalid json']);
     }
-    $stmt = $mysqli->prepare("INSERT INTO {$FILES_TABLE} (name, data) VALUES (?, ?)
-        ON DUPLICATE KEY UPDATE data=VALUES(data), updated_at=CURRENT_TIMESTAMP");
-    $stmt->bind_param("ss", $name, $raw);
-    $stmt->execute();
+    $stmt = $db->prepare("INSERT INTO {$FILES_TABLE} (name, data, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(name) DO UPDATE SET data=excluded.data, updated_at=CURRENT_TIMESTAMP");
+    $stmt->execute([$name, $raw]);
     respond(200, ['status' => 'saved', 'file' => $name]);
 }
 

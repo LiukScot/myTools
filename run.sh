@@ -2,8 +2,9 @@
 set -euo pipefail
 
 PORT="${PORT:-8000}"
+HOST="${HOST:-0.0.0.0}"
 PHP_BIN="${PHP_BIN:-php}"
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROUTER_FILE=""
 ROUTER_TMP=""
 ENV_FILE="$ROOT_DIR/.env"
@@ -142,7 +143,7 @@ load_env_file "$ENV_FILE" || true
 
 ensure_router_file
 
-echo "Serving hub at http://127.0.0.1:${PORT}" \
+echo "Serving hub at http://${HOST}:${PORT}" \
   " (myHealth at /myhealth, myMoney at /mymoney)"
 cd "$ROOT_DIR"
-APP_ROOT="$ROOT_DIR" "$PHP_BIN" -S "127.0.0.1:${PORT}" "$ROUTER_FILE"
+APP_ROOT="$ROOT_DIR" "$PHP_BIN" -S "${HOST}:${PORT}" "$ROUTER_FILE"

@@ -11,19 +11,42 @@ Made 99% by AI, since i have skill issue.
 - `myHealth/` – mental and physical health tracker (`/myhealth`).
 - `myMoney/` – money/investment tracker (`/mymoney`).
 
-## Guidelines for AI agents
+### Self-hosting
 
-- Keep frontend JS in small modules instead of inline `<script>` tags. Each app now loads a top-level module (`/myhealth/js/app.js`, `/mymoney/js/app.js`) plus helper modules (e.g. `api.js`, `utils.js`). Add new helpers there rather than growing a single file.
-- Prefer separating concerns: API/fetch helpers, state/load/save, and UI wiring/rendering should live in distinct modules to ease debugging and testing.
-- Keep sensitive artifacts (sessions, .env) out of the webroot and under `.gitignore` (already configured).
-- CSS naming/scoping: each app is namespaced via `body.mh-app` (myHealth) and `body.mm-app` (myMoney); prefer scoping selectors under those roots and using prefixed BEM-style class names (`mh-card__title`, `mm-nav__button--active`). Avoid bare element selectors;
+- Login + JSON data now live in a local SQLite DB at `data/mytools.sqlite` (auto-created). Override path with `LOCAL_DB_PATH=...` in `.env`.
+- Optional `.env` is still read for things like `ALLOWED_ORIGINS` or a custom DB path.
+- PHP needs the sqlite/pdo_sqlite extension enabled (bundled in most installs).
+- Signup is enabled; new users can register directly.
+- Start the unified server from repo root: `./run.sh`
+  - Hub at `http://127.0.0.1:8000/` by default; set `HOST=0.0.0.0` to expose on your LAN.
 
-### If you self-host and use online db and webhosting solutions
+### Running at liukscot.com (recommended approach)
 
-- Put DB creds in the repo root `.env` (DB_HOST, DB_USER, DB_PASS, DB_NAME).
-- Start the unified server from repo root: `./testing/run.sh`
-  - Hub at `http://127.0.0.1:8000/`
+- What you do:
+  - DNS: point `liukscot.com` and `www.liukscot.com` A/AAAA records to your server.
+  - Reverse proxy with TLS: install Caddy **or** nginx and proxy to `127.0.0.1:8000`.
+    - Caddy (auto-HTTPS):  
+      ```
+      liukscot.com, www.liukscot.com {
+        reverse_proxy 127.0.0.1:8000
+      }
+      ```
+    - nginx (concept): listen on 80→301 to 443; on 443 `proxy_pass http://127.0.0.1:8000;` and use certbot for TLS.
+  - Firewall: allow 80/443; keep 8000 closed externally.
+  - Env: set `ALLOWED_ORIGINS=https://liukscot.com,https://www.liukscot.com` in `.env` (add LAN origins while testing if needed).
+- What the repo does:
+  - `./run.sh` starts PHP on `HOST`/`PORT` (defaults: `127.0.0.1:8000`; override with `HOST=0.0.0.0` and/or `PORT=...`).
+  - APIs auto-create `data/mytools.sqlite` and tables on first write.
+  - Signup is enabled by default; disable by toggling `$ALLOW_SIGNUP` in both APIs if you want invite-only.
 
-- Use `deploy.sh` from repo root to push hub + myHealth + myMoney in one go:
-  - `FTP_HOST=... FTP_USER=... FTP_PASS=... ./deploy.sh`
-  - Optional overrides: `BASE_REMOTE=/public_html`, `REMOTE_HUB=/public_html`, `REMOTE_HEALTH=/public_html/myhealth`, `REMOTE_MONEY=/public_html/mymoney`.
+### Docker
+
+1) Build the image from repo root:
+   - `docker build -t mytools .`
+2) Easiest run (short): `docker compose up -d`  
+   - Ports/env can be overridden: `PORT=9000 docker compose up`  
+   - Uses `docker-compose.yml` volumes to persist SQLite + sessions to `./data`, `./myHealth/sessions`, `./myMoney/sessions`.
+   - Hub: `http://localhost:8000` (or your chosen port; myHealth at `/myhealth`, myMoney at `/mymoney`)
+3) Optional: one-liner without compose (if you prefer):  
+   - `docker run --name mytools -p 8000:8000 -v "$(pwd)/data:/app/data" -v "$(pwd)/myHealth/sessions:/app/myHealth/sessions" -v "$(pwd)/myMoney/sessions:/app/myMoney/sessions" --env-file .env mytools`
+4) Env: set `ALLOWED_ORIGINS`, `LOCAL_DB_PATH` (custom DB path), or override `PORT` as needed (container default `HOST=0.0.0.0`, `PORT=8000`). Compose does not require a `.env`; export vars inline (`ALLOWED_ORIGINS=... docker compose up`) or create a `.env` and run `docker compose --env-file .env up`.

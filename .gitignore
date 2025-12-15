@@ -11,3 +11,11 @@ myMoney/sessions/
 myHealth/sessions/
 myMoney/web/sessions/
 myHealth/web/sessions/
+
+# Local SQLite database (auto-created)
+data/
+*.sqlite
+
+# Local exports / logs (personal data)
+testing/*.js
+testing/errorLogs/
