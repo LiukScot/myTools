@@ -1,15 +1,18 @@
 # myTools
 
 ## What is myTools?
+
 myTools is a site hosting a variety of useful tools.
 Site doesn't require login, and it's self-hostable.
 Made 99% by AI, since i have skill issue.
 
 ### Projects
+
 - `myHealth/` – mental and physical health tracker (`/myhealth`).
 - `myMoney/` – money/investment tracker (`/mymoney`).
 
 ## Guidelines for AI agents
+
 - Keep frontend JS in small modules instead of inline `<script>` tags. Each app now loads a top-level module (`/myhealth/js/app.js`, `/mymoney/js/app.js`) plus helper modules (e.g. `api.js`, `utils.js`). Add new helpers there rather than growing a single file.
 - Prefer separating concerns: API/fetch helpers, state/load/save, and UI wiring/rendering should live in distinct modules to ease debugging and testing.
 - Keep sensitive artifacts (sessions, .env) out of the webroot and under `.gitignore` (already configured).
@@ -23,6 +26,7 @@ Made 99% by AI, since i have skill issue.
 - Forms/layout: myMoney forms use `mm-form-grid`, `mm-form-card`, `mm-field-group`, `mm-inline-row`, `mm-stacked-fields`, `mm-group-box`; myHealth forms use `mh-field-group`, `mh-group-box`, `mh-inline-row`, `mh-stacked-fields`. Keep legacy classes for JS hooks until you update selectors.
 
 ## Local dev (one runner)
+
 - Put DB creds in the repo root `.env` (DB_HOST, DB_USER, DB_PASS, DB_NAME).
 - Start the unified server from repo root: `./testing/run.sh`
   - Hub at `http://127.0.0.1:8000/`
@@ -30,11 +34,13 @@ Made 99% by AI, since i have skill issue.
   - myMoney at `http://127.0.0.1:8000/mymoney`
 
 ## Deploy (shared script)
+
 - Use `deploy.sh` from repo root to push hub + myHealth + myMoney in one go:
   - `FTP_HOST=... FTP_USER=... FTP_PASS=... ./deploy.sh`
   - Optional overrides: `BASE_REMOTE=/public_html`, `REMOTE_HUB=/public_html`, `REMOTE_HEALTH=/public_html/myhealth`, `REMOTE_MONEY=/public_html/mymoney`.
 
 ## Notes
+
 - Both apps share the same DB and FTP credentials; `.env` at repo root is the single source for local dev.
 - Legacy per-app run scripts now delegate to the unified runner for convenience.
 - Shared styling: both apps import `shared/base.css` (includes Open Props via CDN) and override accent colors in their own `style.css`. If CSS looks missing, ensure the web server exposes `shared/` so the `@import "../../shared/base.css";` in `myhealth/web/style.css` and `mymoney/web/style.css` can load. Prefer adding cross-app layout/styling changes in `shared/base.css` first, then apply app-specific tweaks only when necessary to avoid divergence.

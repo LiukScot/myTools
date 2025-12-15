@@ -44,8 +44,8 @@ $USER_SETTINGS_TABLE = 'user_settings';
 
 $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
 
-// Keep session files shared across apps (one level above app folders)
-$sessDir = dirname(__DIR__, 3) . '/sessions';
+// Keep session files shared across apps (repository root /sessions)
+$sessDir = dirname(__DIR__, 4) . '/sessions';
 if (!is_dir($sessDir)) {
     @mkdir($sessDir, 0700, true);
 }
