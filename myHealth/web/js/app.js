@@ -2489,7 +2489,9 @@ function saveGuestPrefs(data) {
 }
 
 function persistGraphSelection() {
-  savePrefs({ graphSelection: graphSelectionState });
+  // Clone to avoid mutating prefs.graphSelection when we clear graphSelectionState during UI sync
+  const snapshot = JSON.parse(JSON.stringify(graphSelectionState));
+  savePrefs({ graphSelection: snapshot });
 }
 
 function drawLineChart(canvas, seriesList, idx, opts = {}) {

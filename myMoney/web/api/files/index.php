@@ -36,6 +36,24 @@ function load_env_files(array $paths)
     }
 }
 
+function env_get(string $key, $default = '')
+{
+    $val = getenv($key);
+    if ($val === false) {
+        return $_ENV[$key] ?? $default;
+    }
+    return $val;
+}
+
+$env_candidates = [
+    dirname(__DIR__, 4) . '/.env', // repository root (shared .env)
+    dirname(__DIR__, 3) . '/.env',
+    dirname(__DIR__, 2) . '/.env',
+    dirname(__DIR__) . '/.env',
+    __DIR__ . '/.env',
+];
+load_env_files($env_candidates);
+
 // Session login only; users can self-register when enabled.
 $ALLOW_SIGNUP = true; // allow self-registration
 $FILES_TABLE = 'files';
@@ -45,14 +63,121 @@ $FILES_TABLE = 'files';
 $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
 
 // Keep session files shared across apps (one level above the app folders, e.g. /public_html/sessions)
-$sessDir = dirname(__DIR__, 3) . '/sessions';
-if (!is_dir($sessDir)) {
-    @mkdir($sessDir, 0700, true);
+function resolve_session_dir(): string
+{
+    $candidates = [
+        dirname(__DIR__, 4) . '/sessions', // repo root when using /web/
+        dirname(__DIR__, 3) . '/sessions', // public_html when deployed flat
+        dirname(__DIR__, 2) . '/sessions',
+    ];
+    foreach ($candidates as $dir) {
+        $parent = dirname($dir);
+        if ($parent === '/' || $parent === '\\') {
+            continue; // avoid writing to filesystem root
+        }
+        if (is_dir($dir) || @mkdir($dir, 0700, true)) {
+            return $dir;
+        }
+    }
+    $fallback = rtrim(sys_get_temp_dir(), '/\\') . '/mytools_sessions';
+    @mkdir($fallback, 0700, true);
+    return $fallback;
 }
-session_save_path($sessDir);
+
+$sessDir = resolve_session_dir();
+
+function configure_session_storage(string $sessDir): string
+{
+    $handlerChoice = strtolower((string) env_get('SESSION_SAVE_HANDLER', 'auto'));
+    $useRedis = $handlerChoice === 'redis' || $handlerChoice === 'auto';
+    $redisUrl = (string) env_get('SESSION_REDIS_URL', '');
+    $redisHost = (string) env_get('SESSION_REDIS_HOST', '127.0.0.1');
+    $redisPort = (int) env_get('SESSION_REDIS_PORT', '6379');
+    $redisPassword = (string) env_get('SESSION_REDIS_PASSWORD', '');
+    $redisPrefix = (string) env_get('SESSION_REDIS_PREFIX', 'mytools_sess_');
+    $connectTimeout = (float) env_get('SESSION_REDIS_CONNECT_TIMEOUT', '0.5');
+    $timeout = (float) env_get('SESSION_REDIS_TIMEOUT', '2');
+    $readTimeout = (float) env_get('SESSION_REDIS_READ_TIMEOUT', '2');
+
+    if ($useRedis && extension_loaded('redis')) {
+        if ($redisUrl !== '') {
+            $parsed = parse_url($redisUrl);
+            if ($parsed && isset($parsed['host'], $parsed['port'])) {
+                $redisHost = $parsed['host'];
+                $redisPort = (int) $parsed['port'];
+            }
+        } else {
+            $redisUrl = "tcp://{$redisHost}:{$redisPort}";
+        }
+
+        $params = [];
+        if ($redisPassword !== '') {
+            $params[] = 'auth=' . rawurlencode($redisPassword);
+        }
+        if ($redisPrefix !== '') {
+            $params[] = 'prefix=' . rawurlencode($redisPrefix);
+        }
+        $params[] = 'persistent=1';
+        $params[] = 'timeout=' . $timeout;
+        $params[] = 'read_timeout=' . $readTimeout;
+
+        if ($params) {
+            $redisUrl .= (strpos($redisUrl, '?') === false ? '?' : '&') . implode('&', $params);
+        }
+
+        $canUseRedis = true;
+        if (class_exists('Redis')) {
+            try {
+                $r = new Redis();
+                $r->connect($redisHost, $redisPort, max($connectTimeout, 0.1));
+                if ($redisPassword !== '') {
+                    $r->auth($redisPassword);
+                }
+                $r->ping();
+                $r->close();
+            } catch (Throwable $e) {
+                $canUseRedis = false;
+                error_log('Redis session unavailable, falling back to file sessions: ' . $e->getMessage());
+            }
+        }
+
+        if ($canUseRedis) {
+            ini_set('session.save_handler', 'redis');
+            ini_set('session.save_path', $redisUrl);
+            return 'redis';
+        }
+    }
+
+    session_save_path($sessDir);
+    return 'files';
+}
+
+function cookie_base_domain(?string $host): ?string
+{
+    $host = strtolower(trim((string) $host));
+    if ($host === '') {
+        return null;
+    }
+    $host = preg_replace('/:\d+$/', '', $host);
+    $host = trim($host, '[]');
+    if (in_array($host, ['localhost', '127.0.0.1', '::1'], true)) {
+        return null;
+    }
+    if (filter_var($host, FILTER_VALIDATE_IP)) {
+        return null; // domain attr on IP hosts breaks cookie persistence
+    }
+    return preg_replace('/^www\./', '', $host);
+}
+
+$sessionBackend = configure_session_storage($sessDir);
+$sessionLifetime = (int) env_get('SESSION_LIFETIME', 60 * 60 * 24 * 30);
+if ($sessionLifetime < 0) {
+    $sessionLifetime = 0;
+}
+$cookieDomain = cookie_base_domain($_SERVER['HTTP_HOST'] ?? '');
 
 // Use 5-arg compatible signature for broader PHP support
-session_set_cookie_params(0, '/', '', $isSecure, true);
+session_set_cookie_params($sessionLifetime, '/', $cookieDomain ?? '', $isSecure, true);
 session_name('MYTOOLS_SESSID');
 session_start();
 
@@ -68,7 +193,10 @@ function load_allowed_origins(): array
     }
     // sensible defaults for local dev and prod domain
     return [
+        'http://192.168.1.13:8000',
+        'http://192.168.1.13',
         'http://127.0.0.1:8000',
+        'http://127.0.0.1',
         'http://localhost:8000',
         'http://localhost',
         'https://liukscot.com',
@@ -114,15 +242,6 @@ function read_json()
     }
     return $data;
 }
-
-$env_candidates = [
-    dirname(__DIR__, 4) . '/.env', // repository root (shared .env)
-    dirname(__DIR__, 3) . '/.env',
-    dirname(__DIR__, 2) . '/.env',
-    dirname(__DIR__) . '/.env',
-    __DIR__ . '/.env',
-];
-load_env_files($env_candidates);
 
 function resolve_db_path(): string
 {
@@ -202,30 +321,25 @@ function connect_db(string $filesTable): PDO
     return $db;
 }
 
-function send_session_cookie($isSecure)
+function send_session_cookie($isSecure, int $lifetime)
 {
+    global $cookieDomain;
     $name = session_name();
     $value = session_id();
     $params = session_get_cookie_params();
-    $host = $_SERVER['HTTP_HOST'] ?? '';
-    $host = preg_replace('/:\d+$/', '', strtolower($host));
-    $baseDomain = $host;
-    if (strpos($host, 'localhost') === false && strpos($host, '127.0.0.1') === false) {
-        $baseDomain = preg_replace('/^www\./', '', $host);
-    }
-    // 30 days persistence
-    $expires = time() + 60 * 60 * 24 * 30;
-    $date = gmdate('D, d M Y H:i:s T', $expires);
 
     $parts = [
         "$name=$value",
-        "expires=$date",
-        "Max-Age=" . (60 * 60 * 24 * 30),
         "path={$params['path']}",
         "HttpOnly"
     ];
-    if ($baseDomain && strpos($baseDomain, 'localhost') === false && strpos($baseDomain, '127.0.0.1') === false) {
-        $parts[] = "domain=.{$baseDomain}";
+    if ($lifetime > 0) {
+        $expires = time() + $lifetime;
+        $parts[] = "expires=" . gmdate('D, d M Y H:i:s T', $expires);
+        $parts[] = "Max-Age=" . $lifetime;
+    }
+    if ($cookieDomain) {
+        $parts[] = "domain=.{$cookieDomain}";
     }
     if ($isSecure)
         $parts[] = "Secure";
@@ -315,7 +429,7 @@ if (preg_match('#/api(?:/files)?/login/?$#', $rawUri)) {
         $_SESSION['name'] = $user['name'];
         $_SESSION['role'] = $user['role'];
         session_regenerate_id(true);
-        send_session_cookie($isSecure);
+        send_session_cookie($isSecure, $sessionLifetime);
         respond(200, [
             'status' => 'ok',
             'email' => $user['email'],
@@ -374,7 +488,7 @@ if (preg_match('#/api(?:/files)?/change-password/?$#', $rawUri)) {
     $up = $db->prepare("UPDATE users SET password_hash=?, updated_at=CURRENT_TIMESTAMP WHERE id=?");
     $up->execute([$newHash, $_SESSION['user_id']]);
     session_regenerate_id(true);
-    send_session_cookie($isSecure);
+    send_session_cookie($isSecure, $sessionLifetime);
     respond(200, ['status' => 'ok']);
 }
 

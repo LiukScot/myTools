@@ -16,6 +16,7 @@ Made 99% by AI, since i have skill issue.
 - Login + JSON data now live in a local SQLite DB at `data/mytools.sqlite` (auto-created). Override path with `LOCAL_DB_PATH=...` in `.env`.
 - Optional `.env` is still read for things like `ALLOWED_ORIGINS` or a custom DB path.
 - PHP needs the sqlite/pdo_sqlite extension enabled (bundled in most installs).
+- Sessions default to local files in `./sessions`, but will auto-use Redis when the `redis` PHP extension is present and a server is reachable (defaults to `127.0.0.1:6379`). Control it with `SESSION_SAVE_HANDLER=auto|redis|files`, `SESSION_REDIS_HOST/PORT/PASSWORD` (or `SESSION_REDIS_URL`), and `SESSION_LIFETIME` seconds (default: 30 days).
 - Signup is enabled; new users can register directly.
 - Start the unified server from repo root: `./run.sh`
   - Hub at `http://127.0.0.1:8000/` by default; set `HOST=0.0.0.0` to expose on your LAN.
@@ -46,6 +47,7 @@ Made 99% by AI, since i have skill issue.
 2) Easiest run (short): `docker compose up -d`  
    - Ports/env can be overridden: `PORT=9000 docker compose up`  
    - Uses `docker-compose.yml` volumes to persist SQLite + sessions to `./data`, `./myHealth/sessions`, `./myMoney/sessions`.
+   - Redis extension is baked into the image; point `SESSION_REDIS_HOST=host.docker.internal` (and `SESSION_SAVE_HANDLER=redis`) to use a host Redis, or add a Redis service to the compose file if you want everything in containers.
    - Hub: `http://localhost:8000` (or your chosen port; myHealth at `/myhealth`, myMoney at `/mymoney`)
 3) Optional: one-liner without compose (if you prefer):  
    - `docker run --name mytools -p 8000:8000 -v "$(pwd)/data:/app/data" -v "$(pwd)/myHealth/sessions:/app/myHealth/sessions" -v "$(pwd)/myMoney/sessions:/app/myMoney/sessions" --env-file .env mytools`

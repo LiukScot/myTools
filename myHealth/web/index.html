@@ -8,53 +8,46 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <link rel="stylesheet" href="/myhealth/style.css">
+  <link rel="stylesheet" href="/shared/base.css">
 </head>
 
 <body class="mh-app">
-  <div class="shell">
-    <header>
-      <div class="title">
+  <div class="container py-3">
+    <header class="d-flex align-items-center gap-3 mb-3">
+      <div class="d-inline-flex align-items-center gap-2 fs-3 fw-bold">
         <span class="heart">❤</span>
         <span>myHealth</span>
       </div>
     </header>
 
-    <div class="card auth-card mh-auth">
-      <div class="auth-row mh-auth__row">
-        <input class="mh-auth__input" type="email" id="auth-email" placeholder="Email" autocomplete="username" />
-        <input class="mh-auth__input" type="password" id="auth-pass" placeholder="Password" autocomplete="current-password" />
-        <button class="mh-btn-primary" id="auth-login" type="button">Log in</button>
-      </div>
-      <div class="mh-status mh-auth__status" id="auth-status"></div>
-      <pre class="debug-log hidden" id="auth-debug"></pre>
-    </div>
-
     <div id="app-main" class="hidden">
-      <div class="top-nav mh-nav">
-        <nav class="mh-nav__list">
-          <button class="mh-nav__btn active" data-target="dashboard">
+      <div class="row g-3 mb-3">
+        <div class="col-12">
+          <div class="d-flex flex-wrap gap-3 align-content-start">
+            <button class="btn btn-outline-primary mh-nav__btn active" data-target="dashboard">
             <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M4 13h6V4H4v9zm10 7h6V4h-6v16z" />
             </svg>
             Dashboard
           </button>
-          <button class="mh-nav__btn" data-target="newlog">
+            <button class="btn btn-outline-secondary mh-nav__btn" data-target="newlog">
             <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M6 5h12v14H6z" />
               <path d="M9 3v4m6-4v4M8 10h8m-8 4h6" />
             </svg>
             Logs and new entries
           </button>
-          <button class="mh-nav__btn" data-target="chatbot">
+            <button class="btn btn-outline-secondary mh-nav__btn" data-target="chatbot">
             <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M5 5h14v9a2 2 0 0 1-2 2H9l-4 3V7a2 2 0 0 1 2-2z" />
               <path d="M8 9h8m-8 4h5" />
             </svg>
             Chatbot
           </button>
-          <button class="mh-nav__btn" data-target="settings">
+            <button class="btn btn-outline-secondary mh-nav__btn" data-target="settings">
             <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z" />
               <path
@@ -62,14 +55,15 @@
             </svg>
             Settings
           </button>
-          <a class="mh-nav__btn mh-nav__hub hidden" id="go-hub" href="/" aria-label="Back to hub">
+            <a class="btn btn-outline-secondary mh-nav__btn hidden" id="go-hub" href="/" aria-label="Back to hub">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M15 5l-7 7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             <span>Back to hub</span>
           </a>
-          <button class="mh-nav__btn danger logout-btn hidden" id="auth-logout" type="button">Log out</button>
-        </nav>
+            <button class="btn btn-outline-danger logout-btn hidden" id="auth-logout" type="button">Log out</button>
+          </div>
+        </div>
       </div>
 
       <section id="dashboard-section">

@@ -492,7 +492,13 @@
         } catch (err) {
           state.authed = false;
           state.email = '';
-          setStatus(err.message || 'Login failed');
+          const msg = (err && err.message ? err.message : '').trim() || 'Login failed';
+          if (msg.toLowerCase().includes('origin not allowed')) {
+            const origin = window.location.origin;
+            setStatus(`Origin not allowed for ${origin}. Add this origin to ALLOWED_ORIGINS.`);
+          } else {
+            setStatus(msg);
+          }
         } finally {
           state.loading = false;
           render();

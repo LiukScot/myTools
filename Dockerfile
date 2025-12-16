@@ -1,9 +1,11 @@
 FROM php:8.2-cli
 
-# Install SQLite support (pdo_sqlite) and CLI client
+# Install SQLite support (pdo_sqlite) and Redis session support
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends sqlite3 libsqlite3-dev; \
+    pecl install redis; \
+    docker-php-ext-enable redis; \
     docker-php-ext-install pdo_sqlite; \
     rm -rf /var/lib/apt/lists/*
 
