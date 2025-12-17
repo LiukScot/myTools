@@ -4,7 +4,7 @@ services:
     image: mytools:local
     container_name: mytools
     ports:
-      - "${PORT:-8000}:${PORT:-8000}"
+      - "${HOST_PORT:-9000}:${PORT:-8000}"
     environment:
       HOST: 0.0.0.0
       PORT: ${PORT:-8000}
