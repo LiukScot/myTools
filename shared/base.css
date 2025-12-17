@@ -369,6 +369,7 @@ textarea:focus,
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+    margin-bottom: 10px;
 }
 
 .mh-quick-btn,
@@ -926,6 +927,14 @@ body.mh-app .mh-nav__hub svg {
     display: flex;
     flex-direction: column;
     gap: 14px;
+}
+
+.stacked-fields .field-group:not(:last-child) {
+    margin-bottom: 8px;
+}
+
+.chat-input-row {
+    margin-top: 8px;
 }
 
 /* Charts */
