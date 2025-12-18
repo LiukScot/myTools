@@ -11,6 +11,7 @@ myMoney/sessions/
 myHealth/sessions/
 myMoney/web/sessions/
 myHealth/web/sessions/
+sessions/
 
 # Local SQLite database (auto-created)
 data/
