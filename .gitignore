@@ -20,3 +20,5 @@ data/
 # Local exports / logs (personal data)
 testing/*.js
 testing/errorLogs/
+
+/sessions/
