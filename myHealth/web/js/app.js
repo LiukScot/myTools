@@ -50,6 +50,8 @@ const chatbotUI = {
   log: document.getElementById("chatbot-log"),
   status: document.getElementById("chatbot-status"),
   loading: document.getElementById("chatbot-loading"),
+  keyAlert: document.getElementById("chatbot-key-alert"),
+  goSettingsLink: document.getElementById("chatbot-go-settings"),
 };
 const appMain = document.getElementById("app-main");
 let isAuthed = false;
@@ -707,10 +709,14 @@ function updateMistralUi(state = { hasKey: false, last4: "" }) {
       ? `Mistral API key stored on server${last4 ? ` (ending ${last4})` : ""}.`
       : "No Mistral key saved. Paste one below to enable the chatbot.";
   }
+  // Hide helper text if alert is visible (avoid redundancy)
   if (chatbotUI.helper) {
-    chatbotUI.helper.textContent = hasKey
-      ? ""
-      : "Save a Mistral key in Settings to enable chatbot calls.";
+    chatbotUI.helper.classList.toggle("hidden", !hasKey);
+    chatbotUI.helper.textContent = hasKey ? "Ask anything about your diary and pain logs." : "";
+  }
+  // Show/hide the prominent key-missing alert
+  if (chatbotUI.keyAlert) {
+    chatbotUI.keyAlert.classList.toggle("hidden", hasKey);
   }
   if (chatbotUI.sendBtn) {
     chatbotUI.sendBtn.disabled = !hasKey;
@@ -1849,7 +1855,7 @@ async function persist(kind, parsed, sourceName) {
 }
 
 function wireEntryTabs() {
-      const buttons = document.querySelectorAll(".mh-entry-btn");
+  const buttons = document.querySelectorAll(".mh-entry-btn");
   const panels = document.querySelectorAll("[data-entry-panel]");
   const autotherapyTab = document.getElementById("autotherapy-tab");
   const setAutotherapyLabel = (key) => {
@@ -1867,9 +1873,9 @@ function wireEntryTabs() {
     btn.addEventListener("click", () => setActive(btn.dataset.entry));
   });
   if (buttons.length) {
-        const current =
-          document.querySelector(".mh-entry-btn.active")?.dataset.entry
-          || buttons[0].dataset.entry;
+    const current =
+      document.querySelector(".mh-entry-btn.active")?.dataset.entry
+      || buttons[0].dataset.entry;
     setActive(current);
   }
   entryTabSetter = setActive;
@@ -2085,7 +2091,7 @@ function wireBackup() {
 
 function appendChatMessage(role, text) {
   if (!chatbotUI.log) return;
-  if (chatbotUI.log.firstElementChild?.classList.contains("hint")) {
+  if (chatbotUI.log.firstElementChild?.classList.contains("mh-hint")) {
     chatbotUI.log.innerHTML = "";
   }
   const row = document.createElement("div");
@@ -2203,10 +2209,18 @@ function wireChatbot() {
     }
     // Ctrl/Cmd+Enter will insert a newline by default
   });
+  // Wire up the "Settings" link in the key-missing alert
+  if (chatbotUI.goSettingsLink) {
+    chatbotUI.goSettingsLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      const settingsBtn = document.querySelector('.mh-nav__btn[data-target="settings"]');
+      if (settingsBtn) settingsBtn.click();
+    });
+  }
 }
 
 function wireNav() {
-      const buttons = document.querySelectorAll(".mh-nav__btn[data-target]");
+  const buttons = document.querySelectorAll(".mh-nav__btn[data-target]");
   const sections = {
     dashboard: document.getElementById("dashboard-section"),
     newlog: document.getElementById("newlog-section"),

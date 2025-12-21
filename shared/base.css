@@ -58,7 +58,8 @@
 
 /* App-specific theme overrides */
 body.mh-app {
-    /* uses defaults; keep here for clarity/extension */
+    /* myHealth uses base theme defaults */
+    display: block;
 }
 
 body.mm-app {
@@ -247,7 +248,7 @@ header {
     align-items: start;
 }
 
-.settings-grid > * {
+.settings-grid>* {
     break-inside: avoid;
     width: 100%;
     margin: 0;
@@ -872,6 +873,29 @@ body.mh-app .mh-nav__hub svg {
     word-break: break-word;
 }
 
+.mh-alert {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 14px;
+}
+
+.mh-alert a {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.mh-alert a:hover {
+    opacity: 0.8;
+}
+
+.mh-alert-warning {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.12);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
 .table-wrap {
     margin-top: 14px;
     border: 1px solid var(--border);
@@ -966,6 +990,7 @@ body.mh-app .mh-nav__hub svg {
 .canvas-large canvas {
     max-height: 520px;
 }
+
 input,
 select,
 textarea {
