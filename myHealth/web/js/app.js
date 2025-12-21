@@ -1372,7 +1372,8 @@ async function saveRows(kind, rows) {
     headers: normalized.headers,
     rows: sortedRows,
   };
-  dataStore[kind] = payload;
+  const nextPayload = kind === "pain" ? ensurePainOptionsPayload(payload) : payload;
+  dataStore[kind] = nextPayload;
   if (kind === "pain") {
     buildOptionCacheFromStore();
   }
@@ -1719,9 +1720,8 @@ function entryDateFromRow(row, headers) {
   return d.toString() === "Invalid Date" ? null : d;
 }
 
-function withPainOptions(kind, payload) {
-  if (kind !== "pain") return payload;
-  const optionsPayload = {
+function buildPainOptionsPayload() {
+  return {
     options: optionFields.reduce((acc, field) => {
       acc[field] = Array.isArray(optionsCache[field]) ? [...optionsCache[field]] : [];
       return acc;
@@ -1731,7 +1731,25 @@ function withPainOptions(kind, payload) {
       return acc;
     }, {}),
   };
-  return { ...payload, options: optionsPayload };
+}
+
+function ensurePainOptionsPayload(payload) {
+  if (!payload || (payload.options && typeof payload.options === "object")) return payload;
+  if (dataStore.pain?.options && typeof dataStore.pain.options === "object") {
+    return { ...payload, options: dataStore.pain.options };
+  }
+  const fromCache = buildPainOptionsPayload();
+  const hasCache = optionFields.some((field) => {
+    const opts = fromCache.options[field] || [];
+    const removed = fromCache.removed[field] || [];
+    return opts.length || removed.length;
+  });
+  return hasCache ? { ...payload, options: fromCache } : payload;
+}
+
+function withPainOptions(kind, payload) {
+  if (kind !== "pain") return payload;
+  return { ...payload, options: buildPainOptionsPayload() };
 }
 
 async function persistNormalized(kind, payload) {
@@ -1763,8 +1781,15 @@ async function persistNormalized(kind, payload) {
 async function saveDataset(kind, payload) {
   const normalized = normalizeRows(payload.headers || [], payload.rows || [], kind);
   const sorted = sortRowsByDateTime(normalized.rows, normalized.headers);
-  const final = { headers: normalized.headers, rows: sorted, source: payload.source || "import", imported_at: new Date().toISOString() };
-  dataStore[kind] = final;
+  const final = {
+    headers: normalized.headers,
+    rows: sorted,
+    source: payload.source || "import",
+    imported_at: new Date().toISOString(),
+    ...(kind === "pain" && payload?.options && typeof payload.options === "object" ? { options: payload.options } : {}),
+  };
+  const nextPayload = kind === "pain" ? ensurePainOptionsPayload(final) : final;
+  dataStore[kind] = nextPayload;
   if (kind === "pain") {
     buildOptionCacheFromStore();
   }
@@ -1817,7 +1842,8 @@ async function persist(kind, parsed, sourceName) {
       headers: mergedHeaders,
       rows: sortedRows,
     };
-    dataStore[kind] = payload;
+    const nextPayload = kind === "pain" ? ensurePainOptionsPayload(payload) : payload;
+    dataStore[kind] = nextPayload;
     if (kind === "pain") {
       buildOptionCacheFromStore();
     }
