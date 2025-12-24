@@ -110,7 +110,7 @@
       position: absolute;
       right: 0;
       top: 60px;
-      width: 320px;
+      width: 640px;
       max-width: 90vw;
       border: 1px solid var(--border);
       border-radius: 14px;
@@ -128,6 +128,26 @@
     .auth-panel h4 {
       margin: 0 0 6px;
       font-size: 15px;
+    }
+
+    .auth-panel .auth-forms {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .auth-panel .auth-col {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      background: var(--card-strong);
+    }
+
+    .auth-panel .auth-col h5 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      letter-spacing: 0.02em;
     }
 
     .auth-panel .field {
@@ -304,6 +324,17 @@
       font-size: 12px;
     }
 
+    @media (max-width: 720px) {
+      .auth-panel {
+        width: 92vw;
+        max-width: 92vw;
+      }
+
+      .auth-panel .auth-forms {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 640px) {
       .shell {
         padding: 36px 16px 48px;
@@ -328,17 +359,45 @@
           <h4>Account</h4>
           <div id="hub-auth-status" class="status"></div>
           <div id="hub-auth-form">
-            <div class="field">
-              <label for="hub-auth-email">Email</label>
-              <input id="hub-auth-email" type="email" autocomplete="email" placeholder="you@example.com" />
-            </div>
-            <div class="field">
-              <label for="hub-auth-pass">Password</label>
-              <input id="hub-auth-pass" type="password" autocomplete="current-password" placeholder="••••••••" />
-            </div>
-            <div class="actions">
-              <button id="hub-auth-submit" class="primary">Sign in</button>
-              <button id="hub-auth-cancel" class="link" type="button">Close</button>
+            <div class="auth-forms">
+              <div class="auth-col">
+                <h5>Sign in</h5>
+                <div class="field">
+                  <label for="hub-auth-email">Email</label>
+                  <input id="hub-auth-email" type="email" autocomplete="email" placeholder="you@example.com" />
+                </div>
+                <div class="field">
+                  <label for="hub-auth-pass">Password</label>
+                  <input id="hub-auth-pass" type="password" autocomplete="current-password" placeholder="••••••••" />
+                </div>
+                <div class="actions">
+                  <button id="hub-auth-submit" class="primary">Sign in</button>
+                  <button id="hub-auth-cancel" class="link" type="button">Close</button>
+                </div>
+              </div>
+              <div class="auth-col">
+                <h5>Create account</h5>
+                <div class="field">
+                  <label for="hub-register-email">Email</label>
+                  <input id="hub-register-email" type="email" autocomplete="email" placeholder="you@example.com" />
+                </div>
+                <div class="field">
+                  <label for="hub-register-name">Name (optional)</label>
+                  <input id="hub-register-name" type="text" autocomplete="name" placeholder="Your name" />
+                </div>
+                <div class="field">
+                  <label for="hub-register-pass">Password</label>
+                  <input id="hub-register-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters" />
+                </div>
+                <div class="field">
+                  <label for="hub-register-pass-2">Repeat password</label>
+                  <input id="hub-register-pass-2" type="password" autocomplete="new-password" placeholder="Repeat password" />
+                </div>
+                <div class="actions">
+                  <button id="hub-register-submit" class="primary">Create account</button>
+                  <button id="hub-register-clear" class="link" type="button">Clear</button>
+                </div>
+              </div>
             </div>
           </div>
           <div id="hub-authed-actions" class="actions column" style="display:none;">
@@ -398,6 +457,12 @@
       const emailInput = document.getElementById('hub-auth-email');
       const passInput = document.getElementById('hub-auth-pass');
       const submitBtn = document.getElementById('hub-auth-submit');
+      const registerEmail = document.getElementById('hub-register-email');
+      const registerName = document.getElementById('hub-register-name');
+      const registerPass = document.getElementById('hub-register-pass');
+      const registerPass2 = document.getElementById('hub-register-pass-2');
+      const registerSubmit = document.getElementById('hub-register-submit');
+      const registerClear = document.getElementById('hub-register-clear');
       const statusEl = document.getElementById('hub-auth-status');
       const formWrap = document.getElementById('hub-auth-form');
       const authedActions = document.getElementById('hub-authed-actions');
@@ -429,12 +494,14 @@
           ? state.email
             ? state.email
             : 'Account'
-          : 'Log in';
+          : 'Sign in / Register';
         authBtn.classList.toggle('logged-in', state.authed);
         if (formWrap) formWrap.style.display = state.authed ? 'none' : 'block';
         if (authedActions) authedActions.style.display = state.authed && state.panelMode === 'menu' ? 'flex' : 'none';
         if (changeWrap) changeWrap.style.display = state.authed && state.panelMode === 'change' ? 'block' : 'none';
         if (submitBtn) submitBtn.disabled = state.loading;
+        if (registerSubmit) registerSubmit.disabled = state.loading;
+        if (registerClear) registerClear.disabled = state.loading;
         if (changeSubmit) changeSubmit.disabled = state.loading;
         if (logoutBtn) logoutBtn.disabled = state.loading;
       }
@@ -493,6 +560,61 @@
           state.authed = false;
           state.email = '';
           const msg = (err && err.message ? err.message : '').trim() || 'Login failed';
+          if (msg.toLowerCase().includes('origin not allowed')) {
+            const origin = window.location.origin;
+            setStatus(`Origin not allowed for ${origin}. Add this origin to ALLOWED_ORIGINS.`);
+          } else {
+            setStatus(msg);
+          }
+        } finally {
+          state.loading = false;
+          render();
+        }
+      }
+
+      function resetRegisterForm() {
+        if (registerEmail) registerEmail.value = '';
+        if (registerName) registerName.value = '';
+        if (registerPass) registerPass.value = '';
+        if (registerPass2) registerPass2.value = '';
+      }
+
+      async function register() {
+        const email = registerEmail?.value?.trim();
+        const name = registerName?.value?.trim() || '';
+        const password = registerPass?.value || '';
+        const confirm = registerPass2?.value || '';
+        if (!email || !password) {
+          setStatus('Email and password required');
+          return;
+        }
+        if (password.length < 8) {
+          setStatus('Password is too short (min 8 chars)');
+          return;
+        }
+        if (password !== confirm) {
+          setStatus('Passwords do not match');
+          return;
+        }
+        state.loading = true;
+        render();
+        setStatus('Creating account...');
+        try {
+          const res = await fetch(`${apiBase}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password, name }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+          setStatus('Account created. Sign in to continue.', true);
+          if (emailInput) emailInput.value = email;
+          if (passInput) passInput.value = '';
+          resetRegisterForm();
+          setTimeout(() => passInput?.focus(), 10);
+        } catch (err) {
+          const msg = (err && err.message ? err.message : '').trim() || 'Registration failed';
           if (msg.toLowerCase().includes('origin not allowed')) {
             const origin = window.location.origin;
             setStatus(`Origin not allowed for ${origin}. Add this origin to ALLOWED_ORIGINS.`);
@@ -592,6 +714,18 @@
       submitBtn?.addEventListener('click', (e) => {
         e.preventDefault();
         if (!state.loading) login();
+      });
+
+      registerSubmit?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!state.loading) register();
+      });
+
+      registerClear?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (state.loading) return;
+        setStatus('');
+        resetRegisterForm();
       });
 
       openChangeBtn?.addEventListener('click', (e) => {
