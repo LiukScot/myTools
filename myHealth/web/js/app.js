@@ -879,7 +879,7 @@ function collectNumericFields(kind, headers, row) {
 
 function renderTable(kind, headers, rows, withActions = false, limit = null) {
   const cfg = datasets[kind];
-  const isLogView = withActions; // Usually true for the main log view
+  const isLogView = withActions;
 
   if (!headers || !rows) {
     cfg.logsTable.innerHTML = "";
@@ -887,87 +887,58 @@ function renderTable(kind, headers, rows, withActions = false, limit = null) {
   }
 
   const sortedRows = sortRowsWithIndex(rows, headers);
-  const globalFilter = (logFilters[kind]?.['global'] || "").toLowerCase();
+  const globalFilter = (logFilters[kind]?.global || "").toLowerCase();
   const filteredRows = sortedRows.filter(({ row }) => {
     if (!globalFilter) return true;
     return Object.values(row).some(v => String(v).toLowerCase().includes(globalFilter));
   });
 
   const displayRows = limit ? filteredRows.slice(0, limit) : filteredRows;
+  const columns = headers.map((header) => ({ key: header, label: header }));
+  const colSpan = columns.length + (isLogView ? 1 : 0);
 
-  // If it's the dashboard/preview, maybe keep it simple? But user asked for "logs of both apps". 
-  // Assuming this replaces the main log tables.
-
-  // Filter Inputs for main view
   let filterHtml = "";
   if (isLogView) {
-    // Simplified filter: just one global search or maybe just date?
-    // For now, let's keep the date range filter in dashboard, 
-    // but here we might want a text filter provided by the existing filter inputs if we keep them.
-    // But the card view makes per-column filtering hard.
-    // Let's add a generic search input if needed, or rely on distinct filters.
-    // The previous filter row had per-column inputs. 
-    // Let's revert to a single "Search" input for simplicity in card view?
-    // Or just skip filters for now as user didn't specify, but removing them might be bad.
-    // I'll add a simple "Filter by content" input above the grid.
-
     filterHtml = `
          <div class="filter-bar">
-             <input type="text" id="filter-${kind}" placeholder="Search logs..." style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text);">
+             <input type="text" id="filter-${kind}" placeholder="Search logs...">
          </div>`;
   }
 
-  const gridHtml = `
-        <div class="log-grid">
-          ${displayRows.map(({ row, idx: originalIdx }) => {
-    const dateKey = findHeader(headers, "date") || "date";
-    const timeKey = findHeader(headers, "hour") || "hour";
-    const dateStr = row[dateKey] || "No date";
-    const timeStr = row[timeKey] || "";
-    const numericFields = collectNumericFields(kind, headers, row);
+  const headerHtml = `
+    <thead>
+      <tr>
+        ${columns.map(col => `<th>${escapeHtml(col.label)}</th>`).join("")}
+        ${isLogView ? "<th>actions</th>" : ""}
+      </tr>
+    </thead>
+  `;
 
-    // Format nice date if possible
-    let niceDate = dateStr;
-    try {
-      const d = new Date(dateStr);
-      if (!isNaN(d)) niceDate = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    } catch (e) { }
+  const bodyHtml = displayRows.length
+    ? displayRows.map(({ row, idx: originalIdx }) => `
+        <tr>
+          ${columns.map(col => `<td>${escapeHtml(row[col.key] ?? "")}</td>`).join("")}
+          ${isLogView ? `
+            <td>
+              <button class="mh-nav__btn small" data-edit-row="${originalIdx}" title="Edit">✏️ edit</button>
+              <button class="mh-nav__btn danger small ml-8" data-delete-row="${originalIdx}" title="Delete">🗑️ delete</button>
+            </td>
+          ` : ""}
+        </tr>
+      `).join("")
+    : `<tr><td colspan="${colSpan}" style="text-align:center; padding:12px 0; color:var(--muted);">no entries yet</td></tr>`;
 
-    return `
-              <div class="log-card">
-                <div class="log-card-header">
-                  <span>${escapeHtml(niceDate)}</span>
-                  <span style="color:var(--accent);">${escapeHtml(timeStr)}</span>
-                </div>
-                ${numericFields.length ? `
-                  <div class="log-card-meta">
-                    ${numericFields.map(f => `
-                      <div class="log-card-meta-row">
-                        <span class="label">${escapeHtml(f.label)}:</span>
-                        <strong>${escapeHtml(String(f.value))}</strong>
-                      </div>
-                    `).join("")}
-                  </div>
-                ` : ""}
-                ${isLogView ? `
-                <div class="log-card-actions">
-                  <button class="mh-nav__btn small" data-edit-row="${originalIdx}" data-kind="${kind}" title="Edit">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </button>
-                  <button class="mh-nav__btn danger small" data-delete-row="${originalIdx}" data-kind="${kind}" title="Delete">
-                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                  </button>
-                </div>
-                ` : ''}
-              </div>
-            `;
-  }).join("")}
-        </div>
-      `;
+  const tableHtml = `
+    <div class="table-scroll">
+      <table class="mh-table">
+        ${headerHtml}
+        <tbody>${bodyHtml}</tbody>
+      </table>
+    </div>
+  `;
 
-  cfg.logsTable.innerHTML = (isLogView ? filterHtml : "") + gridHtml;
+  cfg.logsTable.innerHTML = (isLogView ? filterHtml : "") + tableHtml;
 
-  // Update count span in header
   const countSpanId = kind === 'pain' ? 'pain-count' : 'diary-count';
   const countSpan = document.getElementById(countSpanId);
   if (countSpan) {
@@ -975,36 +946,18 @@ function renderTable(kind, headers, rows, withActions = false, limit = null) {
   }
 
   if (isLogView) {
-    // Wire search
     const searchInput = document.getElementById(`filter-${kind}`);
     if (searchInput) {
-      // Restore filter value
-      // We need a place to store this new single filter
-      // Re-using logFilters[kind]['global'] for now?
-      searchInput.value = logFilters[kind]?.['global'] || "";
+      searchInput.value = logFilters[kind]?.global || "";
       searchInput.addEventListener("input", (e) => {
         if (!logFilters[kind]) logFilters[kind] = {};
-        logFilters[kind]['global'] = e.target.value;
-        // We need to re-run renderTable, but renderTable uses logFilters to filter... 
-        // I need to update the filter logic above to handle 'global'
+        logFilters[kind].global = e.target.value;
         renderLog(kind);
       });
     }
     wireRowActions(kind);
   }
 }
-
-// Quick patch for global filter support in the filter block above
-// I will replace the filter logic block in the next edit or include it here.
-// Let's rewrite the filter block inside this function:
-/*
-  const globalFilter = (logFilters[kind]?.['global'] || "").toLowerCase();
-  const filteredRows = sortedRows.filter(({ row }) => {
-    if (!globalFilter) return true;
-    // Search all values
-    return Object.values(row).some(v => String(v).toLowerCase().includes(globalFilter));
-  });
-*/
 
 
 function parseCSV(text) {

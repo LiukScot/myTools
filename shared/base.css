@@ -133,7 +133,11 @@ a {
     max-width: 1700px;
     width: 98vw;
     margin: 0 auto;
-    padding: var(--space-2) clamp(16px, 4vw, 60px) var(--space-4);
+    padding: var(--space-2) clamp(13.6px, 3.4vw, 51px) var(--space-4);
+}
+
+.container {
+    --bs-gutter-x: 1.275rem;
 }
 
 header {
@@ -1395,7 +1399,7 @@ tbody tr:hover {
     }
 
     .shell {
-        padding: 20px 12px 32px;
+        padding: 20px 10.2px 32px;
     }
 
     .table-wrap {

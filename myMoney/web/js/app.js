@@ -336,63 +336,36 @@ function wireAuthForm() {
 
 
     function renderTable() {
-      // Robust selector: target the wrapper directly
-      const wrapper = document.querySelector('#page-transactions .list-wrap');
-      if (!wrapper) return;
+      const tbody = document.getElementById('transactionsTableBody');
+      if (!tbody) return;
 
       const rows = getFilteredSortedTransactions();
-
-      const gridHtml = `
-        <div class="log-grid">
-          ${rows.map(t => {
-        const dateStr = t.date || '';
-        let niceDate = dateStr;
-        try {
-          const d = new Date(dateStr);
-          if (!isNaN(d)) niceDate = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-        } catch (e) { }
-
-        return `
-              <div class="log-card">
-                <div class="log-card-header">
-                  <span>${escapeHtml(niceDate)}</span>
-                  <span>${formatCurrencyWithColor(t.buyValue)}</span>
-                </div>
-                <div class="log-card-body">
-                   <div>${escapeHtml(t.asset || 'No asset')}</div>
-                   <div class="log-card-meta">${escapeHtml(t.tipo || '')}</div>
-                </div>
-                <div class="log-card-actions">
-                  <button class="nav-button small edit-tx" data-id="${t.id}" title="Edit" style="padding:4px 8px;">
-                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </button>
-                  <button class="nav-button danger small delete-tx" data-id="${t.id}" title="Delete" style="padding:4px 8px;">
-                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                  </button>
-                </div>
-              </div>
-            `;
-      }).join('')}
-        </div>
-      `;
-
-      if (wrapper) {
-        wrapper.innerHTML = gridHtml;
-        const countSpan = document.getElementById("txCountHeader");
-        if (countSpan) countSpan.textContent = `${rows.length} transactions`;
-        // Re-attach events (delegation or direct?)
-        // The actions are wired via delegation or similar? 
-        // Previous implementation: just innerHTML. 
-        // Wait, 'edit-tx' and 'delete-tx' need listeners.
-        // Where are listeners attached? 
-        // I see 'wireRowActions' style logic? No, let's check code.
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:12px 0; color:var(--muted);">no transactions yet</td></tr>`;
+      } else {
+        tbody.innerHTML = rows.map(t => `
+          <tr>
+            <td>${escapeHtml(t.date || '')}</td>
+            <td>${escapeHtml(t.asset || '')}</td>
+            <td>${escapeHtml(t.tipo || '')}</td>
+            <td>${escapeHtml(t.type || '')}</td>
+            <td>${formatCurrencyWithColor(t.buyValue)}</td>
+            <td>${formatCurrencyWithColor(t.pnl)}</td>
+            <td>${escapeHtml(t.note || '')}</td>
+            <td>
+              <button class="mm-nav__btn small edit-tx" data-id="${t.id}" title="Edit">✏️ edit</button>
+              <button class="mm-nav__btn danger small delete-tx ml-8" data-id="${t.id}" title="Delete">🗑️ delete</button>
+            </td>
+          </tr>
+        `).join('');
       }
 
-      // I need to wire events for the new buttons
-      const newContainer = wrapper || document.body; // Fallback
-      newContainer.querySelectorAll('.edit-tx').forEach(btn =>
+      const countSpan = document.getElementById("txCountHeader");
+      if (countSpan) countSpan.textContent = `${rows.length} transactions`;
+
+      tbody.querySelectorAll('.edit-tx').forEach(btn =>
         btn.addEventListener('click', () => editTransaction(btn.dataset.id)));
-      newContainer.querySelectorAll('.delete-tx').forEach(btn =>
+      tbody.querySelectorAll('.delete-tx').forEach(btn =>
         btn.addEventListener('click', () => deleteTransaction(btn.dataset.id)));
     }
 
@@ -450,9 +423,8 @@ function wireAuthForm() {
     }
 
     function renderMonthlyMovements() {
-      // Robust selector: target the wrapper directly
-      const wrapper = document.querySelector('#page-monthly-movements .list-wrap');
-      if (!wrapper) return;
+      const tbody = document.getElementById('monthlyMovementsTableBody');
+      if (!tbody) return;
 
       const income = monthlyMovements.reduce((sum, m) =>
         m.direction === 'income' ? sum + (m.amount || 0) : sum, 0);
@@ -465,45 +437,32 @@ function wireAuthForm() {
       document.getElementById('mmNet').textContent = formatCurrency(net);
 
       const list = getFilteredSortedMonthlyMovements();
-
-      const gridHtml = `
-        <div class="log-grid">
-          ${list.map(m => {
-        const signedAmount = m.direction === 'expense' ? -m.amount : m.amount;
-        return `
-              <div class="log-card">
-                <div class="log-card-header">
-                  <span>${escapeHtml(m.name || 'Untitled')}</span>
-                  <span>${formatCurrencyWithColor(signedAmount)}</span>
-                </div>
-                <div class="log-card-body">
-                   <div class="log-card-meta">${escapeHtml(m.note || '')}</div>
-                   <div class="log-card-meta">${m.direction === 'income' ? 'Entrata' : 'Uscita'}</div>
-                </div>
-                <div class="log-card-actions">
-                  <button class="nav-button small edit-monthly" data-id="${m.id}" title="Edit" style="padding:4px 8px;">
-                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </button>
-                  <button class="nav-button danger small delete-monthly" data-id="${m.id}" title="Delete" style="padding:4px 8px;">
-                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                  </button>
-                </div>
-              </div>
-            `;
-      }).join('')}
-        </div>
-      `;
-
-      if (wrapper) {
-        wrapper.innerHTML = gridHtml;
-        const countSpan = document.getElementById("mmCount");
-        if (countSpan) countSpan.textContent = `${list.length} movements`;
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:12px 0; color:var(--muted);">no movements yet</td></tr>`;
+      } else {
+        tbody.innerHTML = list.map(m => {
+          const signedAmount = m.direction === 'expense' ? -(m.amount || 0) : (m.amount || 0);
+          return `
+            <tr>
+              <td>${escapeHtml(m.name || '')}</td>
+              <td>${escapeHtml(m.direction || '')}</td>
+              <td>${formatCurrencyWithColor(signedAmount)}</td>
+              <td>${escapeHtml(m.note || '')}</td>
+              <td>
+                <button class="mm-nav__btn small edit-monthly" data-id="${m.id}" title="Edit">✏️ edit</button>
+                <button class="mm-nav__btn danger small delete-monthly ml-8" data-id="${m.id}" title="Delete">🗑️ delete</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
       }
 
-      const newContainer = wrapper || document.body;
-      newContainer.querySelectorAll('.edit-monthly').forEach(btn =>
+      const countSpan = document.getElementById("mmCount");
+      if (countSpan) countSpan.textContent = `${list.length} movements`;
+
+      tbody.querySelectorAll('.edit-monthly').forEach(btn =>
         btn.addEventListener('click', () => editMonthlyMovement(btn.dataset.id)));
-      newContainer.querySelectorAll('.delete-monthly').forEach(btn =>
+      tbody.querySelectorAll('.delete-monthly').forEach(btn =>
         btn.addEventListener('click', () => deleteMonthlyMovement(btn.dataset.id)));
     }
 
@@ -1061,7 +1020,7 @@ function wireAuthForm() {
         th.addEventListener('click', () => updateMmSort(th.dataset.mmColumn));
       });
 
-      // Obsolete table listeners removed as we now use direct binding on card actions
+      // Row actions are bound after each render.
 
       const txCancelBtn = document.getElementById('txCancelEditButton');
       if (txCancelBtn) {
