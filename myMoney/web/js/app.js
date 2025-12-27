@@ -341,7 +341,7 @@ function wireAuthForm() {
 
       const rows = getFilteredSortedTransactions();
       if (!rows.length) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:12px 0; color:var(--muted);">no transactions yet</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:10px 0; color:var(--muted);">no transactions yet</td></tr>`;
       } else {
         tbody.innerHTML = rows.map(t => `
           <tr>
@@ -438,7 +438,7 @@ function wireAuthForm() {
 
       const list = getFilteredSortedMonthlyMovements();
       if (!list.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:12px 0; color:var(--muted);">no movements yet</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:10px 0; color:var(--muted);">no movements yet</td></tr>`;
       } else {
         tbody.innerHTML = list.map(m => {
           const signedAmount = m.direction === 'expense' ? -(m.amount || 0) : (m.amount || 0);
@@ -541,12 +541,12 @@ function wireAuthForm() {
         const riskClass = risk;
 
         return `
-          <div class="card asset-card" style="border-left: 4px solid ${color}; position: relative;">
+          <div class="card asset-card" style="position: relative;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                <h3 style="margin:0; color:${color}">${escapeHtml(asset)}</h3>
             </div>
             
-            <div style="display:flex; align-items:center; gap: 8px; margin-top:4px;">
+            <div style="display:flex; align-items:center; gap: 10px; margin-top:10px;">
                <div class="risk-pill ${riskClass}" title="Click to toggle risk" data-risk-asset="${escapeHtml(asset)}">
                  risk: ${risk}
                </div>
@@ -556,7 +556,7 @@ function wireAuthForm() {
                  title="Change color" />
             </div>
 
-            <div style="margin-top:8px; font-size:13px; line-height:1.4;">
+            <div style="margin-top:10px; font-size:13px; line-height:1.4;">
               <div style="color:var(--muted)">current value: <span style="color:var(--text); font-weight:bold;">${formatCurrency(stats.current)}</span></div>
               <div style="color:var(--muted)">invested: ${formatCurrency(stats.buy)}</div>
               <div style="color:var(--muted)">pnl: ${formatCurrencyWithColor(stats.pnl)}</div>
@@ -590,6 +590,16 @@ function wireAuthForm() {
       });
     }
 
+    function pickChartLabelColor(color) {
+      const hex = normalizeColor(color || '#7be6a6').replace('#', '');
+      if (hex.length !== 6) return '#f5f5f7';
+      const r = parseInt(hex.slice(0, 2), 16);
+      const g = parseInt(hex.slice(2, 4), 16);
+      const b = parseInt(hex.slice(4, 6), 16);
+      const luminance = (0.299 * r) + (0.587 * g) + (0.114 * b);
+      return luminance > 165 ? '#0b0b0d' : '#f5f5f7';
+    }
+
     function renderAssetChart() {
       const ctx = document.getElementById('assetAllocationChart');
       if (!ctx) return;
@@ -610,6 +620,39 @@ function wireAuthForm() {
       const colors = filteredLabels.map(label => assetColorMap[label] || normalizeColor(randomColor(label)));
       filteredLabels.forEach((label, idx) => { assetColorMap[label] = colors[idx]; });
 
+      const percentLabelPlugin = {
+        id: 'percentLabelPlugin',
+        afterDatasetDraw(chart) {
+          const dataset = chart.data.datasets?.[0];
+          if (!dataset) return;
+          const total = dataset.data.reduce((sum, val) => sum + (Number(val) || 0), 0);
+          if (!total) return;
+          const meta = chart.getDatasetMeta(0);
+          const fontFamily = Chart.defaults.font?.family || 'sans-serif';
+          chart.ctx.save();
+          chart.ctx.font = `600 11px ${fontFamily}`;
+          chart.ctx.textAlign = 'center';
+          chart.ctx.textBaseline = 'middle';
+          meta.data.forEach((arc, idx) => {
+            const value = Number(dataset.data[idx]) || 0;
+            if (!value) return;
+            const pct = (value / total) * 100;
+            if (pct < 5) return;
+            const label = pct >= 10 ? `${pct.toFixed(0)}%` : `${pct.toFixed(1)}%`;
+            const angle = (arc.startAngle + arc.endAngle) / 2;
+            const radius = (arc.innerRadius + arc.outerRadius) / 2;
+            const x = arc.x + Math.cos(angle) * radius;
+            const y = arc.y + Math.sin(angle) * radius;
+            const sliceColor = Array.isArray(dataset.backgroundColor)
+              ? dataset.backgroundColor[idx]
+              : dataset.backgroundColor;
+            chart.ctx.fillStyle = pickChartLabelColor(sliceColor);
+            chart.ctx.fillText(label, x, y);
+          });
+          chart.ctx.restore();
+        }
+      };
+
       assetChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -617,8 +660,10 @@ function wireAuthForm() {
           datasets: [{ data: filteredData, backgroundColor: colors }]
         },
         options: {
+          maintainAspectRatio: false,
           plugins: { legend: { display: false } }
-        }
+        },
+        plugins: [percentLabelPlugin]
       });
     }
 
@@ -725,7 +770,7 @@ function wireAuthForm() {
       if (tbody) {
         const sorted = [...filtered].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
         if (!sorted.length) {
-          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:12px 0; color:var(--muted);">no snapshots for this range</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:10px 0; color:var(--muted);">no snapshots for this range</td></tr>`;
         } else {
           tbody.innerHTML = sorted.map(s => {
             const total = (s.low || 0) + (s.medium || 0) + (s.high || 0) + (s.liquid || 0);

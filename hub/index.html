@@ -41,7 +41,7 @@
     .shell {
       max-width: 1080px;
       margin: 0 auto;
-      padding: 48px 17px 64px;
+      padding: 50px 20px 60px;
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -52,14 +52,14 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
       position: relative;
     }
 
     .title {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       font-weight: 800;
       letter-spacing: -0.02em;
       font-size: 26px;
@@ -86,11 +86,11 @@
       margin-left: auto;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
     .auth-btn {
-      padding: 10px 12px;
+      padding: 10px 10px;
       border-radius: 12px;
       border: 1px solid var(--border);
       background: var(--card-strong);
@@ -101,9 +101,30 @@
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
     }
 
+    :is(button, .cta) {
+      --btn-glow: color-mix(in srgb, var(--glow-money) 50%, transparent);
+      --btn-glow-strong: rgba(123, 230, 166, 0.11);
+      --btn-hover-border: var(--border);
+      --btn-hover-color: var(--text);
+      transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
+    }
+
+    :is(button, .cta):hover:not(:disabled) {
+      transform: translateY(-1px);
+      border-color: var(--btn-hover-border);
+      color: var(--btn-hover-color);
+    }
+
+    :is(button, .cta):active:not(:disabled) {
+      transform: translateY(0);
+    }
+
     .auth-btn.logged-in {
       border-color: var(--accent-health);
       box-shadow: 0 0 0 1px var(--glow-health), 0 10px 24px rgba(255, 94, 138, 0.25);
+      --btn-glow: color-mix(in srgb, var(--glow-health) 50%, transparent);
+      --btn-glow-strong: rgba(255, 94, 138, 0.125);
+      --btn-hover-border: var(--accent-health);
     }
 
     .auth-panel {
@@ -116,7 +137,7 @@
       border-radius: 14px;
       background: var(--card);
       box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
-      padding: 14px;
+      padding: 10px;
       display: none;
       z-index: 10;
     }
@@ -126,15 +147,15 @@
     }
 
     .auth-panel h4 {
-      margin: 0 0 6px;
+      margin: 0 0 10px;
       font-size: 15px;
     }
 
     .auth-panel .auth-forms {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 8px;
+      gap: 10px;
+      margin-top: 10px;
     }
 
     .auth-panel .auth-col {
@@ -145,7 +166,7 @@
     }
 
     .auth-panel .auth-col h5 {
-      margin: 0 0 6px;
+      margin: 0 0 10px;
       font-size: 13px;
       letter-spacing: 0.02em;
     }
@@ -153,7 +174,7 @@
     .auth-panel .field {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 10px;
       margin: 10px 0;
     }
 
@@ -164,7 +185,7 @@
 
     .auth-panel input {
       width: 100%;
-      padding: 10px 12px;
+      padding: 10px 10px;
       border-radius: 10px;
       border: 1px solid var(--border);
       background: var(--card-strong);
@@ -177,7 +198,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      margin-top: 4px;
+      margin-top: 10px;
     }
 
     .auth-panel .actions.column {
@@ -188,7 +209,7 @@
 
     .auth-panel button.primary {
       flex: 1;
-      padding: 10px 12px;
+      padding: 10px 10px;
       border-radius: 10px;
       border: 1px solid var(--border);
       background: var(--card-strong);
@@ -209,11 +230,14 @@
       border-color: #ff97b1;
       color: #ffd5e1;
       box-shadow: 0 0 0 1px var(--glow-health);
+      --btn-glow: color-mix(in srgb, var(--glow-health) 50%, transparent);
+      --btn-glow-strong: rgba(255, 94, 138, 0.125);
+      --btn-hover-border: #ff97b1;
     }
 
     .auth-panel .change-pass {
       display: none;
-      margin-top: 8px;
+      margin-top: 10px;
     }
 
     .auth-panel .status {
@@ -225,12 +249,12 @@
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
+      gap: 20px;
     }
 
     .card {
       position: relative;
-      padding: 22px;
+      padding: 20px;
       border-radius: 16px;
       border: 1px solid var(--border);
       background: var(--card);
@@ -253,12 +277,12 @@
     }
 
     .card h2 {
-      margin: 0 0 8px;
+      margin: 0 0 10px;
       letter-spacing: -0.01em;
     }
 
     .card p {
-      margin: 0 0 14px;
+      margin: 0 0 10px;
       color: var(--muted);
       line-height: 1.5;
     }
@@ -266,8 +290,8 @@
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
+      gap: 10px;
+      padding: 10px 10px;
       border-radius: 999px;
       font-weight: 700;
       font-size: 13px;
@@ -288,8 +312,8 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 12px 14px;
+      gap: 10px;
+      padding: 10px 10px;
       border-radius: 12px;
       border: 1px solid var(--border);
       color: var(--text);
@@ -301,16 +325,18 @@
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
     }
 
-    .cta.health:hover {
-      border-color: var(--accent-health);
-      box-shadow: 0 0 0 1px var(--glow-health), 0 14px 34px rgba(255, 94, 138, 0.25);
-      color: #ffd4e3;
+    .cta.health {
+      --btn-glow: color-mix(in srgb, var(--glow-health) 50%, transparent);
+      --btn-glow-strong: rgba(255, 94, 138, 0.125);
+      --btn-hover-border: var(--accent-health);
+      --btn-hover-color: #ffd4e3;
     }
 
-    .cta.money:hover {
-      border-color: var(--accent-money);
-      box-shadow: 0 0 0 1px var(--glow-money), 0 14px 34px rgba(123, 230, 166, 0.22);
-      color: #e9fff4;
+    .cta.money {
+      --btn-glow: color-mix(in srgb, var(--glow-money) 50%, transparent);
+      --btn-glow-strong: rgba(123, 230, 166, 0.11);
+      --btn-hover-border: var(--accent-money);
+      --btn-hover-color: #e9fff4;
     }
 
     .stack {
@@ -337,7 +363,7 @@
 
     @media (max-width: 640px) {
       .shell {
-        padding: 36px 13.6px 48px;
+        padding: 40px 10px 50px;
       }
     }
   </style>

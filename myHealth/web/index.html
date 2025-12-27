@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <link rel="stylesheet" href="/shared/base.css?v=20241221-4">
+  <link rel="stylesheet" href="/shared/base.css?v=20241221-24">
 </head>
 
 <body class="mh-app">
@@ -170,7 +170,7 @@
             <div class="form-divider"></div>
             <div class="card">
               <div class="log-header">
-                <h2>Pain log <span id="pain-count" style="color:var(--muted); font-size:14px; margin-left:8px;"></span>
+                <h2>Pain log <span id="pain-count" style="color:var(--muted); font-size:14px; margin-left:10px;"></span>
                 </h2>
               </div>
               <div class="list-wrap" id="pain-table"></div>
@@ -236,7 +236,7 @@
                 <div class="card">
                   <div class="log-header">
                     <h2>Journal log <span id="diary-count"
-                        style="color:var(--muted); font-size:14px; margin-left:8px;"></span></h2>
+                        style="color:var(--muted); font-size:14px; margin-left:10px;"></span></h2>
                   </div>
                   <div class="list-wrap" id="diary-table"></div>
                 </div>
@@ -255,24 +255,23 @@
       <section id="chatbot-section" class="hidden">
         <div class="card">
           <h2>Chatbot</h2>
-          <div class="mh-hint">Ask the assistant about your diary and pain logs.</div>
           <div class="mh-alert mh-alert-warning" id="chatbot-key-alert">
             <strong>⚠️ Setup required:</strong> Save your Mistral API key in <a href="#" id="chatbot-go-settings">Settings</a> to enable the chatbot.
           </div>
 
-          <div class="stacked-fields" style="gap: 15px;">
+          <div class="stacked-fields" style="gap: 20px;">
             <div class="field-group">
+              <div class="chat-range" aria-label="Chat context range">
+                <span class="sub-label">How many days should the model read?</span>
+                <div class="mh-quick-filters">
+                  <button class="mh-quick-btn chat-range-btn" data-range="30">1 month</button>
+                  <button class="mh-quick-btn chat-range-btn" data-range="90">3 months</button>
+                  <button class="mh-quick-btn chat-range-btn" data-range="365">1 year</button>
+                  <button class="mh-quick-btn chat-range-btn" data-range="all">Since start</button>
+                </div>
+              </div>
               <label for="chatbot-prompt"><strong>Message</strong></label>
               <div class="mh-hint" id="chatbot-helper">Save a Mistral key in Settings to enable sending.</div>
-          <div class="chat-range" aria-label="Chat context range">
-            <span class="sub-label">How many days should the model read?</span>
-            <div class="mh-quick-filters">
-              <button class="mh-quick-btn chat-range-btn" data-range="30">1 month</button>
-              <button class="mh-quick-btn chat-range-btn" data-range="90">3 months</button>
-              <button class="mh-quick-btn chat-range-btn" data-range="365">1 year</button>
-              <button class="mh-quick-btn chat-range-btn" data-range="all">Since start</button>
-            </div>
-          </div>
               <div class="chat-input-row constrained">
                 <textarea id="chatbot-prompt" class="inline-input multiline" rows="3"
                   placeholder="Ask about your trends, e.g. \" Summarize my pain this week\""></textarea>
@@ -365,7 +364,7 @@
     </div>
   </div>
 
-  <script type="module" src="/myhealth/js/app.js?v=2025-03-08"></script>
+  <script type="module" src="/myhealth/js/app.js?v=2025-03-15"></script>
 
 </body>
 

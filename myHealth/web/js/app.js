@@ -711,8 +711,8 @@ function updateMistralUi(state = { hasKey: false, last4: "" }) {
   }
   // Hide helper text if alert is visible (avoid redundancy)
   if (chatbotUI.helper) {
-    chatbotUI.helper.classList.toggle("hidden", !hasKey);
-    chatbotUI.helper.textContent = hasKey ? "Ask anything about your diary and pain logs." : "";
+    chatbotUI.helper.classList.add("hidden");
+    chatbotUI.helper.textContent = "";
   }
   // Show/hide the prominent key-missing alert
   if (chatbotUI.keyAlert) {
@@ -926,7 +926,7 @@ function renderTable(kind, headers, rows, withActions = false, limit = null) {
           ` : ""}
         </tr>
       `).join("")
-    : `<tr><td colspan="${colSpan}" style="text-align:center; padding:12px 0; color:var(--muted);">no entries yet</td></tr>`;
+    : `<tr><td colspan="${colSpan}" style="text-align:center; padding:10px 0; color:var(--muted);">no entries yet</td></tr>`;
 
   const tableHtml = `
     <div class="table-scroll">
@@ -2726,11 +2726,11 @@ function handleHover(canvas, evt) {
   const endText = hasRange ? fmt.format(closest.bucketEnd) : "";
   const rangeText = hasRange ? (startText === endText ? startText : `${startText} – ${endText}`) : "";
   const aggLine = isAvg
-    ? `<div style="color:${"var(--muted)"}; margin-top:2px;">Avg of ${closest.count || "multiple"} entries${rangeText ? ` (${escapeHtml(rangeText)})` : ""}</div>`
+    ? `<div style="color:${"var(--muted)"}; margin-top:10px;">Avg of ${closest.count || "multiple"} entries${rangeText ? ` (${escapeHtml(rangeText)})` : ""}</div>`
     : "";
   const dot = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${closest.color || "var(--accent)"};"></span>`;
   tooltip.innerHTML = `
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
       ${dot}
       <strong style="color:${closest.color || "var(--text)"}">${escapeHtml(closest.seriesLabel || meta.yLabel)}</strong>
     </div>
